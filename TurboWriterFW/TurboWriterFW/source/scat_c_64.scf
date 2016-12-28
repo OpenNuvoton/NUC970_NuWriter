@@ -1,0 +1,32 @@
+;/******************************************************************************
+; *
+; * Copyright (c) 2003 Windond Electronics Corp.
+; * All rights reserved.
+; *
+; * $Workfile: $
+; *
+; * $Author: $
+; ******************************************************************************/
+;/*
+; * $History: $
+; */
+; This scatter loading setting is for NUC900.
+; After booting, the ROM was remapped to 0xAF000000 and SDRAM was 
+; initialized. Remapping and SDRAM initialization were done by init.s
+; Ater the init.s exected, it pass the control right to __main.o of C Library.
+; The __main.o would copy vector table and RO codes to memory according to the 
+; scatter loading setting.
+; 
+; NOTE: The heap base of C Library is defined in retarget.c.
+;       It is needed to be set for C Library.
+
+ROM_LOAD 0x03F00040
+{	
+	ROM1 +0 0xfff00
+	{
+		*.o (WB_INIT, +First)
+		*(+RO)
+		*(+RW)
+		*(+ZI)
+	}
+}

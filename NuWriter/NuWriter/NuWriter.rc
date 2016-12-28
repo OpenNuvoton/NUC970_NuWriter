@@ -1,0 +1,641 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#ifndef APSTUDIO_INVOKED
+#include "targetver.h"
+#endif
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Chinese (Taiwan) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHT)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL
+#pragma code_page(950)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#ifndef APSTUDIO_INVOKED\r\n"
+    "#include ""targetver.h""\r\n"
+    "#endif\r\n"
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#include ""res\\NuWriter.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""     // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\NuWriter.ico"
+IDI_CHIP                ICON                    "res\\chip.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_SPI DIALOGEX 0, 0, 442, 152
+STYLE DS_SETFONT | WS_CHILD
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_SPI_IMAGELIST,"SysListView32",LVS_REPORT | WS_BORDER | WS_TABSTOP,0,6,183,131
+    GROUPBOX        "Parameters",IDC_STATIC,186,2,255,148
+    PUSHBUTTON      "Burn",IDC_SPI_DOWNLOAD,192,109,55,14
+    PUSHBUTTON      "Verify",IDC_SPI_VERIFY,251,109,55,14
+    LTEXT           "Image Name :",IDC_STATIC,194,16,50,8
+    LTEXT           "Image Type :",IDC_STATIC,194,34,50,8
+    LTEXT           "Image encrypt :",IDC_STATIC,194,51,60,8
+    LTEXT           "Image execute address : 0x",IDC_STATIC,194,70,93,8
+    LTEXT           "Image start offset : 0x",IDC_STATIC,194,89,73,8
+    LTEXT           "",IDC_SPI_IMAGENAME_A,246,14,84,12,SS_SUNKEN
+    PUSHBUTTON      "",IDC_SPI_BROWSE,332,13,16,15
+    CONTROL         "Data",IDC_SPI_TYPE_A,"Button",BS_AUTORADIOBUTTON | WS_GROUP,249,33,31,10
+    CONTROL         "Environment",IDC_SPI_TYPE_A2,"Button",BS_AUTORADIOBUTTON,285,33,52,10
+    CONTROL         "uBoot",IDC_SPI_TYPE_A4,"Button",BS_AUTORADIOBUTTON,348,33,34,10
+    CONTROL         "Pack",IDC_SPI_TYPE_A3,"Button",BS_AUTORADIOBUTTON,389,33,35,10
+    COMBOBOX        IDC_SPI_COMBO_ENCRYPT,256,50,113,30,CBS_DROPDOWN | CBS_SORT | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Enable",IDC_SPI_ENC_E,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,374,51,37,10
+    EDITTEXT        IDC_SPI_EXECADDR_A,288,68,81,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_SPI_FLASHOFFSET_A,268,86,81,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Read",IDC_SPI_READ,310,109,55,14
+    PUSHBUTTON      "Erase",IDC_SPI_ERASEALL,369,109,55,14
+    CONTROL         "",IDC_SPI_DOWNPROGRESS,"msctls_progress32",WS_BORDER,221,132,193,10
+    ICON            IDI_CHIP,IDC_STATIC,194,127,20,20,SS_CENTERIMAGE
+    LTEXT           "Alignment : 0x10000",IDC_SPI_STATUS,5,140,177,8,NOT WS_VISIBLE
+END
+
+IDD_SDRAM DIALOGEX 0, 0, 442, 152
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD
+FONT 8, "MS Sans Serif", 700, 0, 0x0
+BEGIN
+    PUSHBUTTON      "Browse",IDC_SDRAM_BROWSE,377,25,60,14
+    PUSHBUTTON      "Download",IDC_SDRAM_DOWNLOAD,377,122,60,14
+    CONTROL         "",IDC_SDRAM_DOWNPROGRESS,"msctls_progress32",WS_BORDER,77,127,286,8
+    LTEXT           "Choose file :",IDC_STATIC,22,26,52,8
+    LTEXT           "...",IDC_SDRAMSTATUS,77,99,286,12,SS_SUNKEN
+    LTEXT           "Status :",IDC_STATIC,41,103,33,8
+    GROUPBOX        "",IDC_STATIC,77,66,152,23
+    CONTROL         "Download only",IDC_SDRAM_AUTORUN,"Button",BS_AUTORADIOBUTTON | WS_GROUP,82,75,63,10
+    CONTROL         "Download and run",IDC_SDRAM_NOAUTORUN,"Button",BS_AUTORADIOBUTTON,149,75,78,10
+    LTEXT           "...",IDC_SDRAM_FILENAME,77,25,286,13,SS_SUNKEN
+    EDITTEXT        IDC_SDRAM_BUFFER_ADDRESS,90,50,68,12,ES_AUTOHSCROLL
+    ICON            IDI_CHIP,IDC_STATIC,51,119,20,20,SS_CENTERIMAGE
+    LTEXT           "0x",IDC_STATIC,77,52,15,14
+    LTEXT           "Option: ",IDC_STATIC,45,75,26,8
+    LTEXT           "Execute address :",IDC_STATIC,5,52,69,8
+END
+
+IDD_TARGET_CHIP DIALOGEX 0, 0, 183, 124
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "nuvoTon Nu-Writer v1.0 - Select Chip"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "Continue",IDOK,96,84,61,14
+    PUSHBUTTON      "Quit",IDCANCEL,16,84,61,14
+    CONTROL         "Auto to countinue",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,106,112,10
+    LTEXT           "Select target chip :",IDC_STATIC,16,18,124,8
+    LTEXT           "Select DDR parameter :",IDC_STATIC_DDR_PAR,16,48,116,8
+    COMBOBOX        IDC_COMBO1,16,31,141,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_DDR,16,61,141,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         140,IDC_STATIC,"Static",SS_BITMAP,1,1,501,15
+END
+
+IDD_MMC DIALOGEX 0, 0, 442, 152
+STYLE DS_SETFONT | WS_CHILD
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_MMC_IMAGELIST,"SysListView32",LVS_REPORT | WS_BORDER | WS_TABSTOP,0,6,183,131
+    GROUPBOX        "Parameters",-1,186,2,255,148
+    PUSHBUTTON      "Burn",IDC_MMC_DOWNLOAD,192,109,55,14
+    PUSHBUTTON      "Verify",IDC_MMC_VERIFY,251,109,55,14
+    LTEXT           "Image Name :",-1,194,16,52,8
+    LTEXT           "Image Type :",-1,194,34,49,8
+    LTEXT           "Image encrypt :",-1,194,51,71,8
+    LTEXT           "Image execute address : 0x",-1,194,70,89,8
+    LTEXT           "Image start offset : 0x",-1,194,89,73,8
+    LTEXT           "",IDC_MMC_IMAGENAME_A,246,14,84,12,SS_SUNKEN
+    PUSHBUTTON      "",IDC_MMC_BROWSE,332,13,16,15
+    CONTROL         "Data",IDC_MMC_TYPE_A,"Button",BS_AUTORADIOBUTTON | WS_GROUP,249,33,31,10
+    CONTROL         "Environment",IDC_MMC_TYPE_A2,"Button",BS_AUTORADIOBUTTON,285,33,52,10
+    CONTROL         "uBoot",IDC_MMC_TYPE_A4,"Button",BS_AUTORADIOBUTTON,348,33,34,10
+    CONTROL         "Pack",IDC_MMC_TYPE_A3,"Button",BS_AUTORADIOBUTTON,389,33,35,10
+    COMBOBOX        IDC_MMC_COMBO_ENCRYPT,256,50,113,30,CBS_DROPDOWN | CBS_SORT | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Enable",IDC_MMC_ENC_E,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,374,51,37,10
+    EDITTEXT        IDC_MMC_EXECADDR_A,288,68,81,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MMC_FLASHOFFSET_A,268,86,81,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Read",IDC_MMC_READ,310,109,55,14
+    CONTROL         "",IDC_MMC_PROGRESS,"msctls_progress32",WS_BORDER,221,132,193,10
+    ICON            IDI_CHIP,-1,194,127,20,20,SS_CENTERIMAGE
+    PUSHBUTTON      "Format",IDC_MMC_FORMAT,369,109,55,14
+    LTEXT           "Alignment : 0x200",IDC_MMC_STATUS,5,140,180,8
+END
+
+IDD_NAND DIALOGEX 0, 0, 442, 152
+STYLE DS_SETFONT | WS_CHILD
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_NAND_IMAGELIST,"SysListView32",LVS_REPORT | WS_BORDER | WS_TABSTOP,0,6,183,131
+    GROUPBOX        "Parameters",IDC_STATIC,186,2,255,148
+    PUSHBUTTON      "Burn",IDC_NAND_DOWNLOAD,192,109,55,14
+    PUSHBUTTON      "Verify",IDC_NAND_VERIFY,251,109,55,14
+    LTEXT           "Image Name :",IDC_STATIC,194,16,51,8
+    LTEXT           "Image Type :",IDC_STATIC,194,34,49,8
+    LTEXT           "Image encrypt :",IDC_STATIC,194,51,60,8
+    LTEXT           "Image execute address : 0x",IDC_STATIC,194,70,92,8
+    LTEXT           "Image start offset : 0x",IDC_STATIC,194,89,73,8
+    LTEXT           "",IDC_NAND_IMAGENAME_A,246,14,84,12,SS_SUNKEN
+    PUSHBUTTON      "",IDC_NAND_BROWSE,332,13,16,15
+    CONTROL         "Data",IDC_NAND_TYPE_A,"Button",BS_AUTORADIOBUTTON | WS_GROUP,249,33,28,10
+    CONTROL         "Environment",IDC_NAND_TYPE_A2,"Button",BS_AUTORADIOBUTTON,285,33,52,10
+    CONTROL         "uBoot",IDC_NAND_TYPE_A4,"Button",BS_AUTORADIOBUTTON,348,33,32,10
+    CONTROL         "Pack",IDC_NAND_TYPE_A3,"Button",BS_AUTORADIOBUTTON,389,33,29,10
+    CONTROL         "FS",IDC_NAND_TYPE_A5,"Button",BS_AUTORADIOBUTTON | NOT WS_VISIBLE,366,14,22,10
+    COMBOBOX        IDC_NAND_COMBO_ENCRYPT,256,50,113,30,CBS_DROPDOWN | CBS_SORT | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Enable",IDC_NAND_ENC_E,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,374,51,37,10
+    EDITTEXT        IDC_NAND_EXECADDR_A,288,68,81,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_NAND_FLASHOFFSET_A,268,86,81,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Read",IDC_NAND_READ,310,109,55,14
+    PUSHBUTTON      "Erase",IDC_NAND_ERASEALL,369,109,55,14
+    CONTROL         "",IDC_NAND_PROGRESS,"msctls_progress32",WS_BORDER,221,132,193,10
+    ICON            IDI_CHIP,IDC_STATIC,194,127,20,20,SS_CENTERIMAGE
+    LTEXT           "Alignment :",IDC_NAND_STATUS,5,140,177,8
+END
+
+IDD_MTP DIALOGEX 0, 0, 442, 152
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    PUSHBUTTON      "Burn",IDC_MTP_DOWNLOAD,365,131,50,14
+    CONTROL         "",IDC_MTP_DOWNPROGRESS,"msctls_progress32",WS_BORDER,70,135,286,8
+    LTEXT           "Choose file :",IDC_STATIC,24,29,47,8
+    ICON            IDI_CHIP,IDC_STATIC,38,129,20,20,SS_CENTERIMAGE
+    LTEXT           "Mode :",IDC_STATIC,39,50,27,8
+    LTEXT           "Option :",IDC_STATIC,36,8,35,8
+    CONTROL         "AES",IDC_MTP_A0,"Button",BS_AUTORADIOBUTTON | WS_GROUP,75,9,29,10
+    CONTROL         "SHA",IDC_MTP_A1,"Button",BS_AUTORADIOBUTTON,115,9,29,10
+    CONTROL         "Valid",IDC_MTP_A2,"Button",BS_AUTORADIOBUTTON | NOT WS_VISIBLE,153,9,33,10
+    GROUPBOX        "",IDC_STATIC,70,42,196,22
+    GROUPBOX        "",IDC_STATIC,70,0,196,22
+    PUSHBUTTON      "Modify",IDC_MTP_MODIFY,365,26,50,14
+    COMBOBOX        IDC_MTP_COMBO_ENCRYPT,70,27,286,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "USB",IDC_MTP_M0,"Button",BS_AUTORADIOBUTTON | NOT WS_VISIBLE | WS_GROUP,270,50,28,10
+    CONTROL         "eMMC",IDC_MTP_M1,"Button",BS_AUTORADIOBUTTON,75,50,33,10
+    CONTROL         "NAND",IDC_MTP_M2,"Button",BS_AUTORADIOBUTTON,113,50,32,10
+    CONTROL         "SPIFLASH",IDC_MTP_M3,"Button",BS_AUTORADIOBUTTON,153,50,49,10
+    LTEXT           "Encrypt :",IDC_STATIC,32,71,41,8
+    GROUPBOX        "",IDC_STATIC,70,64,196,22
+    CONTROL         "Enable",IDC_MTP_ENABLE,"Button",BS_AUTORADIOBUTTON | WS_GROUP,75,72,40,10
+    CONTROL         "Disable",IDC_MTP_DISABLE,"Button",BS_AUTORADIOBUTTON,115,72,44,10
+    LTEXT           "Lock :",IDC_STATIC,40,93,21,8
+    GROUPBOX        "",IDC_STATIC,70,85,344,22
+    CONTROL         "Enable",IDC_CHECK_LOCK_ENABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,75,93,36,10
+    LTEXT           "You have select lock mtp key, once mtp key is locked can not be program any more.",IDC_LOCK_COMMENT,116,94,267,8
+    LTEXT           "Program times of MTP",IDC_STATIC,298,50,70,8
+    LTEXT           "N/A",IDC_MTP_PSTATIC,370,50,43,10,SS_SUNKEN
+    EDITTEXT        IDC_MTP_STATUS,69,111,344,14,ES_AUTOHSCROLL | NOT WS_VISIBLE
+END
+
+IDD_INIT DIALOGEX 0, 0, 187, 39
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Auto Downloading..."
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_DOWNPROGRESS,"msctls_progress32",WS_BORDER,56,15,128,8
+    LTEXT           "Static",IDC_DOWNLOADSTATUS,0,12,52,11
+END
+
+IDD_READ DIALOGEX 0, 0, 287, 82
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "nuvoTon Nu-Writer - Read"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,230,61,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,175,61,50,14
+    LTEXT           "Start :",IDC_STATIC,92,31,22,11
+    EDITTEXT        IDC_READ_BLOCKS,114,46,46,14,ES_AUTOHSCROLL
+    LTEXT           "blocks(1 block is 64  KB)",IDC_SIZENAME,173,48,95,8
+    LTEXT           "Save File :",IDC_STATIC,3,10,60,8
+    PUSHBUTTON      "",IDC_READ_BROSWSE,236,9,14,12
+    LTEXT           "Static",IDC_READ_FILENAME2,51,9,182,12,SS_SUNKEN
+    EDITTEXT        IDC_READ_STARTBLKS,114,28,46,14,ES_AUTOHSCROLL,WS_EX_CLIENTEDGE
+    LTEXT           "Read block of Save file :",IDC_STATIC,3,31,81,8
+    LTEXT           "Length :",IDC_STATIC,86,48,28,8
+    LTEXT           "Blocks",IDC_STARTSIZENAME,173,30,45,8
+END
+
+IDD_PACK DIALOGEX 0, 0, 442, 162
+STYLE DS_SETFONT | WS_CHILD
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_PACK_IMAGELIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | WS_BORDER,7,6,429,70
+    PUSHBUTTON      "Add",IDC_PACK_ADD,380,88,57,14
+    PUSHBUTTON      "Modify",IDC_PACK_MODIFY,380,106,57,14
+    PUSHBUTTON      "Delete",IDC_PACK_DELETE,380,124,57,14
+    PUSHBUTTON      "Output",IDC_PACK_OUTPUT,380,142,57,14
+    CONTROL         "",IDC_PACK_DOWNPROGRESS,"msctls_progress32",NOT WS_VISIBLE | WS_BORDER,130,17,193,10
+    CONTROL         "",IDC_PACK_TABCONTROL,"SysTabControl32",TCS_HOTTRACK | TCS_MULTILINE | TCS_FIXEDWIDTH | TCS_TOOLTIPS | WS_GROUP | WS_TABSTOP,7,77,372,84
+    LTEXT           "Alignment : SPI(0x10000) / eMMC(0x200) / NAND(0x20000)",IDC_PACK_STATUS,117,2,231,8,NOT WS_VISIBLE
+END
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 170, 62
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About NuWriter"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,14,14,21,20
+    LTEXT           "NuWriter, Version 1.0",IDC_STATIC,42,14,114,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2014",IDC_STATIC,42,26,114,8
+    DEFPUSHBUTTON   "OK",IDOK,113,41,50,14,WS_GROUP
+END
+
+IDD_NUWRITER_DIALOG DIALOGEX 0, 0, 482, 253
+STYLE DS_SETFONT | DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "nuvoTon Nu-Writer v1.0"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    PUSHBUTTON      "EXIT",IDCANCEL,416,226,50,14
+    LTEXT           " No Version",IDC_VERSION,6,20,67,11,SS_SUNKEN
+    LTEXT           "Choose type :",IDC_STATIC,7,37,59,8
+    COMBOBOX        IDC_COMBO_TYPE,61,35,81,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "DDR Init :",IDC_STATIC,149,38,45,8
+    LTEXT           "*.INI",IDC_STATIC_DDRFile,191,37,152,11,SS_SUNKEN
+    LTEXT           " COMx ",IDC_COMPORT,347,37,58,11,SS_SUNKEN
+    PUSHBUTTON      "Re-Connect",IDC_RECONNECT,407,35,58,14
+    GROUPBOX        "...",IDC_TYPE,10,53,455,169
+    CONTROL         140,IDC_STATIC,"Static",SS_BITMAP,-1,0,1389,15
+END
+
+IDD_FORMAT DIALOGEX 0, 0, 239, 48
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "nuvoTon Nu-Writer - Format"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,182,31,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,124,31,50,14
+    EDITTEXT        IDC_FORMAT_SPACE,61,10,40,14,ES_AUTOHSCROLL
+    LTEXT           "Reserve space :",IDC_STATIC,6,13,53,8
+    LTEXT           "sectors (1 sector is 512 bytes )",IDC_STATIC,108,13,131,8
+END
+
+IDD_ERASE DIALOGEX 0, 0, 286, 82
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "nuvoTon Nu-Writer - Erase"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,181,64,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,233,64,50,14
+    EDITTEXT        IDC_ERASE_BLOCKS,88,46,46,14,ES_AUTOHSCROLL
+    LTEXT           "blocks(1 block is 64  KB)",IDC_ERASE_SIZENAME,144,49,95,8
+    EDITTEXT        IDC_ERASE_STARTBLKS,88,28,46,14,ES_AUTOHSCROLL,WS_EX_CLIENTEDGE
+    LTEXT           "Erase Size :",IDC_STATIC,10,31,47,8
+    LTEXT           "blocks",IDC_ERASE_STARTSIZENAME,143,31,45,8
+    CONTROL         "Erase All",IDC_ERASE_RADIO1,"Button",BS_AUTORADIOBUTTON | WS_GROUP,7,9,43,10
+    CONTROL         "Erase as bellow",IDC_ERASE_RADIO2,"Button",BS_AUTORADIOBUTTON,56,9,100,10
+    LTEXT           "Start :",IDC_STATIC,66,31,22,11
+    LTEXT           "Length :",IDC_STATIC,60,48,28,8
+    GROUPBOX        "",IDC_STATIC,6,22,223,41
+    LTEXT           "",IDC_ERASE_INFO,9,70,121,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_SPI, DIALOG
+    BEGIN
+        RIGHTMARGIN, 433
+    END
+
+    IDD_SDRAM, DIALOG
+    BEGIN
+        LEFTMARGIN, 12
+        RIGHTMARGIN, 435
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 145
+        HORZGUIDE, 65
+    END
+
+    IDD_TARGET_CHIP, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 176
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 117
+    END
+
+    IDD_MMC, DIALOG
+    BEGIN
+        RIGHTMARGIN, 433
+    END
+
+    IDD_NAND, DIALOG
+    BEGIN
+        RIGHTMARGIN, 433
+    END
+
+    IDD_MTP, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 435
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 145
+    END
+
+    IDD_INIT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        BOTTOMMARGIN, 38
+    END
+
+    IDD_READ, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 280
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 75
+    END
+
+    IDD_PACK, DIALOG
+    BEGIN
+        RIGHTMARGIN, 433
+        BOTTOMMARGIN, 39
+    END
+
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 163
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 55
+    END
+
+    IDD_NUWRITER_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 475
+        VERTGUIDE, 470
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 246
+    END
+
+    IDD_FORMAT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 232
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 41
+    END
+
+    IDD_ERASE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 279
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 75
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BANNER              BITMAP                  "res\\banner.bmp"
+IDB_READ_DEVICE         BITMAP                  "res\\ReadDevice.bmp"
+IDB_WRITE_DEVICE        BITMAP                  "res\\WriterDevice.bmp"
+IDB_BROWSE              BITMAP                  "res\\Browse.bmp"
+IDB_FORMAT              BITMAP                  "res\\Format.bmp"
+IDB_ERASEALL            BITMAP                  "res\\EraseAll.bmp"
+IDB_VERIFY              BITMAP                  "res\\Verify.bmp"
+IDB_CONTINUE            BITMAP                  "res\\Continue.bmp"
+IDB_RECONNECT0          BITMAP                  "res\\ReConnect0.bmp"
+IDB_RECONNECT1          BITMAP                  "res\\ReConnect1.bmp"
+IDB_EXIT                BITMAP                  "res\\Exit.bmp"
+IDB_NUWRITER            BITMAP                  "res\\NuWriter.bmp"
+IDB_ADD                 BITMAP                  "res\\Add.bmp"
+IDB_DELETE              BITMAP                  "res\\Delete.bmp"
+IDB_MODIFY              BITMAP                  "res\\Modify.bmp"
+IDB_OUTPUT              BITMAP                  "res\\Output.bmp"
+#endif    // Chinese (Taiwan) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_PACK_TAB1 DIALOGEX 0, 0, 364, 78
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
+BEGIN
+    LTEXT           "Image Name :",IDC_STATIC,1,12,50,8
+    LTEXT           "Image Type :",IDC_STATIC,1,28,50,8
+    LTEXT           "Image encrypt :",IDC_STATIC,156,11,60,8
+    LTEXT           "Image execute address : 0x",IDC_STATIC,174,45,94,8
+    LTEXT           "",IDC_PACK_IMAGENAME_A,48,10,84,12,SS_SUNKEN
+    PUSHBUTTON      "",IDC_PACK_BROWSE,134,8,16,15
+    CONTROL         "Data",IDC_PACK_TYPE_A,"Button",BS_AUTORADIOBUTTON | WS_GROUP,48,28,31,10
+    CONTROL         "Enviroment",IDC_PACK_TYPE_A2,"Button",BS_AUTORADIOBUTTON,82,28,52,10
+    CONTROL         "uBoot",IDC_PACK_TYPE_A4,"Button",BS_AUTORADIOBUTTON,134,28,34,10
+    CONTROL         "FS",IDC_PACK_TYPE_A5,"Button",BS_AUTORADIOBUTTON | NOT WS_VISIBLE,169,28,20,10
+    CONTROL         "Pack",IDC_PACK_TYPE_A3,"Button",BS_AUTORADIOBUTTON | NOT WS_VISIBLE,194,28,35,10
+    COMBOBOX        IDC_PACK_COMBO_ENCRYPT,208,10,113,30,CBS_DROPDOWN | CBS_SORT | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Enable",IDC_PACK_ENC_E,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,326,11,35,10
+    EDITTEXT        IDC_PACK_EXECADDR_A,270,42,81,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_PACK_FLASHOFFSET_A,89,43,81,14,ES_AUTOHSCROLL
+    LTEXT           "Image start offset : 0x",IDC_STATIC,1,46,80,8
+    LTEXT           "Alignment : SPI(0x10000) / eMMC(0x200) / NAND(0x20000)",IDC_PACK_STATUS,2,63,231,8,NOT WS_VISIBLE
+END
+
+IDD_PACK_TAB2 DIALOGEX 0, 0, 364, 103
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
+BEGIN
+    LTEXT           "Mode :",IDC_STATIC,16,52,27,8
+    LTEXT           "Option :",IDC_STATIC,14,8,35,8
+    CONTROL         "AES",IDC_PACK_MTP_A0,"Button",BS_AUTORADIOBUTTON | WS_GROUP,46,8,29,10
+    CONTROL         "SHA",IDC_PACK_MTP_A1,"Button",BS_AUTORADIOBUTTON,84,8,29,10
+    CONTROL         "Valid",IDC_PACK_MTP_A2,"Button",BS_AUTORADIOBUTTON | NOT WS_VISIBLE,118,8,33,10
+    GROUPBOX        "",IDC_STATIC,3,44,170,22
+    GROUPBOX        "",IDC_STATIC,3,0,170,22
+    CONTROL         "USB",IDC_PACK_MTP_M0,"Button",BS_AUTORADIOBUTTON | NOT WS_VISIBLE | WS_GROUP,11,89,28,10
+    CONTROL         "eMMC",IDC_PACK_MTP_M1,"Button",BS_AUTORADIOBUTTON,46,52,32,10
+    CONTROL         "NAND",IDC_PACK_MTP_M2,"Button",BS_AUTORADIOBUTTON,84,52,32,10
+    CONTROL         "SPIFLASH",IDC_PACK_MTP_M3,"Button",BS_AUTORADIOBUTTON,118,52,48,10
+    LTEXT           "Encrypt :",IDC_STATIC,187,52,41,8
+    GROUPBOX        "",IDC_STATIC,183,44,179,22
+    CONTROL         "Enable",IDC_PACK_MTP_ENABLE,"Button",BS_AUTORADIOBUTTON | WS_GROUP,223,52,40,10
+    CONTROL         "Disable",IDC_PACK_MTP_DISABLE,"Button",BS_AUTORADIOBUTTON,272,52,44,10
+    LTEXT           "Lock :",IDC_STATIC,195,9,21,8
+    CONTROL         "Enable",IDC_PACK_CHECK_LOCK_ENABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,223,9,35,10
+    GROUPBOX        "",IDC_STATIC,181,0,182,22
+    LTEXT           "Choose file :",IDC_STATIC,0,30,47,8
+    PUSHBUTTON      "Modify",IDC_PACK_MTP_MODIFY,311,28,50,14
+    COMBOBOX        IDC_PACK_MTP_COMBO_ENCRYPT,48,29,259,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Can't be progarm any more",IDC_TAB_LOCK_COMMENT,261,9,88,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_PACK_TAB1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 357
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 71
+    END
+
+    IDD_PACK_TAB2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 357
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 96
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "CompanyName", "TODO: <Company name>"
+            VALUE "FileDescription", "TODO: <File description>"
+            VALUE "FileVersion", "1.0.0.1"
+            VALUE "InternalName", "NuWriter.exe"
+            VALUE "LegalCopyright", "TODO: (c) <Company name>.  All rights reserved."
+            VALUE "OriginalFilename", "NuWriter.exe"
+            VALUE "ProductName", "TODO: <Product name>"
+            VALUE "ProductVersion", "1.0.0.1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ABOUTBOX            "&About NuWriter..."
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#include "res\NuWriter.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"     // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

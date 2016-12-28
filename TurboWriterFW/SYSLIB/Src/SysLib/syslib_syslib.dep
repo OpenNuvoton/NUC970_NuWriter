@@ -1,0 +1,50 @@
+Dependencies for Project 'syslib', Target 'syslib': (DO NOT MODIFY !)
+F (..\wb_aic.c)(0x535DFD52)(-c --cpu ARM926EJ-S -g -O0 --apcs=interwork --split_sections -I..\..\Lib -I C:\Keil\ARM\RV31\INC -I C:\Keil\ARM\CMSIS\Include -I C:\Keil\ARM\Inc\Toshiba -o ".\obj\wb_aic.o" --omf_browse ".\obj\wb_aic.crf" --depend ".\obj\wb_aic.d")
+I (C:\Program Files\ARM\ADSv1_2\INCLUDE\stdio.h)(0x3BEB19E6)
+I (..\..\Lib\wblib.h)(0x51A855E6)
+I (..\..\Lib\NUC970_reg.h)(0x53589C7D)
+I (..\..\Lib\wberrcode.h)(0x509B7DE0)
+I (..\..\Lib\wbio.h)(0x521EE253)
+I (..\..\Lib\wbtypes.h)(0x521EA8A2)
+F (..\wb_cache.c)(0x5100F9F2)(-c --cpu ARM926EJ-S -g -O0 --apcs=interwork --split_sections -I..\..\Lib -I C:\Keil\ARM\RV31\INC -I C:\Keil\ARM\CMSIS\Include -I C:\Keil\ARM\Inc\Toshiba -o ".\obj\wb_cache.o" --omf_browse ".\obj\wb_cache.crf" --depend ".\obj\wb_cache.d")
+I (..\..\Lib\wblib.h)(0x51A855E6)
+I (..\..\Lib\NUC970_reg.h)(0x53589C7D)
+I (..\..\Lib\wberrcode.h)(0x509B7DE0)
+I (..\..\Lib\wbio.h)(0x521EE253)
+I (..\..\Lib\wbtypes.h)(0x521EA8A2)
+F (..\wb_config.c)(0x509B7DE0)(-c --cpu ARM926EJ-S -g -O0 --apcs=interwork --split_sections -I..\..\Lib -I C:\Keil\ARM\RV31\INC -I C:\Keil\ARM\CMSIS\Include -I C:\Keil\ARM\Inc\Toshiba -o ".\obj\wb_config.o" --omf_browse ".\obj\wb_config.crf" --depend ".\obj\wb_config.d")
+I (..\..\Lib\wblib.h)(0x51A855E6)
+I (..\..\Lib\NUC970_reg.h)(0x53589C7D)
+I (..\..\Lib\wberrcode.h)(0x509B7DE0)
+I (..\..\Lib\wbio.h)(0x521EE253)
+I (..\..\Lib\wbtypes.h)(0x521EA8A2)
+F (..\wb_ebi.c)(0x509B7DE0)(-c --cpu ARM926EJ-S -g -O0 --apcs=interwork --split_sections -I..\..\Lib -I C:\Keil\ARM\RV31\INC -I C:\Keil\ARM\CMSIS\Include -I C:\Keil\ARM\Inc\Toshiba -o ".\obj\wb_ebi.o" --omf_browse ".\obj\wb_ebi.crf" --depend ".\obj\wb_ebi.d")
+I (C:\Program Files\ARM\ADSv1_2\INCLUDE\stdio.h)(0x3BEB19E6)
+I (..\..\Lib\wblib.h)(0x51A855E6)
+I (..\..\Lib\NUC970_reg.h)(0x53589C7D)
+I (..\..\Lib\wberrcode.h)(0x509B7DE0)
+I (..\..\Lib\wbio.h)(0x521EE253)
+I (..\..\Lib\wbtypes.h)(0x521EA8A2)
+F (..\wb_mmu.c)(0x509B7DE0)(-c --cpu ARM926EJ-S -g -O0 --apcs=interwork --split_sections -I..\..\Lib -I C:\Keil\ARM\RV31\INC -I C:\Keil\ARM\CMSIS\Include -I C:\Keil\ARM\Inc\Toshiba -o ".\obj\wb_mmu.o" --omf_browse ".\obj\wb_mmu.crf" --depend ".\obj\wb_mmu.d")
+I (..\..\Lib\wblib.h)(0x51A855E6)
+I (..\..\Lib\NUC970_reg.h)(0x53589C7D)
+I (..\..\Lib\wberrcode.h)(0x509B7DE0)
+I (..\..\Lib\wbio.h)(0x521EE253)
+I (..\..\Lib\wbtypes.h)(0x521EA8A2)
+F (..\wb_timer.c)(0x518B6884)(-c --cpu ARM926EJ-S -g -O0 --apcs=interwork --split_sections -I..\..\Lib -I C:\Keil\ARM\RV31\INC -I C:\Keil\ARM\CMSIS\Include -I C:\Keil\ARM\Inc\Toshiba -o ".\obj\wb_timer.o" --omf_browse ".\obj\wb_timer.crf" --depend ".\obj\wb_timer.d")
+I (C:\Program Files\ARM\ADSv1_2\INCLUDE\stdio.h)(0x3BEB19E6)
+I (..\..\Lib\wblib.h)(0x51A855E6)
+I (..\..\Lib\NUC970_reg.h)(0x53589C7D)
+I (..\..\Lib\wberrcode.h)(0x509B7DE0)
+I (..\..\Lib\wbio.h)(0x521EE253)
+I (..\..\Lib\wbtypes.h)(0x521EA8A2)
+F (..\wb_uart.c)(0x521F0D03)(-c --cpu ARM926EJ-S -g -O0 --apcs=interwork --split_sections -I..\..\Lib -I C:\Keil\ARM\RV31\INC -I C:\Keil\ARM\CMSIS\Include -I C:\Keil\ARM\Inc\Toshiba -o ".\obj\wb_uart.o" --omf_browse ".\obj\wb_uart.crf" --depend ".\obj\wb_uart.d")
+I (C:\Program Files\ARM\ADSv1_2\INCLUDE\string.h)(0x3BEB19E6)
+I (C:\Program Files\ARM\ADSv1_2\INCLUDE\stdio.h)(0x3BEB19E6)
+I (..\..\Lib\wblib.h)(0x51A855E6)
+I (..\..\Lib\NUC970_reg.h)(0x53589C7D)
+I (..\..\Lib\wberrcode.h)(0x509B7DE0)
+I (..\..\Lib\wbio.h)(0x521EE253)
+I (..\..\Lib\wbtypes.h)(0x521EA8A2)
+F (..\wb_dcache.s)(0x509B7DE0)(--cpu ARM926EJ-S -g --apcs=interwork -I C:\Keil\ARM\RV31\INC -I C:\Keil\ARM\CMSIS\Include -I C:\Keil\ARM\Inc\Toshiba --list "wb_dcache.lst" --xref -o ".\obj\wb_dcache.o" --depend ".\obj\wb_dcache.d")
+F (..\wb_sysctl.s)(0x509B7DE0)(--cpu ARM926EJ-S -g --apcs=interwork -I C:\Keil\ARM\RV31\INC -I C:\Keil\ARM\CMSIS\Include -I C:\Keil\ARM\Inc\Toshiba --list "wb_sysctl.lst" --xref -o ".\obj\wb_sysctl.o" --depend ".\obj\wb_sysctl.d")

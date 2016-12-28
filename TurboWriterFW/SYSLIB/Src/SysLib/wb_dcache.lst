@@ -1,0 +1,69 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000         ;/******************************************************
+                       *********************
+    2 00000000         ; *                                                     
+                                           *
+    3 00000000         ; * Copyright (c) 2008 Nuvoton Technolog. All rights res
+                       erved.              *
+    4 00000000         ; *                                                     
+                                           *
+    5 00000000         ; ******************************************************
+                       *********************/
+    6 00000000         ; 
+    7 00000000         
+    8 00000000                 AREA             MEM_INIT, CODE, READONLY
+    9 00000000         
+   10 00000000                 EXPORT           sys_flush_and_clean_dcache
+   11 00000000         
+   12 00000000         sys_flush_and_clean_dcache
+   13 00000000         
+   14 00000000         tci_loop
+   15 00000000 EE17FF7E        MRC              p15, 0, r15, c7, c14, 3 ; test 
+                                                            clean and invalidat
+                                                            e
+   16 00000004 1AFFFFFD        BNE              tci_loop
+   17 00000008         
+   18 00000008 E12FFF1E        BX               r14
+   19 0000000C         
+   20 0000000C         
+   21 0000000C                 END
+Command Line: --debug --xref --cpu=ARM926EJ-S --apcs=interwork --depend=.\obj\w
+b_dcache.d -o.\obj\wb_dcache.o -IC:\Keil\ARM\RV31\INC -IC:\Keil\ARM\CMSIS\Inclu
+de -IC:\Keil\ARM\Inc\Toshiba --list=wb_dcache.lst ..\wb_dcache.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+MEM_INIT 00000000
+
+Symbol: MEM_INIT
+   Definitions
+      At line 8 in file ..\wb_dcache.s
+   Uses
+      None
+Comment: MEM_INIT unused
+sys_flush_and_clean_dcache 00000000
+
+Symbol: sys_flush_and_clean_dcache
+   Definitions
+      At line 12 in file ..\wb_dcache.s
+   Uses
+      At line 10 in file ..\wb_dcache.s
+Comment: sys_flush_and_clean_dcache used once
+tci_loop 00000000
+
+Symbol: tci_loop
+   Definitions
+      At line 14 in file ..\wb_dcache.s
+   Uses
+      At line 16 in file ..\wb_dcache.s
+Comment: tci_loop used once
+3 symbols
+333 symbols in table
