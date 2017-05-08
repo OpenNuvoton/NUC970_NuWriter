@@ -115,7 +115,7 @@ BEGIN
     PUSHBUTTON      "Browse",IDC_SDRAM_BROWSE,377,25,60,14
     PUSHBUTTON      "Download",IDC_SDRAM_DOWNLOAD,377,122,60,14
     CONTROL         "",IDC_SDRAM_DOWNPROGRESS,"msctls_progress32",WS_BORDER,77,127,286,8
-    LTEXT           "Choose file :",IDC_STATIC,22,26,52,8
+    LTEXT           "Choose file :",IDC_STATIC,23,26,52,8
     LTEXT           "...",IDC_SDRAMSTATUS,77,99,286,12,SS_SUNKEN
     LTEXT           "Status :",IDC_STATIC,41,103,33,8
     GROUPBOX        "",IDC_STATIC,77,66,152,23
@@ -127,6 +127,11 @@ BEGIN
     LTEXT           "0x",IDC_STATIC,77,52,15,14
     LTEXT           "Option: ",IDC_STATIC,45,75,26,8
     LTEXT           "Execute address :",IDC_STATIC,5,52,69,8
+    LTEXT           "...",IDC_DTB_FILENAME,78,6,286,13,SS_SUNKEN
+    LTEXT           "DTB file :",IDC_STATIC_DTB,33,9,30,8
+    PUSHBUTTON      "Browse",IDC_DTB_BROWSE,377,5,60,14
+    EDITTEXT        IDC_DTB_BUFFER_ADDRESS,232,49,68,12,ES_AUTOHSCROLL
+    LTEXT           "DTB address :   0x",IDC_STATIC_DTB2,167,51,63,8
 END
 
 IDD_TARGET_CHIP DIALOGEX 0, 0, 183, 124

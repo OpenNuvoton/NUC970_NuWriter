@@ -28,13 +28,16 @@ public:
 	afx_msg void OnBnClickedSdramBrowse();	
 	CProgressCtrl	m_progress;
 	CString	m_fileinfo;
+	CString	m_dtbinfo;
 	CString	m_address;
+	CString m_dtbaddress;
 	HANDLE m_ExitEvent;
 	CString m_filename;
+	CString m_dtbname;
 	CStatic sdramstatus;
 	int		m_autorun;
 
-	BOOL XUSB(CString& portName,CString& m_pathName);
+	BOOL XUSB(CString& portName,CString& m_pathName,CString address,int autorun);
 	void Download();
 	static unsigned WINAPI Download_proc(void* args);
 	LRESULT ShowStatus( WPARAM  pos, LPARAM message);
@@ -43,10 +46,12 @@ public:
 	
 	FooButton m_download;
 	FooButton m_browse;
+	FooButton m_dtbbrowse;
 
 	BOOL InitFile(int flag);
 	int InitFlag;
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+	afx_msg void OnBnClickedDtbBrowse();
 };
 
 #endif

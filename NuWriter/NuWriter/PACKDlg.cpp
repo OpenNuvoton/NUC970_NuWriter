@@ -610,9 +610,12 @@ void CPACKDlg::OnBnClickedPackDelete()
 				len.Format(_T("%x"),total);
 				fclose(rfp);
 			}
-		if(*itemType!=PMTP)
-			m_imagelist.InsertItem(m_imagelist.GetItemCount(),filename,flagstr,enc,*itemStartblock,len,*itemExec);
-		else
+		if(*itemType!=PMTP){
+			if(*itemType==UBOOT)
+				m_imagelist.InsertItem(m_imagelist.GetItemCount(),filename,flagstr,enc,*itemStartblock,len,*itemExec);
+			else
+				m_imagelist.InsertItem(m_imagelist.GetItemCount(),filename,flagstr,enc,*itemStartblock,len,_T(""));
+		}else
 			m_imagelist.InsertItem(m_imagelist.GetItemCount(),filename,flagstr,enc,_T(""),len,_T(""));
 	}
 #else
@@ -898,7 +901,8 @@ void CPACKDlg::OnBnClickedPackOutput()
 			return;
 
 	//CAddFileDialog dlg(TRUE,NULL,NULL,OFN_CREATEPROMPT | OFN_HIDEREADONLY ,_T("Bin,Img Files  (*.bin)|*.bin|All Files (*.*)|*.*||"));
-	CAddFileDialog dlg(TRUE,NULL,NULL,OFN_FILEMUSTEXIST | OFN_HIDEREADONLY ,_T("Bin Files (*.bin)|*.bin|All Files (*.*)|*.*||"));
+	CAddFileDialog dlg(FALSE,NULL,NULL,OFN_CREATEPROMPT | OFN_HIDEREADONLY ,_T("Bin Files (*.bin)|*.bin|All Files (*.*)|*.*||"));
+	//CAddFileDialog dlg(TRUE,NULL,NULL,OFN_FILEMUSTEXIST | OFN_HIDEREADONLY ,_T("Bin Files (*.bin)|*.bin|All Files (*.*)|*.*||"));
 
 	dlg.m_ofn.lpstrTitle=_T("Choose burning file...");
 	CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);

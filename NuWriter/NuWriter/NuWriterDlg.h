@@ -132,6 +132,8 @@ public:
 	int FirstDelay;
 
 	CString Nand_size;
+
+	int DtbEn;
 };
 
 #endif

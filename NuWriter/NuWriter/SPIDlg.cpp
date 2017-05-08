@@ -567,6 +567,12 @@ BOOL CSPIDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			GetDlgItem(IDC_SPI_FLASHOFFSET_A)->SetWindowText(_T("0"));
 			GetDlgItem(IDC_SPI_FLASHOFFSET_A)->EnableWindow(FALSE);
 			GetDlgItem(IDC_SPI_EXECADDR_A)->EnableWindow(TRUE);
+
+			GetDlgItem(IDC_SPI_ENC_E)->EnableWindow(TRUE);
+			if(m_spi_enc_check.GetCheck()==true)
+				GetDlgItem(IDC_SPI_COMBO_ENCRYPT)->EnableWindow(TRUE);
+			else
+				GetDlgItem(IDC_SPI_COMBO_ENCRYPT)->EnableWindow(FALSE);
 		}
 		
 	}
@@ -577,7 +583,7 @@ BOOL CSPIDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		{
 			TmpOffsetFlag=0;
 			GetDlgItem(IDC_SPI_FLASHOFFSET_A)->SetWindowText(TmpOffset);
-			GetDlgItem(IDC_SPI_FLASHOFFSET_A)->EnableWindow(TRUE);		
+			GetDlgItem(IDC_SPI_FLASHOFFSET_A)->EnableWindow(TRUE);
 		}
 		
 
@@ -585,9 +591,16 @@ BOOL CSPIDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		{
 			GetDlgItem(IDC_SPI_EXECADDR_A)->EnableWindow(FALSE);
 			GetDlgItem(IDC_SPI_FLASHOFFSET_A)->EnableWindow(FALSE);
+			GetDlgItem(IDC_SPI_ENC_E)->EnableWindow(FALSE);
+			GetDlgItem(IDC_SPI_COMBO_ENCRYPT)->EnableWindow(FALSE);
 		}else{
 			GetDlgItem(IDC_SPI_EXECADDR_A)->EnableWindow(FALSE);
 			GetDlgItem(IDC_SPI_FLASHOFFSET_A)->EnableWindow(TRUE);
+			GetDlgItem(IDC_SPI_ENC_E)->EnableWindow(TRUE);
+			if(m_spi_enc_check.GetCheck()==true)
+				GetDlgItem(IDC_SPI_COMBO_ENCRYPT)->EnableWindow(TRUE);
+			else
+				GetDlgItem(IDC_SPI_COMBO_ENCRYPT)->EnableWindow(FALSE);
 		}
 	}
 

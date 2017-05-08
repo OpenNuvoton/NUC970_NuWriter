@@ -615,6 +615,12 @@ BOOL CNANDDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			GetDlgItem(IDC_NAND_FLASHOFFSET_A)->SetWindowText(_T("0"));						
 			GetDlgItem(IDC_NAND_FLASHOFFSET_A)->EnableWindow(FALSE);
 			GetDlgItem(IDC_NAND_EXECADDR_A)->EnableWindow(TRUE);
+			GetDlgItem(IDC_NAND_ENC_E)->EnableWindow(TRUE);
+			if(m_nand_enc_check.GetCheck()==(int)true)
+				GetDlgItem(IDC_NAND_COMBO_ENCRYPT)->EnableWindow(TRUE);
+			else
+				GetDlgItem(IDC_NAND_COMBO_ENCRYPT)->EnableWindow(FALSE);
+			
 		}
 		
 	}
@@ -633,9 +639,16 @@ BOOL CNANDDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		{
 			GetDlgItem(IDC_NAND_EXECADDR_A)->EnableWindow(FALSE);
 			GetDlgItem(IDC_NAND_FLASHOFFSET_A)->EnableWindow(FALSE);
+			GetDlgItem(IDC_NAND_ENC_E)->EnableWindow(FALSE);
+			GetDlgItem(IDC_NAND_COMBO_ENCRYPT)->EnableWindow(FALSE);
 		}else{
 			GetDlgItem(IDC_NAND_EXECADDR_A)->EnableWindow(FALSE);
 			GetDlgItem(IDC_NAND_FLASHOFFSET_A)->EnableWindow(TRUE);
+			GetDlgItem(IDC_NAND_ENC_E)->EnableWindow(TRUE);
+			if(m_nand_enc_check.GetCheck()==(int)true)
+				GetDlgItem(IDC_NAND_COMBO_ENCRYPT)->EnableWindow(TRUE);
+			else
+				GetDlgItem(IDC_NAND_COMBO_ENCRYPT)->EnableWindow(FALSE);
 		}
 	}
 

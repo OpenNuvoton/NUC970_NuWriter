@@ -139,13 +139,14 @@ typedef enum _DOWNMETHOD
 #define PACK_ACTION  	5
 #define FORMAT_ACTION	6
 
-#define NEED_AUTORUN 0x80000000
+#define NEED_AUTORUN	0x80000000
 
 typedef struct _SDRAM_RAW_TYPEHEAD //SDRAM ,NOR(raw) and SPI
 {
 	DWORD flag;//write,modify and erase
 	DWORD filelen;
 	DWORD address; //if bit 31 is "1" ,autorun it
+	DWORD dtbaddress;
 
 }SDRAM_RAW_TYPEHEAD,*PSDRAM_RAW_TYPEHEAD;
 

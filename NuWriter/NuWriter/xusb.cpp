@@ -140,7 +140,8 @@ unsigned char * DDR2Buf(char *buf,int buflen,int *ddrlen)
 }
 /************** SDRAM Begin ************/
 
-BOOL CRAMDlg::XUSB(CString& portName,CString& m_pathName)
+//BOOL CRAMDlg::XUSB(CString& portName,CString& m_pathName)
+BOOL CRAMDlg::XUSB(CString& portName,CString& m_pathName,CString address,int autorun)
 {
 	BOOL bResult;
 	CString posstr;
@@ -194,11 +195,16 @@ BOOL CRAMDlg::XUSB(CString& portName,CString& m_pathName)
 		
 		fhead.flag=WRITE_ACTION;
 		fhead.filelen=file_len;
-		swscanf_s(m_address,_T("%x"),&fhead.address);
+		fhead.dtbaddress = 0;
+		swscanf_s(address,_T("%x"),&fhead.address);
 
-		if(m_autorun)
-		{
+		if(autorun){
 			fhead.address|=NEED_AUTORUN;
+		}
+		
+		if(autorun==2){
+			swscanf_s(m_dtbaddress,_T("%x"),&fhead.dtbaddress);
+			fhead.dtbaddress |= NEED_AUTORUN;
 		}
 
 		memcpy(lpBuffer,(unsigned char*)&fhead,sizeof(SDRAM_RAW_TYPEHEAD));		

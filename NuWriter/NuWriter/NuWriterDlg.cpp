@@ -125,6 +125,7 @@ BOOL CNuWriterDlg::OnInitDialog()
 	ChipEraseWithBad=0;
 	ChipReadWithBad=0;
 	ChipWriteWithOOB=0;
+	DtbEn=0;
 	DDRBuf=NULL;
 	//---auto detect device -------------------------------------------------
 	//UsbRegisterDeviceNotification(this,OSR_DEVICE_INTERFACE,1);
@@ -361,7 +362,7 @@ void CNuWriterDlg::INItoSaveOrLoad(int Flag)
 		ChipEraseWithBad=_wtoi(m_inifile.GetValue(_T("TARGET"),_T("ChipEraseWithBad")));
 		ChipReadWithBad=_wtoi(m_inifile.GetValue(_T("TARGET"),_T("ChipReadWithBad")));
 		ChipWriteWithOOB=_wtoi(m_inifile.GetValue(_T("TARGET"),_T("ChipWriteWithOOB")));
-
+		DtbEn=_wtoi(m_inifile.GetValue(_T("SDRAM"),_T("DTBEN")));
 		FirstDelay=_wtoi(m_inifile.GetValue(_T("TARGET"),_T("FirstDelay")));
 		
 		if(Timeus==0) Timeus=5000;

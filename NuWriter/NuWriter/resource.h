@@ -76,13 +76,16 @@
 #define IDC_SDRAM_BROWSE                1028
 #define IDC_SDRAM_DOWNLOAD              1029
 #define IDC_SDRAM_DOWNPROGRESS          1030
+#define IDC_DTB_BROWSE                  1031
 #define IDC_SDRAMSTATUS                 1032
 #define IDC_SDRAM_NOAUTORUN             1033
 #define IDC_SDRAM_AUTORUN               1034
 #define IDC_SDRAM_FILENAME              1035
 #define IDC_SDRAM_BUFFER_ADDRESS        1036
 #define IDC_MMC_IMAGELIST               1037
+#define IDC_DTB_FILENAME                1037
 #define IDC_SPI_IMAGENAME_A             1038
+#define IDC_DTB_BUFFER_ADDRESS          1038
 #define IDC_MMC_IMAGENAME_A             1039
 #define IDC_MMC_DOWNPROGRESS            1040
 #define IDC_MMC_PROGRESS                1040
@@ -197,6 +200,9 @@
 #define IDC_ERASE_STARTSIZENAME         1144
 #define IDC_ERASE_SIZENAME              1145
 #define IDC_ERASE_INFO                  1146
+#define IDC_STATIC_DTB                  1147
+#define DC_STATIC_DTB2                  1148
+#define IDC_STATIC_DTB2                 1148
 #define IDC_DOWNLOADSTATUS              4000
 
 // Next default values for new objects
@@ -205,7 +211,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        164
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1147
+#define _APS_NEXT_CONTROL_VALUE         1149
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

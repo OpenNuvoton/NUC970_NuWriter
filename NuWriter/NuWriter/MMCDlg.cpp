@@ -549,6 +549,11 @@ BOOL CMMCDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			GetDlgItem(IDC_MMC_FLASHOFFSET_A)->SetWindowText(_T("400"));						
 			GetDlgItem(IDC_MMC_FLASHOFFSET_A)->EnableWindow(FALSE);
 			GetDlgItem(IDC_MMC_EXECADDR_A)->EnableWindow(TRUE);
+			GetDlgItem(IDC_MMC_ENC_E)->EnableWindow(TRUE);
+			if(m_mmc_enc_check.GetCheck()==(int)true)
+				GetDlgItem(IDC_MMC_COMBO_ENCRYPT)->EnableWindow(TRUE);
+			else
+				GetDlgItem(IDC_MMC_COMBO_ENCRYPT)->EnableWindow(FALSE);
 		}
 		
 	}
@@ -566,9 +571,16 @@ BOOL CMMCDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		{
 			GetDlgItem(IDC_MMC_EXECADDR_A)->EnableWindow(FALSE);
 			GetDlgItem(IDC_MMC_FLASHOFFSET_A)->EnableWindow(FALSE);
+			GetDlgItem(IDC_MMC_ENC_E)->EnableWindow(FALSE);
+			GetDlgItem(IDC_MMC_COMBO_ENCRYPT)->EnableWindow(FALSE);
 		}else{
 			GetDlgItem(IDC_MMC_EXECADDR_A)->EnableWindow(FALSE);
 			GetDlgItem(IDC_MMC_FLASHOFFSET_A)->EnableWindow(TRUE);
+			GetDlgItem(IDC_MMC_ENC_E)->EnableWindow(TRUE);
+			if(m_mmc_enc_check.GetCheck()==(int)true)
+				GetDlgItem(IDC_MMC_COMBO_ENCRYPT)->EnableWindow(TRUE);
+			else
+				GetDlgItem(IDC_MMC_COMBO_ENCRYPT)->EnableWindow(FALSE);
 		}			
 	}
 
