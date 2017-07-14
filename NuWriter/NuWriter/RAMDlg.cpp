@@ -40,6 +40,7 @@ void CRAMDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SDRAM_DOWNLOAD, m_download);
 	DDX_Control(pDX, IDC_SDRAM_BROWSE, m_browse);
 	DDX_Control(pDX, IDC_DTB_BROWSE, m_dtbbrowse);
+	DDX_Control(pDX, IDC_DTB_EN, m_dtb_en);
 	
 }
 
@@ -52,6 +53,7 @@ BEGIN_MESSAGE_MAP(CRAMDlg, CDialog)
 	ON_WM_CTLCOLOR()
 	ON_WM_SHOWWINDOW()
 	ON_BN_CLICKED(IDC_DTB_BROWSE, &CRAMDlg::OnBnClickedDtbBrowse)
+	ON_BN_CLICKED(IDC_DTB_EN, &CRAMDlg::OnBnClickedDtbEn)
 END_MESSAGE_MAP()
 
 
@@ -100,6 +102,7 @@ BOOL CRAMDlg::InitFile(int flag)
 
 	if(mainWnd->DtbEn==1)
 	{
+		GetDlgItem(IDC_DTB_EN)->ShowWindow(SW_SHOW);
 		GetDlgItem(IDC_STATIC_DTB)->ShowWindow(SW_SHOW);
 		GetDlgItem(IDC_DTB_FILENAME)->ShowWindow(SW_SHOW);
 		GetDlgItem(IDC_DTB_BROWSE)->ShowWindow(SW_SHOW);
@@ -107,6 +110,7 @@ BOOL CRAMDlg::InitFile(int flag)
 		GetDlgItem(IDC_STATIC_DTB2)->ShowWindow(SW_SHOW);
 		
 	}else{
+		GetDlgItem(IDC_DTB_EN)->ShowWindow(SW_HIDE);
 		GetDlgItem(IDC_STATIC_DTB)->ShowWindow(SW_HIDE);
 		GetDlgItem(IDC_DTB_FILENAME)->ShowWindow(SW_HIDE);
 		GetDlgItem(IDC_DTB_BROWSE)->ShowWindow(SW_HIDE);
@@ -134,6 +138,19 @@ BOOL CRAMDlg::InitFile(int flag)
 			GetDlgItem(IDC_DTB_BUFFER_ADDRESS)->SetWindowText(tmp);
 			m_dtbaddress=tmp;
 
+			tmp=mainWnd->m_inifile.GetValue(_T("SDRAM"),_T("DTB_UIEN"));
+			m_dtb_en.SetCheck(_wtoi(tmp));
+			if(_wtoi(tmp)==1)
+			{				
+				GetDlgItem(IDC_DTB_BROWSE)->EnableWindow(TRUE);
+				GetDlgItem(IDC_DTB_BUFFER_ADDRESS)->EnableWindow(TRUE);
+			}else{
+				GetDlgItem(IDC_DTB_BROWSE)->EnableWindow(FALSE);
+				GetDlgItem(IDC_DTB_BUFFER_ADDRESS)->EnableWindow(FALSE);
+			}
+			
+			
+
 			tmp=mainWnd->m_inifile.GetValue(_T("SDRAM"),_T("TYPE"));			
 			((CButton *)GetDlgItem(IDC_SDRAM_AUTORUN))->SetCheck(FALSE);
 			switch(_wtoi(tmp))
@@ -150,6 +167,10 @@ BOOL CRAMDlg::InitFile(int flag)
 			mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("DTBPATH"),m_dtbname);
 			mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("EXEADDR"),m_address);
 			mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("DTBADDR"),m_dtbaddress);
+
+			tmp.Format(_T("%d"),m_dtb_en.GetCheck());
+			mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("DTB_UIEN"),tmp);
+			
 			mainWnd->m_inifile.WriteFile();
 			break;
 	}
@@ -296,7 +317,7 @@ void CRAMDlg:: Download()
 				//AfxMessageBox("Download unsuccessfully!! Please check device");
 			}
 		}else{			
-			if(!m_dtbname.IsEmpty()){
+			if(!m_dtbname.IsEmpty() && m_dtb_en.GetCheck()!=FALSE){
 				XUSB(mainWnd->m_portName,m_dtbname,m_dtbaddress,0);
 			}
 			XUSB(mainWnd->m_portName,m_filename,m_address,2);
@@ -389,4 +410,16 @@ void CRAMDlg::OnBnClickedDtbBrowse()
 
 	mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("DTBPATH"),m_dtbname);
 	mainWnd->m_inifile.WriteFile();
+}
+
+void CRAMDlg::OnBnClickedDtbEn()
+{
+	if(m_dtb_en.GetCheck())
+	{				
+		GetDlgItem(IDC_DTB_BROWSE)->EnableWindow(TRUE);
+		GetDlgItem(IDC_DTB_BUFFER_ADDRESS)->EnableWindow(TRUE);
+	}else{
+		GetDlgItem(IDC_DTB_BROWSE)->EnableWindow(FALSE);
+		GetDlgItem(IDC_DTB_BUFFER_ADDRESS)->EnableWindow(FALSE);
+	}
 }

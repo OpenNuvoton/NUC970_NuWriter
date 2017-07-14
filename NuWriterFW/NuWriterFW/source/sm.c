@@ -189,7 +189,19 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
             break;
 
         case 0xdc:  // 512M
-            if ((tempID[3] & 0x33) == 0x11)
+            if((tempID[0]==0x98) && (tempID[1]==0xDC) &&(tempID[2]==0x90)&&(tempID[3]==0x26)&&(tempID[4]==0x76))
+            {
+               pSM->uBlockPerFlash = 2047;
+               pSM->uPagePerBlock = 64;
+               pSM->uSectorPerBlock = 256; 
+               pSM->uPageSize = 4096;
+               pSM->uNandECC = BCH_T12;
+               pSM->bIsMLCNand = TRUE;
+               pSM->uSpareSize = 192;
+               pSM->bIsMulticycle = TRUE;
+               break;
+            }
+            else if ((tempID[3] & 0x33) == 0x11)
             {
                 pSM->uBlockPerFlash = 4095;
                 pSM->uPagePerBlock = 64;

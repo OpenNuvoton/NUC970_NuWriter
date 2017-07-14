@@ -47,11 +47,13 @@ public:
 	FooButton m_download;
 	FooButton m_browse;
 	FooButton m_dtbbrowse;
+	CButton m_dtb_en;
 
 	BOOL InitFile(int flag);
 	int InitFlag;
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnBnClickedDtbBrowse();
+	afx_msg void OnBnClickedDtbEn();
 };
 
 #endif
