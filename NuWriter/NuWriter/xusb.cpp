@@ -5496,6 +5496,7 @@ BOOL CMTPDlg::XUSB_Burn(CString& portName,CString& m_pathName)
 			AfxMessageBox(_T("Write MTP head error\n"));
 			return FALSE;
 		}		
+		Sleep(50);
 		bResult=NucUsb.NUC_ReadPipe(0,(UCHAR *)&ack,4);
 		if(bResult==FALSE)
 		{

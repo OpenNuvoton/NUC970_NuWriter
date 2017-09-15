@@ -312,6 +312,7 @@ BOOL CMTPDlg::OnCommand(WPARAM wParam, LPARAM lParam)
     if(m_mtp_option==0)
 	{
 		//---Check ddr dirctory has how much *.ini-------------------------------
+		#if 0
 		m_combo_encrypt.ResetContent();
 		CString szDirForKEY,KeyName;
 		CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
@@ -325,6 +326,7 @@ BOOL CMTPDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		for(item=sList.begin();item!=sList.end();item++)	
 			m_combo_encrypt.AddString(*item);			
 		m_combo_encrypt.SetCurSel(0);		
+		#endif
 		//-----------------------------------------------------------------------
 		GetDlgItem(IDC_MTP_MODIFY)->SetWindowText(_T("Modify"));
 		COLORREF col = RGB(0xFF, 0x00, 0xFF);			

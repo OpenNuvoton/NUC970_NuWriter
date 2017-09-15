@@ -88,7 +88,7 @@ int main()
     MSG_DEBUG("0x%x\n", inpw(REG_USBD_PHY_CTL));   
 
     sysprintf("=======================================\n");		
-    sysprintf("Run framware code\n");
+    sysprintf("Run firmware code\n");
     CPU_Info();
 
     /* enable USB engine */
