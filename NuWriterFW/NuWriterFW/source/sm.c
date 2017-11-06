@@ -90,7 +90,8 @@ VOID fmiSM_Initial(FMI_SM_INFO_T *pSM)
     outpw(REG_NFECR, 0x01);
 }
 
-
+UINT32 Custom_uBlockPerFlash;
+UINT32 Custom_uPagePerBlock;
 INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
 {
     UINT32 tempID[5];
@@ -339,13 +340,78 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
                 pSM->uPageSize       = 4096;
                 pSM->uNandECC        = BCH_T24;
                 pSM->bIsMulticycle   = TRUE;
-                pSM->uSpareSize      = 224;
+                //pSM->uSpareSize      = 224;
+                pSM->uSpareSize      = 188;
                 pSM->bIsMLCNand      = TRUE;
-
                 break;
             }
+            
+            /* Using PowerOn setting*/
+            {
+              const UINT16 BCH12_SPARE[3] = { 92,184,368};/* 2K, 4K, 8K */
+              const UINT16 BCH15_SPARE[3] = {116,232,464};/* 2K, 4K, 8K */
+              const UINT16 BCH24_SPARE[3] = { 90,180,360};/* 2K, 4K, 8K */
+              unsigned int volatile u32PowerOn;
+              unsigned int volatile gu_fmiSM_PageSize;
+              unsigned int volatile g_u32ExtraDataSize;
+              u32PowerOn = inpw(REG_PWRON);
+              if((u32PowerOn&0x3C0)==0x3C0 ){
             MSG_DEBUG("SM ID not support!![%x][%x]\n", tempID[0], tempID[1]);
             return Fail;
+    }
+
+              MSG_DEBUG("Using PoowerOn setting 0x%x\n",u32PowerOn);
+              if ((u32PowerOn & 0xC0) != 0xC0)	/* PWRON[7:6] */
+              {
+                gu_fmiSM_PageSize = 1024 << (((u32PowerOn >> 6) & 0x3) + 1);
+                switch(gu_fmiSM_PageSize)
+                {
+                  case 2048:
+                    MSG_DEBUG("2KB\n");
+                    break;
+                  case 4096:
+                    MSG_DEBUG("4KB\n");
+                    break;
+                  case 8192:
+                    MSG_DEBUG("8KB\n");
+                    break;
+                }
+              }else
+                gu_fmiSM_PageSize=2048;
+              
+              if((u32PowerOn & 0x300) != 0x300)	/* PWRON[9:8] */
+              {
+                switch((u32PowerOn & 0x300))
+                {
+                  case 0x000:
+                    MSG_DEBUG("T12\n");
+                    g_u32ExtraDataSize = BCH12_SPARE[gu_fmiSM_PageSize >> 12] + 8;
+                    pSM->uNandECC = BCH_T12;
+                    break;
+                  case 0x100:
+                    MSG_DEBUG("T15\n");
+                    g_u32ExtraDataSize = BCH15_SPARE[gu_fmiSM_PageSize >> 12] + 8;
+                    pSM->uNandECC = BCH_T15;
+                    break;
+                  case 0x200:
+                    MSG_DEBUG("T24\n");
+                    g_u32ExtraDataSize = BCH24_SPARE[gu_fmiSM_PageSize >> 12] + 8;
+                    pSM->uNandECC = BCH_T24;
+                    break;
+                }
+              }else{
+                MSG_DEBUG("T12\n");
+                g_u32ExtraDataSize = BCH12_SPARE[gu_fmiSM_PageSize >> 12] + 8;
+              }
+
+              pSM->uBlockPerFlash  = Custom_uBlockPerFlash-1;        // block index with 0-base. = physical blocks - 1
+              pSM->uPagePerBlock   = Custom_uPagePerBlock;
+              pSM->uPageSize       = gu_fmiSM_PageSize;
+              pSM->uSectorPerBlock = pSM->uPageSize / 512 * pSM->uPagePerBlock;
+              pSM->bIsMulticycle   = TRUE;
+              pSM->uSpareSize      = g_u32ExtraDataSize;
+              pSM->bIsMLCNand      = TRUE;
+          }
     }
 
     MSG_DEBUG("SM ID [%x][%x][%x][%x]\n", tempID[0], tempID[1], tempID[2], tempID[3]);

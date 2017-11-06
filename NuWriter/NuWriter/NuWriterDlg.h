@@ -133,6 +133,9 @@ public:
 
 	CString Nand_size;
 
+	int Nand_uBlockPerFlash;
+	int Nand_uPagePerBlock;
+
 	int DtbEn;
 };
 

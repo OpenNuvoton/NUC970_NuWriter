@@ -365,6 +365,9 @@ void CNuWriterDlg::INItoSaveOrLoad(int Flag)
 		DtbEn=_wtoi(m_inifile.GetValue(_T("SDRAM"),_T("DTBEN")));
 		FirstDelay=_wtoi(m_inifile.GetValue(_T("TARGET"),_T("FirstDelay")));
 		
+		Nand_uBlockPerFlash=_wtoi(m_inifile.GetValue(_T("NAND_INFO"),_T("uBlockPerFlash")));
+		Nand_uPagePerBlock=_wtoi(m_inifile.GetValue(_T("NAND_INFO"),_T("uPagePerBlock")));
+		
 		if(Timeus==0) Timeus=5000;
 		
   }else if(Flag==SAVE)
@@ -817,6 +820,12 @@ BOOL CNuWriterDlg:: Info()
 		NucUsb.NUC_CloseHandle();
 		return FALSE;
 	}	
+
+	m_info.Nand_uPagePerBlock =  Nand_uPagePerBlock;
+	m_info.Nand_uBlockPerFlash = Nand_uBlockPerFlash;
+	bResult=NucUsb.NUC_WritePipe(0,(UCHAR *)&m_info, sizeof(INFO_T));
+	if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT) bResult=FALSE;
+	if(bResult!=TRUE)	bResult=FALSE;
 
 	bResult=NucUsb.NUC_ReadPipe(0,(UCHAR *)&m_info, sizeof(INFO_T));			
 	if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT) bResult=FALSE;

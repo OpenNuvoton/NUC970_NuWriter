@@ -62,6 +62,7 @@ typedef struct _INFO_T
 	DWORD	Nand_uPagePerBlock;
 	DWORD	Nand_uPageSize;
 	DWORD   Nand_uSectorPerBlock;
+	DWORD   Nand_uBlockPerFlash;
 	DWORD	Nand_uBadBlockCount;
 	DWORD   Nand_uSpareSize;
 	DWORD   SPI_ID;

@@ -1988,7 +1988,7 @@ int Read_Nand_Redunancy(UINT32 dst_adr,UINT32 blockNo, UINT32 len)
 int BatchBurn_NAND_BOOT(UINT32 len,UINT32 blockNo,UINT32 blockLen,UINT32 HeaderFlag)
 {
   int volatile status = 0;
-  int volatile page_count, block_count, page, addr, blockNum, total;
+  int volatile page_count, block_count = 0, page, addr, blockNum, total;
   int volatile blkindx,i, j, pagetmp=0; 
   unsigned int address = DOWNLOAD_BASE;
 
@@ -2711,6 +2711,7 @@ typedef struct _info{
   UINT32  Nand_uPagePerBlock;
   UINT32  Nand_uPageSize;
   UINT32  Nand_uSectorPerBlock;
+  UINT32  Nand_uBlockPerFlash;
   UINT32  Nand_uBadBlockCount;
   UINT32  Nand_uSpareSize;
   UINT32  SPI_ID;
@@ -2720,11 +2721,28 @@ typedef struct _info{
 }INFO_T;
 
 extern INT16 usiReadID(void);
+extern UINT32 Custom_uBlockPerFlash;
+extern UINT32 Custom_uPagePerBlock; 
 void UXmodem_INFO()
 {
     //int i;
     INFO_T info;
+    UINT8 *ptr=(UINT8 *)&info;
     memset((char *)&info,0x0,sizeof(INFO_T));
+
+    MSG_DEBUG("Receive INFO flash Image ...\n");
+    while(1)
+    {
+        if(Bulk_Out_Transfer_Size>=sizeof(INFO_T))
+        {                   
+              usb_recv(ptr,sizeof(INFO_T));
+              break;
+        }
+    }
+    Custom_uPagePerBlock = info.Nand_uPagePerBlock;
+    Custom_uBlockPerFlash = info.Nand_uBlockPerFlash;
+    MSG_DEBUG("Nand_uPagePerBlock=%d\n",Custom_uPagePerBlock);
+    MSG_DEBUG("Nand_uBlockPerFlash=%d\n",Custom_uBlockPerFlash);
     MSG_DEBUG("Get INFO flash Image ...\n");    
 
     if (usiInit())
