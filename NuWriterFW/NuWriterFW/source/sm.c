@@ -94,7 +94,7 @@ UINT32 Custom_uBlockPerFlash;
 UINT32 Custom_uPagePerBlock;
 INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
 {
-    UINT32 tempID[5];
+    UINT32 tempID[5],u32PowerOn,IsID=0;
 
     if (pSM->bIsInResetState == FALSE)
     {
@@ -345,20 +345,19 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
                 pSM->bIsMLCNand      = TRUE;
                 break;
             }
+            IsID=1;
+    }
+    
             
             /* Using PowerOn setting*/
+      u32PowerOn = inpw(REG_PWRON);
+      if((u32PowerOn&0x3C0)!=0x3C0 )
             {
               const UINT16 BCH12_SPARE[3] = { 92,184,368};/* 2K, 4K, 8K */
               const UINT16 BCH15_SPARE[3] = {116,232,464};/* 2K, 4K, 8K */
               const UINT16 BCH24_SPARE[3] = { 90,180,360};/* 2K, 4K, 8K */
-              unsigned int volatile u32PowerOn;
               unsigned int volatile gu_fmiSM_PageSize;
               unsigned int volatile g_u32ExtraDataSize;
-              u32PowerOn = inpw(REG_PWRON);
-              if((u32PowerOn&0x3C0)==0x3C0 ){
-            MSG_DEBUG("SM ID not support!![%x][%x]\n", tempID[0], tempID[1]);
-            return Fail;
-    }
 
               MSG_DEBUG("Using PoowerOn setting 0x%x\n",u32PowerOn);
               if ((u32PowerOn & 0xC0) != 0xC0)	/* PWRON[7:6] */
@@ -411,6 +410,10 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
               pSM->bIsMulticycle   = TRUE;
               pSM->uSpareSize      = g_u32ExtraDataSize;
               pSM->bIsMLCNand      = TRUE;
+    }else{
+      if(IsID==1){
+        MSG_DEBUG("SM ID not support!![%x][%x]\n", tempID[0], tempID[1]);
+        return Fail;
           }
     }
 
