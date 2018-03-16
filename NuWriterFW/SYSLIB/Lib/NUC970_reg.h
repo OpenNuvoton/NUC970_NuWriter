@@ -1668,6 +1668,7 @@ USB Device Control Registers
 /*
   GPIO Control Registers  
 */
+#if(0)
 #define     REG_GPIOC_DIR		(GPIO_BA+0x04)  /* GPIO portC direction control register */
 #define     REG_GPIOC_DATAOUT	(GPIO_BA+0x08)  /* GPIO portC data output register */
 #define     REG_GPIOC_DATAIN	(GPIO_BA+0x0C)  /* GPIO portC data input register */
@@ -1714,6 +1715,168 @@ USB Device Control Registers
 #define     rGPIOI_DATAOU		(*(unsigned int volatile *)REG_GPIOI_DATAOU)
 #define     rGPIOI_DATAIN		(*(unsigned int volatile *)REG_GPIOI_DATAIN)
 
+#else
+#define     REG_GPIOA_DIR       (GPIO_BA+0x000)  /*!< GPIO portA direction control register */
+#define     REG_GPIOA_DATAOUT   (GPIO_BA+0x004)  /*!< GPIO portA data output register */
+#define     REG_GPIOA_DATAIN    (GPIO_BA+0x008)  /*!< GPIO portA data input register */
+#define     REG_GPIOA_IMD       (GPIO_BA+0x00C)  /*!< GPIO Port A Interrupt Mode Register */
+#define     REG_GPIOA_IREN      (GPIO_BA+0x010)  /*!< GPIO Port A Interrupt Rising-Edge or Level-High Enable Register */
+#define     REG_GPIOA_IFEN      (GPIO_BA+0x014)  /*!< GPIO Port A Interrupt Falling-Edge or Level-Low Enable Register */
+#define     REG_GPIOA_ISR       (GPIO_BA+0x018)  /*!< GPIO Port A Interrupt Status Register */
+#define     REG_GPIOA_DBEN      (GPIO_BA+0x01C)  /*!< GPIO Port A De-bounce Enable Register */
+#define     REG_GPIOA_PUEN      (GPIO_BA+0x020)  /*!< GPIO Port A Pull-Up Enable Register */
+#define     REG_GPIOA_PDEN      (GPIO_BA+0x024)  /*!< GPIO Port A Pull-Down Enable Register */
+#define     REG_GPIOA_ICEN      (GPIO_BA+0x028)  /*!< GPIO Port A CMOS Input Enable Register */
+#define     REG_GPIOA_ISEN      (GPIO_BA+0x02C)  /*!< GPIO Port A Schmitt-Trigger Input Enable Register */
+
+#define     REG_GPIOB_DIR       (GPIO_BA+0x040)  /*!< GPIO port B direction control register */
+#define     REG_GPIOB_DATAOUT   (GPIO_BA+0x044)  /*!< GPIO port B data output register */
+#define     REG_GPIOB_DATAIN    (GPIO_BA+0x048)  /*!< GPIO port B data input register */
+#define     REG_GPIOB_IMD       (GPIO_BA+0x04C)  /*!< GPIO Port B Interrupt Mode Register */
+#define     REG_GPIOB_IREN      (GPIO_BA+0x050)  /*!< GPIO Port B Interrupt Rising-Edge or Level-High Enable Register */
+#define     REG_GPIOB_IFEN      (GPIO_BA+0x054)  /*!< GPIO Port B Interrupt Falling-Edge or Level-Low Enable Register */
+#define     REG_GPIOB_ISR       (GPIO_BA+0x058)  /*!< GPIO Port B Interrupt Status Register */
+#define     REG_GPIOB_DBEN      (GPIO_BA+0x05C)  /*!< GPIO Port B De-bounce Enable Register */
+#define     REG_GPIOB_PUEN      (GPIO_BA+0x060)  /*!< GPIO Port B Pull-Up Enable Register */
+#define     REG_GPIOB_PDEN      (GPIO_BA+0x064)  /*!< GPIO Port B Pull-Down Enable Register */
+#define     REG_GPIOB_ICEN      (GPIO_BA+0x068)  /*!< GPIO Port B CMOS Input Enable Register */
+#define     REG_GPIOB_ISEN      (GPIO_BA+0x06C)  /*!< GPIO Port B Schmitt-Trigger Input Enable Register */
+
+#define     REG_GPIOC_DIR       (GPIO_BA+0x080)  /*!< GPIO port C direction control register */
+#define     REG_GPIOC_DATAOUT   (GPIO_BA+0x084)  /*!< GPIO port C data output register */
+#define     REG_GPIOC_DATAIN    (GPIO_BA+0x088)  /*!< GPIO port C data input register */
+#define     REG_GPIOC_IMD       (GPIO_BA+0x08C)  /*!< GPIO Port C Interrupt Mode Register */
+#define     REG_GPIOC_IREN      (GPIO_BA+0x090)  /*!< GPIO Port C Interrupt Rising-Edge or Level-High Enable Register */
+#define     REG_GPIOC_IFEN      (GPIO_BA+0x094)  /*!< GPIO Port C Interrupt Falling-Edge or Level-Low Enable Register */
+#define     REG_GPIOC_ISR       (GPIO_BA+0x098)  /*!< GPIO Port C Interrupt Status Register */
+#define     REG_GPIOC_DBEN      (GPIO_BA+0x09C)  /*!< GPIO Port C De-bounce Enable Register */
+#define     REG_GPIOC_PUEN      (GPIO_BA+0x0A0)  /*!< GPIO Port C Pull-Up Enable Register */
+#define     REG_GPIOC_PDEN      (GPIO_BA+0x0A4)  /*!< GPIO Port C Pull-Down Enable Register */
+#define     REG_GPIOC_ICEN      (GPIO_BA+0x0A8)  /*!< GPIO Port C CMOS Input Enable Register */
+#define     REG_GPIOC_ISEN      (GPIO_BA+0x0AC)  /*!< GPIO Port C Schmitt-Trigger Input Enable Register */
+
+#define     REG_GPIOD_DIR       (GPIO_BA+0x0C0)  /*!< GPIO port D direction control register */
+#define     REG_GPIOD_DATAOUT   (GPIO_BA+0x0C4)  /*!< GPIO port D data output register */
+#define     REG_GPIOD_DATAIN    (GPIO_BA+0x0C8)  /*!< GPIO port D data input register */
+#define     REG_GPIOD_IMD       (GPIO_BA+0x0CC)  /*!< GPIO Port D Interrupt Mode Register */
+#define     REG_GPIOD_IREN      (GPIO_BA+0x0D0)  /*!< GPIO Port D Interrupt Rising-Edge or Level-High Enable Register */
+#define     REG_GPIOD_IFEN      (GPIO_BA+0x0D4)  /*!< GPIO Port D Interrupt Falling-Edge or Level-Low Enable Register */
+#define     REG_GPIOD_ISR       (GPIO_BA+0x0D8)  /*!< GPIO Port D Interrupt Status Register */
+#define     REG_GPIOD_DBEN      (GPIO_BA+0x0DC)  /*!< GPIO Port D De-bounce Enable Register */
+#define     REG_GPIOD_PUEN      (GPIO_BA+0x0E0)  /*!< GPIO Port D Pull-Up Enable Register */
+#define     REG_GPIOD_PDEN      (GPIO_BA+0x0E4)  /*!< GPIO Port D Pull-Down Enable Register */
+#define     REG_GPIOD_ICEN      (GPIO_BA+0x0E8)  /*!< GPIO Port D CMOS Input Enable Register */
+#define     REG_GPIOD_ISEN      (GPIO_BA+0x0EC)  /*!< GPIO Port D Schmitt-Trigger Input Enable Register */
+
+#define     REG_GPIOE_DIR       (GPIO_BA+0x100)  /*!< GPIO port E direction control register */
+#define     REG_GPIOE_DATAOUT   (GPIO_BA+0x104)  /*!< GPIO port E data output register */
+#define     REG_GPIOE_DATAIN    (GPIO_BA+0x108)  /*!< GPIO port E data input register */
+#define     REG_GPIOE_IMD       (GPIO_BA+0x10C)  /*!< GPIO Port E Interrupt Mode Register */
+#define     REG_GPIOE_IREN      (GPIO_BA+0x110)  /*!< GPIO Port E Interrupt Rising-Edge or Level-High Enable Register */
+#define     REG_GPIOE_IFEN      (GPIO_BA+0x114)  /*!< GPIO Port E Interrupt Falling-Edge or Level-Low Enable Register */
+#define     REG_GPIOE_ISR       (GPIO_BA+0x118)  /*!< GPIO Port E Interrupt Status Register */
+#define     REG_GPIOE_DBEN      (GPIO_BA+0x11C)  /*!< GPIO Port E De-bounce Enable Register */
+#define     REG_GPIOE_PUEN      (GPIO_BA+0x120)  /*!< GPIO Port E Pull-Up Enable Register */
+#define     REG_GPIOE_PDEN      (GPIO_BA+0x124)  /*!< GPIO Port E Pull-Down Enable Register */
+#define     REG_GPIOE_ICEN      (GPIO_BA+0x128)  /*!< GPIO Port E CMOS Input Enable Register */
+#define     REG_GPIOE_ISEN      (GPIO_BA+0x12C)  /*!< GPIO Port E Schmitt-Trigger Input Enable Register */
+
+#define     REG_GPIOF_DIR       (GPIO_BA+0x140)  /*!< GPIO port F direction control register */
+#define     REG_GPIOF_DATAOUT   (GPIO_BA+0x144)  /*!< GPIO port F data output register */
+#define     REG_GPIOF_DATAIN    (GPIO_BA+0x148)  /*!< GPIO port F data input register */
+#define     REG_GPIOF_IMD       (GPIO_BA+0x14C)  /*!< GPIO Port F Interrupt Mode Register */
+#define     REG_GPIOF_IREN      (GPIO_BA+0x150)  /*!< GPIO Port F Interrupt Rising-Edge or Level-High Enable Register */
+#define     REG_GPIOF_IFEN      (GPIO_BA+0x154)  /*!< GPIO Port F Interrupt Falling-Edge or Level-Low Enable Register */
+#define     REG_GPIOF_ISR       (GPIO_BA+0x158)  /*!< GPIO Port F Interrupt Status Register */
+#define     REG_GPIOF_DBEN      (GPIO_BA+0x15C)  /*!< GPIO Port F De-bounce Enable Register */
+#define     REG_GPIOF_PUEN      (GPIO_BA+0x160)  /*!< GPIO Port F Pull-Up Enable Register */
+#define     REG_GPIOF_PDEN      (GPIO_BA+0x164)  /*!< GPIO Port F Pull-Down Enable Register */
+#define     REG_GPIOF_ICEN      (GPIO_BA+0x168)  /*!< GPIO Port F CMOS Input Enable Register */
+#define     REG_GPIOF_ISEN      (GPIO_BA+0x16C)  /*!< GPIO Port F Schmitt-Trigger Input Enable Register */
+
+#define     REG_GPIOG_DIR       (GPIO_BA+0x180)  /*!< GPIO port G direction control register */
+#define     REG_GPIOG_DATAOUT   (GPIO_BA+0x184)  /*!< GPIO port G data output register */
+#define     REG_GPIOG_DATAIN    (GPIO_BA+0x188)  /*!< GPIO port G data input register */
+#define     REG_GPIOG_IMD       (GPIO_BA+0x18C)  /*!< GPIO Port G Interrupt Mode Register */
+#define     REG_GPIOG_IREN      (GPIO_BA+0x190)  /*!< GPIO Port G Interrupt Rising-Edge or Level-High Enable Register */
+#define     REG_GPIOG_IFEN      (GPIO_BA+0x194)  /*!< GPIO Port G Interrupt Falling-Edge or Level-Low Enable Register */
+#define     REG_GPIOG_ISR       (GPIO_BA+0x198)  /*!< GPIO Port G Interrupt Status Register */
+#define     REG_GPIOG_DBEN      (GPIO_BA+0x19C)  /*!< GPIO Port G De-bounce Enable Register */
+#define     REG_GPIOG_PUEN      (GPIO_BA+0x1A0)  /*!< GPIO Port G Pull-Up Enable Register */
+#define     REG_GPIOG_PDEN      (GPIO_BA+0x1A4)  /*!< GPIO Port G Pull-Down Enable Register */
+#define     REG_GPIOG_ICEN      (GPIO_BA+0x1A8)  /*!< GPIO Port G CMOS Input Enable Register */
+#define     REG_GPIOG_ISEN      (GPIO_BA+0x1AC)  /*!< GPIO Port G Schmitt-Trigger Input Enable Register */
+
+#define     REG_GPIOH_DIR       (GPIO_BA+0x1C0)  /*!< GPIO port H direction control register */
+#define     REG_GPIOH_DATAOUT   (GPIO_BA+0x1C4)  /*!< GPIO port H data output register */
+#define     REG_GPIOH_DATAIN    (GPIO_BA+0x1C8)  /*!< GPIO port H data input register */
+#define     REG_GPIOH_IMD       (GPIO_BA+0x1CC)  /*!< GPIO Port H Interrupt Mode Register */
+#define     REG_GPIOH_IREN      (GPIO_BA+0x1D0)  /*!< GPIO Port H Interrupt Rising-Edge or Level-High Enable Register */
+#define     REG_GPIOH_IFEN      (GPIO_BA+0x1D4)  /*!< GPIO Port H Interrupt Falling-Edge or Level-Low Enable Register */
+#define     REG_GPIOH_ISR       (GPIO_BA+0x1D8)  /*!< GPIO Port H Interrupt Status Register */
+#define     REG_GPIOH_DBEN      (GPIO_BA+0x1DC)  /*!< GPIO Port H De-bounce Enable Register */
+#define     REG_GPIOH_PUEN      (GPIO_BA+0x1E0)  /*!< GPIO Port H Pull-Up Enable Register */
+#define     REG_GPIOH_PDEN      (GPIO_BA+0x1E4)  /*!< GPIO Port H Pull-Down Enable Register */
+#define     REG_GPIOH_ICEN      (GPIO_BA+0x1E8)  /*!< GPIO Port H CMOS Input Enable Register */
+#define     REG_GPIOH_ISEN      (GPIO_BA+0x1EC)  /*!< GPIO Port H Schmitt-Trigger Input Enable Register */
+
+#define     REG_GPIOI_DIR       (GPIO_BA+0x200)  /*!< GPIO port I direction control register */
+#define     REG_GPIOI_DATAOUT   (GPIO_BA+0x204)  /*!< GPIO port I data output register */
+#define     REG_GPIOI_DATAIN    (GPIO_BA+0x208)  /*!< GPIO port I data input register */
+#define     REG_GPIOI_IMD       (GPIO_BA+0x20C)  /*!< GPIO Port I Interrupt Mode Register */
+#define     REG_GPIOI_IREN      (GPIO_BA+0x210)  /*!< GPIO Port I Interrupt Rising-Edge or Level-High Enable Register */
+#define     REG_GPIOI_IFEN      (GPIO_BA+0x214)  /*!< GPIO Port I Interrupt Falling-Edge or Level-Low Enable Register */
+#define     REG_GPIOI_ISR       (GPIO_BA+0x218)  /*!< GPIO Port I Interrupt Status Register */
+#define     REG_GPIOI_DBEN      (GPIO_BA+0x21C)  /*!< GPIO Port I De-bounce Enable Register */
+#define     REG_GPIOI_PUEN      (GPIO_BA+0x220)  /*!< GPIO Port I Pull-Up Enable Register */
+#define     REG_GPIOI_PDEN      (GPIO_BA+0x224)  /*!< GPIO Port I Pull-Down Enable Register */
+#define     REG_GPIOI_ICEN      (GPIO_BA+0x228)  /*!< GPIO Port I CMOS Input Enable Register */
+#define     REG_GPIOI_ISEN      (GPIO_BA+0x22C)  /*!< GPIO Port I Schmitt-Trigger Input Enable Register */
+
+#define     REG_GPIOJ_DIR       (GPIO_BA+0x240)  /*!< GPIO port J direction control register */
+#define     REG_GPIOJ_DATAOUT   (GPIO_BA+0x244)  /*!< GPIO port J data output register */
+#define     REG_GPIOJ_DATAIN    (GPIO_BA+0x248)  /*!< GPIO port J data input register */
+#define     REG_GPIOJ_IMD       (GPIO_BA+0x24C)  /*!< GPIO Port J Interrupt Mode Register */
+#define     REG_GPIOJ_IREN      (GPIO_BA+0x250)  /*!< GPIO Port J Interrupt Rising-Edge or Level-High Enable Register */
+#define     REG_GPIOJ_IFEN      (GPIO_BA+0x254)  /*!< GPIO Port J Interrupt Falling-Edge or Level-Low Enable Register */
+#define     REG_GPIOJ_ISR       (GPIO_BA+0x258)  /*!< GPIO Port J Interrupt Status Register */
+#define     REG_GPIOJ_DBEN      (GPIO_BA+0x25C)  /*!< GPIO Port J De-bounce Enable Register */
+#define     REG_GPIOJ_PUEN      (GPIO_BA+0x260)  /*!< GPIO Port J Pull-Up Enable Register */
+#define     REG_GPIOJ_PDEN      (GPIO_BA+0x264)  /*!< GPIO Port J Pull-Down Enable Register */
+#define     REG_GPIOJ_ICEN      (GPIO_BA+0x268)  /*!< GPIO Port J CMOS Input Enable Register */
+#define     REG_GPIOJ_ISEN      (GPIO_BA+0x26C)  /*!< GPIO Port J Schmitt-Trigger Input Enable Register */
+
+#define     REG_GPIO_DBNCECON   (GPIO_BA+0x3F0)  /*!< GPIO Debounce Control Register */
+#define     REG_GPIO_ISR        (GPIO_BA+0x3FC)  /*!< GPIO Port Interrupt Status Register */
+
+/**@}*/ /* end of GPIO register group */
+
+
+
+#define     rGPIOC_DIR			(*(unsigned int volatile *)REG_GPIOC_DIR)
+#define     rGPIOC_DATAOUT		(*(unsigned int volatile *)REG_GPIOC_DATAOUT)
+#define     rGPIOC_DATAIN		(*(unsigned int volatile *)REG_GPIOC_DATAIN)
+#define     rGPIOD_DIR			(*(unsigned int volatile *)REG_GPIOD_DIR)
+#define     rGPIOD_DATAOUT		(*(unsigned int volatile *)REG_GPIOD_DATAOUT)
+#define     rGPIOD_DATAIN		(*(unsigned int volatile *)REG_GPIOD_DATAIN)
+#define     rGPIOE_DIR			(*(unsigned int volatile *)REG_GPIOE_DIR)
+#define     rGPIOE_DATAOUT		(*(unsigned int volatile *)REG_GPIOE_DATAOUT)
+#define     rGPIOE_DATAIN		(*(unsigned int volatile *)REG_GPIOE_DATAIN)
+#define     rGPIOF_DIR			(*(unsigned int volatile *)REG_GPIOF_DIR)
+#define     rGPIOF_DATAOUT		(*(unsigned int volatile *)REG_GPIOF_DATAOUT)
+#define     rGPIOF_DATAIN		(*(unsigned int volatile *)REG_GPIOF_DATAIN)
+#define     rGPIOG_DIR			(*(unsigned int volatile *)REG_GPIOG_DIR)
+#define     rGPIOG_DATAOUT		(*(unsigned int volatile *)REG_GPIOG_DATAOUT)
+#define     rGPIOG_DATAIN		(*(unsigned int volatile *)REG_GPIOG_DATAIN)
+#define     rGPIOH_DBNCE		(*(unsigned int volatile *)REG_GPIOH_DBNCE)
+#define     rGPIOH_DIR			(*(unsigned int volatile *)REG_GPIOH_DIR)
+#define     rGPIOH_DATAOUT		(*(unsigned int volatile *)REG_GPIOH_DATAOUT)
+#define     rGPIOH_DATAIN		(*(unsigned int volatile *)REG_GPIOH_DATAIN)
+#define     rGPIOI_DIR			(*(unsigned int volatile *)REG_GPIOI_DIR)
+#define     rGPIOI_DATAOU		(*(unsigned int volatile *)REG_GPIOI_DATAOU)
+#define     rGPIOI_DATAIN		(*(unsigned int volatile *)REG_GPIOI_DATAIN)
+
+#endif
 
 /* 
   RTC Control Registers
