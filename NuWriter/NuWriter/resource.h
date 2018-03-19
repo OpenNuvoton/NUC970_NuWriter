@@ -45,6 +45,7 @@
 #define IDC_PACK_TAB2                   160
 #define IDD_PACK_TAB2                   160
 #define IDD_ERASE                       163
+#define IDD_FAST                        164
 #define IDC_COMBO_TYPE                  1001
 #define IDC_RECONNECT                   1002
 #define IDC_VERSION                     1003
@@ -134,13 +135,13 @@
 #define IDC_MTP_A2                      1081
 #define IDC_MTP_M4                      1082
 #define IDC_PROGRESS1                   1082
-#define IDC_DOWNPROGRESS                1082
 #define IDC_OTP_M0                      1083
 #define IDC_EDIT1                       1083
 #define IDC_SPI_BLOCKS                  1083
 #define IDC_READ_BLOCKS                 1083
 #define IDC_MTP_M0                      1083
 #define IDC_FORMAT_SPACE                1083
+#define IDC_USBEDIT1                    1083
 #define IDC_SPIREAD_BROSWSE             1084
 #define IDC_READ_BROSWSE                1084
 #define IDC_READ_STARTBLKS              1085
@@ -204,15 +205,79 @@
 #define DC_STATIC_DTB2                  1148
 #define IDC_STATIC_DTB2                 1148
 #define IDC_DTB_EN                      1149
+#define IDC_FAST_IMAGENAME              1150
+#define IDC_FAST_BROWSE                 1151
+#define IDC_FAST_TYPE_STATIC            1152
+#define IDC_RADIO_FAST_NAND             1153
+#define IDC_RADIO_FAST_SPI              1154
+#define IDC_RADIO_FAST_eMMC             1155
+#define IDC_BTN_FAST_START              1156
+#define IDC_FAST_PROGRESS1              1157
+#define IDC_FAST_PROGRESS2              1158
+#define IDC_FAST_PROGRESS3              1159
+#define IDC_FAST_PROGRESS4              1160
+#define IDC_FAST_PROGRESS5              1161
+#define IDC_FAST_PROGRESS6              1162
+#define IDC_FAST_PROGRESS7              1163
+#define IDC_FAST_PROGRESS8              1164
+#define IDC_FAST_CHKD1                  1165
+#define IDC_FAST_CHKD2                  1166
+#define IDC_FAST_CHKD3                  1167
+#define IDC_FAST_CHKD4                  1168
+#define IDC_FAST_CHKD5                  1169
+#define IDC_FAST_CHKD6                  1170
+#define IDC_FAST_CHKD7                  1171
+#define IDC_FAST_CHKD8                  1172
+#define IDC_FAST_FILE_STATIC            1173
+#define IDC_STATIC_FAST_MSG1            1174
+#define IDC_STATIC_FAST_MSG2            1175
+#define IDC_STATIC_FAST_MSG3            1176
+#define IDC_STATIC_FAST_MSG4            1177
+#define IDC_STATIC_FAST_MSG5            1178
+#define IDC_STATIC_FAST_MSG6            1179
+#define IDC_STATIC_FAST_MSG7            1180
+#define IDC_STATIC_FAST_MSG8            1181
+#define IDC_STATIC_FAST_MSG9            1182
+#define IDC_STATIC_GROUP_DEVICE         1182
+#define IDC_STATIC_FAST_DEV1            1183
+#define IDC_STATIC_FAST_DEV2            1184
+#define IDC_STATIC_FAST_DEV3            1185
+#define IDC_STATIC_FAST_DEV4            1186
+#define IDC_STATIC_FAST_DEV5            1187
+#define IDC_STATIC_FAST_DEV6            1188
+#define IDC_STATIC_FAST_DEV7            1189
+#define IDC_STATIC_FAST_DEV8            1190
+#define IDC_STATIC_FAST_DEV9            1191
+#define IDC_BUTTON1                     1191
+#define IDC_BUTTON2                     1192
+#define IDC_IDCOMBO                     1193
+#define IDC_COMBO_FAST_ID               1193
+#define IDC_RSTBTN                      1194
+#define IDC_ALLRSTBTN                   1195
 #define IDC_DOWNLOADSTATUS              4000
+#define IDC_DOWNLOADSTATUS2             4001
+#define IDC_DOWNLOADSTATUS3             4002
+#define IDC_DOWNLOADSTATUS4             4003
+#define IDC_DOWNLOADSTATUS5             4004
+#define IDC_DOWNLOADSTATUS6             4005
+#define IDC_DOWNLOADSTATUS7             4006
+#define IDC_DOWNLOADSTATUS8             4007
+#define IDC_DOWNPROGRESS                4008
+#define IDC_DOWNPROGRESS2               4009
+#define IDC_DOWNPROGRESS3               4010
+#define IDC_DOWNPROGRESS4               4011
+#define IDC_DOWNPROGRESS5               4012
+#define IDC_DOWNPROGRESS6               4013
+#define IDC_DOWNPROGRESS7               4014
+#define IDC_DOWNPROGRESS8               4015
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        164
+#define _APS_NEXT_RESOURCE_VALUE        165
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1150
+#define _APS_NEXT_CONTROL_VALUE         1196
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

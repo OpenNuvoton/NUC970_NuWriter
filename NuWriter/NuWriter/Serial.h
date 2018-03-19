@@ -139,6 +139,7 @@ typedef enum _DOWNMETHOD
 #define READ_ACTION		4
 #define PACK_ACTION  	5
 #define FORMAT_ACTION	6
+#define PACK_VERIFY_ACTION	7
 
 #define NEED_AUTORUN	0x80000000
 
@@ -185,8 +186,8 @@ typedef struct _NORBOOT_NAND_HEAD //NAND and NOR(bootloader)
 	DWORD no;
 	CHAR name[16];
 	DWORD type;
-	DWORD execaddr;    //end block
-	DWORD flashoffset; //start block
+	DWORD execaddr;    //end block = excute address
+	DWORD flashoffset; //start block =  start address
 	DWORD endaddr;	
 	UCHAR macaddr[8];  //mac address
 	DWORD initSize;

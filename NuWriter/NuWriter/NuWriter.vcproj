@@ -216,6 +216,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FastDlg.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\FooButton.cpp"
 				>
 			</File>
@@ -335,6 +339,10 @@
 			</File>
 			<File
 				RelativePath=".\EraseDlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FastDlg.h"
 				>
 			</File>
 			<File
