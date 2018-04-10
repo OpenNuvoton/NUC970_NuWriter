@@ -217,7 +217,8 @@ void CPACKDlg::OnBnClickedPackAdd()
             if(m_packtab1.m_type==UBOOT) {
                 int ddrlen;
                 UCHAR * ddrbuf;
-                ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
+                //ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
+                ddrbuf=DDR2Buf(mainWnd->ShareDDRBuf,mainWnd->DDRLen,&ddrlen);//cfli0409
                 total+=(ddrlen+16);
             }
 
@@ -1038,7 +1039,8 @@ BOOL CPACKDlg::InitFile(int flag)
                 if(*itemType==UBOOT) {
                     int ddrlen;
                     UCHAR * ddrbuf;
-                    ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
+                    //ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
+                    ddrbuf=DDR2Buf(mainWnd->ShareDDRBuf,mainWnd->DDRLen,&ddrlen);//cfli0409
                     total+=(ddrlen+16);
                 }
 

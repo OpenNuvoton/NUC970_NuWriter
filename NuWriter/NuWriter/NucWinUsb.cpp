@@ -524,7 +524,7 @@ BOOL CNucWinUsb::EnableOneWinUsbDevice(int id)
 
     bResult = OpenDevice(id);
     if(!bResult) {
-        TRACE("OpenDevice: Try again\n");
+        TRACE(_T("(%d)  OpenDevice: Try again\n"),id);
         //str.Format(_T("Device %d NucWinUsb.cpp  OpenDevice: Try again\n"),id);
         //AfxMessageBox(str);
         Sleep(500);
@@ -538,14 +538,14 @@ BOOL CNucWinUsb::EnableOneWinUsbDevice(int id)
     Sleep(200);//for Mass production
     bResult = GetOneUSBDeviceSpeed(id);
     if(!bResult) {
-        TRACE("XXX GetOneUSBDeviceSpeed; Device %d\n",id);
+        TRACE(_T("(%d) XXX GetOneUSBDeviceSpeed\n"),id);
         CloseWinUsbDevice(id);
         return bResult;
     }
     Sleep(200);//for Mass production
     bResult = QueryOneDeviceEndpoints( id );
     if(!bResult) {
-        TRACE("XXX QueryOneDeviceEndpoints: Device %d\n",id);
+        TRACE(_T("(%d) XXX QueryOneDeviceEndpoints\n"),id);
         CloseWinUsbDevice(id);
         return bResult;
     }

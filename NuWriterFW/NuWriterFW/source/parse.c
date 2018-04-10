@@ -2582,6 +2582,7 @@ void UXmodem_NAND()
 
             if (ppack.imagetype == UBOOT) {   // system image
                 int offblk=0;
+                int rawfilelen = 0;
                 _ch=((unsigned char*)(((unsigned int)DOWNLOAD_BASE)|NON_CACHE));
                 ptr=_ch;
                 while(fmiCheckInvalidBlock(pSM, pNandImage->blockNo/(pSM->uPagePerBlock*pSM->uPageSize)+offblk) == 1) {
@@ -2600,12 +2601,13 @@ void UXmodem_NAND()
                 MSG_DEBUG("offblk = %d, ptr[0~3] = 0x%x  0x%x  0x%x  0x%x\n", offblk, ptr[0], ptr[1], ptr[2], ptr[3]);
                 //sysprintf("ptr[4096~4099] = 0x%x  0x%x  0x%x  0x%x\n", ptr[4096], ptr[4097], ptr[4098], ptr[4099]);
                 memmove(_ch,_ch+16+ddrlen+ppack.startaddr,ppack.filelen);
-
+                rawfilelen = ppack.filelen - (ddrlen+16+ppack.startaddr);
+                MSG_DEBUG("ppack.filelen = (%d) 0x%x,  rawfilelen = (%d)0x%x\n", ppack.filelen, ppack.filelen, rawfilelen, rawfilelen);
                 do {
                     usb_send(ptr,TRANSFER_LEN); //send data to PC
                     usb_recv((unsigned char*)_ack,4); //recv data from PC
                     ptr += (*_ack);
-                } while((ptr-_ch)<(ppack.filelen));
+                } while((ptr-_ch)<(rawfilelen));
 
             } else {
                 int total,offblk=0;

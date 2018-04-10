@@ -951,8 +951,14 @@ BOOL CNuWriterDlg:: Info()
         return FALSE;
     }
 
+    m_info.Nand_uPagePerBlock =  Nand_uPagePerBlock;
+    m_info.Nand_uBlockPerFlash = Nand_uBlockPerFlash;
+    bResult=NucUsb.NUC_WritePipe(0,(UCHAR *)&m_info, sizeof(INFO_T));
+    if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT) bResult=FALSE;
+    if(bResult!=TRUE)	bResult=FALSE;
+
     bResult=NucUsb.NUC_ReadPipe(0,(UCHAR *)&m_info, sizeof(INFO_T));
-    if(WaitForSingleObject(m_ExitEvent[0], 0) != WAIT_TIMEOUT) bResult=FALSE;
+    if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT) bResult=FALSE;
     if(bResult!=TRUE)	bResult=FALSE;
 
 
@@ -988,6 +994,12 @@ BOOL CNuWriterDlg::OneDeviceInfo(int id)
         return FALSE;
     }
 
+    m_info.Nand_uPagePerBlock =  Nand_uPagePerBlock;
+    m_info.Nand_uBlockPerFlash = Nand_uBlockPerFlash;
+    bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)&m_info, sizeof(INFO_T));
+    if(WaitForSingleObject(m_ExitEvent[id], 0) != WAIT_TIMEOUT) bResult=FALSE;
+    if(bResult!=TRUE)	bResult=FALSE;
+
     bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&m_info, sizeof(INFO_T));
     if(WaitForSingleObject(m_ExitEvent[id], 0) != WAIT_TIMEOUT) bResult=FALSE;
     if(bResult!=TRUE)	bResult=FALSE;
@@ -1012,10 +1024,10 @@ unsigned WINAPI CNuWriterDlg::Info_proc(void* args)
     }
 #else
     TRACE("Info_proc:: %d   %d\n",pThis->g_iDeviceNum, NucUsb.WinUsbNumber);
-    if(pThis->g_iDeviceNum < NucUsb.WinUsbNumber) {
+    //if(pThis->g_iDeviceNum < NucUsb.WinUsbNumber) {
         TRACE("Info_proc:idevice =%d\n",pThis->iDevice);
         pThis->OneDeviceInfo(pThis->iDevice++);
-    }
+    //}
 #endif
     return 0;
 }

@@ -724,7 +724,8 @@ BOOL CSPIDlg::XUSB_Burn(CString& portName,CString& m_pathName,int *len)
         swscanf_s(m_execaddr,_T("%x"),&m_fhead->execaddr);
         swscanf_s(m_startblock,_T("%x"),&m_fhead->flashoffset);
         //-------------------DDR---------------------
-        ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
+        //ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
+        ddrbuf=DDR2Buf(mainWnd->ShareDDRBuf,mainWnd->DDRLen,&ddrlen);//cfli0409
         file_len=file_len+ddrlen;
         ((NORBOOT_NAND_HEAD *)m_fhead)->initSize=ddrlen;
         //-------------------------------------------
@@ -2142,7 +2143,8 @@ BOOL CMMCDlg::XUSB_Burn(CString& portName,CString& m_pathName,int *len)
         swscanf_s(m_execaddr,_T("%x"),&m_fhead->execaddr);
         swscanf_s(m_startblock,_T("%x"),&m_fhead->flashoffset);
         //-------------------DDR---------------------
-        ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
+        //ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
+        ddrbuf=DDR2Buf(mainWnd->ShareDDRBuf,mainWnd->DDRLen,&ddrlen);//cfli0409
         file_len=file_len+ddrlen;
         ((NORBOOT_MMC_HEAD *)m_fhead)->initSize=ddrlen;
         //-------------------------------------------
@@ -3529,7 +3531,8 @@ BOOL CNANDDlg::XUSB_Burn(CString& portName,CString& m_pathName,int *len,int *blo
         swscanf_s(m_execaddr,_T("%x"),&m_fhead->execaddr);
         swscanf_s(m_startblock,_T("%x"),&m_fhead->flashoffset);
         //-------------------DDR---------------------
-        ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
+        //ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
+        ddrbuf=DDR2Buf(mainWnd->ShareDDRBuf,mainWnd->DDRLen,&ddrlen);//cfli0409
         file_len=file_len+ddrlen;
         ((NORBOOT_NAND_HEAD *)m_fhead)->initSize=ddrlen;
         //-------------------------------------------
@@ -4048,7 +4051,8 @@ BOOL CNANDDlg::XUSB_BurnWithOOB(CString& portName,CString& m_pathName,int *len,i
         swscanf_s(m_execaddr,_T("%x"),&m_fhead->execaddr);
         swscanf_s(m_startblock,_T("%x"),&m_fhead->flashoffset);
         //-------------------DDR---------------------
-        ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
+        //ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
+        ddrbuf=DDR2Buf(mainWnd->ShareDDRBuf,mainWnd->DDRLen,&ddrlen);//cfli0409
         file_len=file_len+ddrlen;
         ((NORBOOT_NAND_HEAD *)m_fhead)->initSize=ddrlen;
         //-------------------------------------------
@@ -5673,9 +5677,9 @@ int FastDlg::XUSB_FastNANDVerify(int id, CString& portName, CString& m_pathName)
     PACK_HEAD *ppackhead =(PACK_HEAD *)lpBuffer;
 
     int imagenum = 0;
-    ppackhead->fileLength = (lpBuffer[7] << 24 | lpBuffer[6] << 16 | lpBuffer[5] << 8 | lpBuffer[4]);
+    ppackhead->fileLength = ((lpBuffer[7]&0xff) << 24 | (lpBuffer[6]&0xff) << 16 | (lpBuffer[5]&0xff) << 8 | (lpBuffer[4]&0xff));
 
-    ppackhead->num = (lpBuffer[11] << 24 | lpBuffer[10] << 16 | lpBuffer[9] << 8 | lpBuffer[8]);
+    ppackhead->num = ((lpBuffer[11]&0xff) << 24 | (lpBuffer[10]&0xff) << 16 | (lpBuffer[9]&0xff) << 8 | (lpBuffer[8]&0xff));
     imagenum = ppackhead->num;
 
 
@@ -5692,9 +5696,10 @@ int FastDlg::XUSB_FastNANDVerify(int id, CString& portName, CString& m_pathName)
 
     memset(m_fhead_nand, 0x00, sizeof(NORBOOT_NAND_HEAD));
     m_fhead_nand->flag=PACK_VERIFY_ACTION;
-    m_fhead_nand->filelen= (lpBuffer[19] << 24 | lpBuffer[18] << 16 | lpBuffer[17] << 8 | lpBuffer[16]); // child1 file len
-    m_fhead_nand->flashoffset = (lpBuffer[23] << 24 | lpBuffer[22] << 16 | lpBuffer[21] << 8 | lpBuffer[20]); // child1 start address
-    m_fhead_nand->type = (lpBuffer[27] << 24 | lpBuffer[26] << 16 | lpBuffer[25] << 8 | lpBuffer[24]); // child1 image type
+    //TRACE(_T("%x  %x  %x %x\n"),lpBuffer[16], lpBuffer[17], lpBuffer[18], lpBuffer[19]);
+    m_fhead_nand->filelen= ((lpBuffer[19]&0xff) << 24 | (lpBuffer[18]&0xff) << 16 | (lpBuffer[17]&0xff) << 8 | (lpBuffer[16]&0xff)); // child1 file len
+    m_fhead_nand->flashoffset = ((lpBuffer[23]&0xff) << 24 | (lpBuffer[22]&0xff) << 16 | (lpBuffer[21]&0xff) << 8 | (lpBuffer[20]&0xff)); // child1 start address
+    m_fhead_nand->type = ((lpBuffer[27]&0xff) << 24 | (lpBuffer[26]&0xff) << 16 | (lpBuffer[25]&0xff) << 8 | (lpBuffer[24]&0xff)); // child1 image type
     m_fhead_nand->no = imagenum;
     memcpy(temp,(unsigned char*)m_fhead_nand,sizeof(NORBOOT_NAND_HEAD));
     bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)temp, sizeof(NORBOOT_NAND_HEAD));
