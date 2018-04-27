@@ -276,8 +276,8 @@ BOOL CNuWriterDlg::OnInitDialog()
 
 #endif
 
-    if(DDRBuf!=NULL)
-        free(DDRBuf);
+    //if(DDRBuf!=NULL)
+    //    free(DDRBuf);
 
     delete [] charPathName;
     delete pNewFont;
@@ -395,8 +395,8 @@ void CNuWriterDlg::OnBnClickedReconnect()
             FastMode_ProgressControl(8, 1); // HIDE
         }
 
-        if(DDRBuf!=NULL)
-            free(DDRBuf);
+        //if(DDRBuf!=NULL)
+        //    free(DDRBuf);
         //AfxMessageBox(_T("Please reset device and Re-connect now !!!\n"));
 
         return;
@@ -435,8 +435,8 @@ void CNuWriterDlg::OnBnClickedReconnect()
         mainWnd->GetDlgItem(IDC_BTN_FAST_START)->EnableWindow(TRUE);
     }
 
-    if(DDRBuf!=NULL)
-        free(DDRBuf);
+    //if(DDRBuf!=NULL)
+    //    free(DDRBuf);
 }
 
 void CNuWriterDlg::OnDestroy()
@@ -504,8 +504,8 @@ void CNuWriterDlg::INItoSaveOrLoad(int Flag)
 }
 void CNuWriterDlg::UpdateBufForDDR()
 {
-    if(DDRBuf!=NULL)
-        free(DDRBuf);
+    //if(DDRBuf!=NULL)
+    //    free(DDRBuf);
     //DDRBuf=LoadDDRInit(DDRFileFullPath,&DDRLen);
     LoadDDRInit(DDRFileFullPath,&DDRLen);
 
@@ -566,11 +566,10 @@ void CNuWriterDlg::LoadDDRInit(CString pathName,int *len)
 #endif
 
     *len=tmpbuf_size;
-    DDRBuf = ptmpbuf;
+    //DDRBuf = ptmpbuf;
 
-
-    memcpy((char *)ShareDDRBuf, DDRBuf, *len);
-
+    memcpy((char *)ShareDDRBuf, ptmpbuf, *len);
+	free(ptmpbuf);
     return ;//ptmpbuf;
 }
 

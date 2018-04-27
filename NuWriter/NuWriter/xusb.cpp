@@ -6468,41 +6468,743 @@ int FastDlg::XUSB_FastSPIVerify(int id, CString& portName, CString& m_pathName)
             NucUsb.CloseWinUsbDevice(id);
             //AfxMessageBox(_T("ACK error !"));
             return FALSE;
+    }
+    total+= sizeof(PACK_CHILD_HEAD);
+    pbuf+= sizeof(PACK_CHILD_HEAD);
+
+    int ddrlen;
+    //UCHAR * ddrbuf;
+    if(child.imagetype == UBOOT) {
+        //ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
+        ddrlen = (((mainWnd->DDRLen+8+15)/16)*16);
+        pbuf += 16 + mainWnd->DDRLen + uBootHeadLen;
+        total+= 16 + mainWnd->DDRLen + uBootHeadLen;
+    }
+
+
+    if(child.imagetype == UBOOT) {
+        // send DDR parameter Length
+        bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)&ddrlen,4);
+        Sleep(5);
+        if(bResult==FALSE) {
+            fclose(fp);
+            delete []lpBuffer;
+            NucUsb.CloseWinUsbDevice(id);
+            //AfxMessageBox(_T("Write SPI head error\n"));
+            return FALSE;
+        }
+
+        bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
+        if(bResult==FALSE || ack!=0x85) {
+            fclose(fp);
+            delete []lpBuffer;
+            NucUsb.CloseWinUsbDevice(id);
+            //AfxMessageBox(_T("ACK error !"));
+            return FALSE;
+        }
+
+        scnt=(child.filelen-ddrlen-16)/BUF_SIZE;
+        rcnt=(child.filelen-ddrlen-16)%BUF_SIZE;
+    } else {
+        scnt=child.filelen/BUF_SIZE;
+        rcnt=child.filelen%BUF_SIZE;
+    }
+
+    int prepos=0;
+    while(scnt>0) {
+    
+        if(child.imagetype !=ENV) {
+            fseek(fp,total,SEEK_SET);
+            fread(temp,BUF_SIZE,1,fp);
+        } else {
+            fseek(fp,total,SEEK_SET);
+            fread(temp,BUF_SIZE,1,fp);
+        }
+        bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)lpBuffer, BUF_SIZE);
+        if(WaitForSingleObject(m_ExitEventBurn[id], 0) != WAIT_TIMEOUT) {
+            delete []lpBuffer;
+            fclose(fp);
+            NucUsb.CloseWinUsbDevice(id);
+            return FALSE;
+        }
+    
+        if(bResult==TRUE) {
+            total+=BUF_SIZE;
+            pbuf+=BUF_SIZE;
+            totalsize += BUF_SIZE;
+    
+            pos=(int)(((float)(((float)total/(float)file_len))*100));
+            posstr.Format(_T("%d%%"),pos);
+    
+            if(DataCompare(temp,lpBuffer,BUF_SIZE))
+                ack=BUF_SIZE;
+            else
+                ack=0;//compare error
+            bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)&ack,4);
+            if((bResult==FALSE)||(!ack)) {
+                delete []lpBuffer;
+                NucUsb.CloseWinUsbDevice(id);
+                fclose(fp);
+                return FALSE;
+            }
+    
+        } else {
+            fclose(fp);
+            delete []lpBuffer;
+            NucUsb.CloseWinUsbDevice(id);
+            return FALSE;
+        }
+    
+        if(WaitForSingleObject(m_ExitEventBurn[id], 0) != WAIT_TIMEOUT) {
+            fclose(fp);
+            delete []lpBuffer;
+            NucUsb.CloseWinUsbDevice(id);
+            return FALSE;
+        }
+
+        scnt--;
+#if(0)
+        if((pos!=prepos) || (pos==100)) {
+            prepos=pos;
+            if((scnt % 4 == 0) || pos == 100) {
+                PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)(pos),0);
+            }
+#endif
+            if(pos%5==0) {
+                prepos=pos;
+                PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)pos,0);
+            }
+        }
+
+        if(rcnt>0) {
+            memset((char *)&temp, 0xff, BUF_SIZE);
+            if(m_fhead_spi->type != ENV) {
+                fseek(fp,total,SEEK_SET);
+                fread(temp,rcnt,1,fp);
+            } else {
+                fseek(fp,total,SEEK_SET);
+                fread(temp,BUF_SIZE,1,fp);
+            }
+            bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)lpBuffer,BUF_SIZE);
+            if(WaitForSingleObject(m_ExitEventBurn[id], 0) != WAIT_TIMEOUT) {
+                fclose(fp);
+                delete []lpBuffer;
+                NucUsb.CloseWinUsbDevice(id);
+                return FALSE;
+            }
+
+            if(bResult==TRUE) {
+                total+=rcnt;
+                pbuf+=rcnt;
+                totalsize += rcnt;
+                if(DataCompare(temp,lpBuffer,rcnt))
+                    ack=BUF_SIZE;
+                else
+                    ack=0;//compare error
+
+                bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)&ack, 4);
+                if((bResult==FALSE)||(!ack)) {
+                    fclose(fp);
+                    delete []lpBuffer;
+                    NucUsb.CloseWinUsbDevice(id);
+                    return FALSE;
+
+                }
+
+            } else {
+                fclose(fp);
+                delete []lpBuffer;
+                NucUsb.CloseWinUsbDevice(id);
+                return FALSE;
+            }
+
+            if(WaitForSingleObject(m_ExitEventBurn[id], 0) != WAIT_TIMEOUT) {
+                fclose(fp);
+                delete []lpBuffer;
+                NucUsb.CloseWinUsbDevice(id);
+                return FALSE;
+            }
+
+            pos=(int)(((float)(((float)total/(float)file_len))*100));
+            //pos=(int)(((float)(((float)totalsize/(float)file_len))*100));
+
+            if(pos>=100) {
+                pos=100;
+            }
+            posstr.Format(_T("%d%%"),pos);
+
+            //if((pos!=prepos) || (pos==100)) {
+            if(pos%5==0) {
+                prepos=pos;
+                PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)pos,0);
+            }
+        }
+    }
+
+    fclose(fp);
+    delete []lpBuffer;
+    NucUsb.CloseWinUsbDevice(id);
+    return TRUE;
+
+}
+
+
+BOOL FastDlg::XUSB_FasteMMCErase(int id, CString& portName)
+{
+    BOOL bResult;
+    CString tempstr;
+    int count=0;
+    DWORD  iRet = 0x00;
+    unsigned int ack,erase_pos=0;
+    NORBOOT_MMC_HEAD *fhead;
+    char* lpBuffer;
+
+    CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
+    fhead=(NORBOOT_MMC_HEAD *)malloc(sizeof(NORBOOT_MMC_HEAD));
+
+    //TRACE(_T("XUSB_FasteMMCErase start (%d)\n"), id);
+    /***********************************************/
+    bResult=NucUsb.EnableOneWinUsbDevice(id);
+    if(bResult==FALSE) {
+        free(fhead);
+        //AfxMessageBox(_T("Please reset device and Re-connect now !!!\n"));
+        return FALSE;
+    }
+#if(0)
+    bResult=NucUsb.NUC_CheckFw(id);
+    if(bResult==FALSE) {
+        AfxMessageBox(_T("Please reset device and Re-connect now !!!\n"));
+        free(fhead);
+        return FALSE;
+    }
+#endif
+    USHORT typeack=0x0;
+    bResult=NucUsb.NUC_SetType(id,MMC,(UCHAR *)&typeack,sizeof(typeack));
+    if(bResult==FALSE) {
+        free(fhead);
+        NucUsb.CloseWinUsbDevice(id);
+        TRACE(_T("XXX Erase NUC_SetType error !!!\n"));
+        return FALSE;
+    }
+
+    lpBuffer = new char[BUF_SIZE];
+    memset((unsigned char*)fhead,0,sizeof(NORBOOT_MMC_HEAD));
+    fhead->flag=FORMAT_ACTION;
+    fhead->ReserveSize = 1;
+    memcpy(lpBuffer,(unsigned char*)fhead,sizeof(NORBOOT_MMC_HEAD));
+    free(fhead);
+
+    bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)lpBuffer, sizeof(NORBOOT_MMC_HEAD));
+    if(bResult==FALSE) {
+        delete []lpBuffer;
+        NucUsb.CloseWinUsbDevice(id);
+        TRACE(_T("(%d) XXX Erase eMMC head error\n"), id);
+        return FALSE;
+    }
+
+    bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
+    if(bResult==FALSE || ack!=0x85) {
+        delete []lpBuffer;
+        NucUsb.CloseWinUsbDevice(id);
+        TRACE(_T("(%d) XXX Erase Read ACK error ack= 0x%x   0x%x\n"), id, ack, GetLastError());
+        return FALSE;
+    }
+
+    erase_pos=0;
+    int wait_pos=0;
+    ((CProgressCtrl *)GetDlgItem(iId_Array[id]))->SetRange(0,100);
+    ((CProgressCtrl *)GetDlgItem(iId_Array[id]))->SetBkColor(COLOR_ERASE);
+
+    while(erase_pos!=100) {
+        if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
+            delete []lpBuffer;
+            NucUsb.CloseWinUsbDevice(id);
+            TRACE(_T("XXX (%d) WaitForSingleObject error. 0x%x \n"),id, GetLastError());
+            return FALSE;
+        }
+        Sleep(10);
+        bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
+        if(bResult=FALSE) {
+            delete []lpBuffer;
+            NucUsb.CloseWinUsbDevice(id);
+            TRACE(_T("XXX (%d) Erase Read ACK error ack=0x%x,  0x%x\n"), id, ack, GetLastError());
+            return FALSE;
+        }
+
+        if(!((ack>>16)&0xffff)) {
+            erase_pos=ack&0xffff;
+            PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)erase_pos,0);
+        } else {
+            delete []lpBuffer;
+            NucUsb.CloseWinUsbDevice(id);
+            TRACE(_T("XXX (%d) Erase error ack=0x%x,  0x%x\n"), id, ack, GetLastError());
+            return FALSE;
+        }
+
+        if(erase_pos==95) {
+            wait_pos++;
+            if(wait_pos>100) {
+                delete []lpBuffer;
+                NucUsb.CloseWinUsbDevice(id);
+                TRACE(_T("XXX (%d) Erase error wait_pos=%d\n"), id, wait_pos);
+                return FALSE;
+            }
+        }
+    }
+
+    delete []lpBuffer;
+    NucUsb.CloseWinUsbDevice(id);
+    return TRUE;
+}
+
+BOOL FastDlg::XUSB_FasteMMCBurn(int id, CString& portName,CString& m_pathName,int *len)
+{
+    BOOL bResult;
+    CString posstr;
+    CString tempstr;
+    int count=0;
+    FILE* fp;
+    int pos=0;
+    UCHAR burn_pos=0;
+    unsigned int total,file_len,scnt,rcnt;
+    unsigned int totalsize;
+    ULONG ack;
+    char* lpBuffer;
+    CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
+
+    //TRACE(_T("XUSB_FasteMMCBurn start (%d)  ,%s\n"), id, m_pathName);
+    bResult=NucUsb.EnableOneWinUsbDevice(id);
+    if(!bResult) {
+        //AfxMessageBox(_T("XXX Device Enable error\n"));
+        return FALSE;
+    }
+#if(0)
+    bResult=NucUsb.NUC_CheckFw(id);
+    if(bResult==FALSE) {
+        AfxMessageBox(_T("Please reset device and Re-connect now !!!\n"));
+        return FALSE;
+    }
+#endif
+    USHORT typeack=0x0;
+    bResult=NucUsb.NUC_SetType(id,MMC,(UCHAR *)&typeack,sizeof(typeack));
+    if(bResult==FALSE) {
+        NucUsb.CloseWinUsbDevice(id);
+        TRACE(_T("XXX (%d) Burn  NUC_SetType error \n"), id);
+        return FALSE;
+    }
+
+    fp=_wfopen(m_pathName,_T("rb"));
+    if(!fp) {
+        NucUsb.CloseWinUsbDevice(id);
+        fclose(fp);
+        AfxMessageBox(_T("File Open error\n"));
+        return FALSE;
+    }
+
+    fseek(fp,0,SEEK_END);
+    file_len=ftell(fp);
+    fseek(fp,0,SEEK_SET);
+    if(!file_len) {
+        NucUsb.CloseWinUsbDevice(id);
+        fclose(fp);
+        AfxMessageBox(_T("File length is zero\n"));
+        return FALSE;
+    }
+
+    unsigned int magic;
+    fread((unsigned char *)&magic,4,1,fp);
+    if(magic!=0x5) {
+        NucUsb.CloseWinUsbDevice(id);
+        fclose(fp);
+        AfxMessageBox(_T("Pack Image Format Error\n"));
+        return FALSE;
+    }
+
+    fseek(fp,0,SEEK_SET);
+    lpBuffer = new char[file_len]; //read file to buffer
+    memset(lpBuffer,0x00,file_len);
+    memset((unsigned char*)m_fhead_emmc,0,sizeof(NORBOOT_MMC_HEAD));
+    total=0;
+    m_fhead_emmc->flag=PACK_ACTION;
+    m_fhead_emmc->type=m_type;
+    m_fhead_emmc->filelen=file_len;
+    memcpy(lpBuffer,(unsigned char*)m_fhead_emmc,sizeof(NORBOOT_MMC_HEAD));
+    bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)lpBuffer, sizeof(NORBOOT_MMC_HEAD));
+    if(bResult==FALSE) {
+        delete []lpBuffer;
+        NucUsb.CloseWinUsbDevice(id);
+        fclose(fp);
+        TRACE(_T("XXX (%d) eMMC Burn file format error! 0x%x\n"), id, GetLastError());
+        return FALSE;
+    }
+
+    bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
+    if(bResult==FALSE) {
+        delete []lpBuffer;
+        NucUsb.CloseWinUsbDevice(id);
+        fclose(fp);
+        TRACE(_T("XXX (%d) eMMC Burn Read ACK error! 0x%x\n"), id, GetLastError());
+        return FALSE;
+    }
+
+    fread(lpBuffer,m_fhead_emmc->filelen,1,fp);
+    if(lpBuffer[0]!=0x5) {
+        delete []lpBuffer;
+        fclose(fp);
+        AfxMessageBox(_T("This file is not pack image"));
+        return FALSE;
+    }
+    fclose(fp);
+
+
+    char *pbuf = lpBuffer;
+    PACK_HEAD *ppackhead=(PACK_HEAD *)lpBuffer;
+    bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)pbuf, sizeof(PACK_HEAD));
+    Sleep(5);
+    if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
+        delete []lpBuffer;
+        NucUsb.CloseWinUsbDevice(id);
+        TRACE(_T("XXX (%d) WaitForSingleObject error 1\n"),id);
+        return FALSE;
+    }
+    if(bResult==FALSE) {
+        delete []lpBuffer;
+        NucUsb.CloseWinUsbDevice(id);
+        TRACE(_T("XXX (%d) eMMC Burn Write error! 0x%x\n"), id, GetLastError());
+        return FALSE;
+    }
+
+    bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
+    if(bResult==FALSE) {
+        delete []lpBuffer;
+        NucUsb.CloseWinUsbDevice(id);
+        TRACE(_T("XXX (%d) eMMC Burn Read error! 0x%x\n"), id, GetLastError());
+        return FALSE;
+    }
+
+    total+= sizeof(PACK_HEAD);
+    pbuf+= sizeof(PACK_HEAD);
+    PACK_CHILD_HEAD child;
+    ((CProgressCtrl *)GetDlgItem(iId_Array[id]))->SetRange(0,100);
+    ((CProgressCtrl *)GetDlgItem(iId_Array[id]))->SetBkColor(COLOR_BURN);
+    int posnum=0;
+    int prepos=0;
+
+#if !defined(BATCH_BURN)
+
+#else
+    unsigned int blockNum;
+    totalsize = 0;
+    for(int i=0; i<(int)(ppackhead->num); i++) {
+        total=0;
+        memcpy(&child,(char *)pbuf,sizeof(PACK_CHILD_HEAD));
+        bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)pbuf, sizeof(PACK_CHILD_HEAD));
+        if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
+            delete []lpBuffer;
+            NucUsb.CloseWinUsbDevice(id);
+            TRACE(_T("XXX (%d) WaitForSingleObject error 2. 0x%x\n"),id, bResult);
+            return FALSE;
+        }
+        if(bResult==FALSE) {
+            delete []lpBuffer;
+            NucUsb.CloseWinUsbDevice(id);
+            TRACE(_T("XXX (%d) eMMC Burn Write error! 0x%x\n"), id, GetLastError());
+            return FALSE;
+        }
+
+        bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
+        if(bResult==FALSE) {
+            delete []lpBuffer;
+            NucUsb.CloseWinUsbDevice(id);
+            TRACE(_T("XXX (%d) eMMC Burn Read error! 0x%x\n"), id, GetLastError());
+            return FALSE;
+        }
+
+        pbuf+= sizeof(PACK_CHILD_HEAD);
+        //Sleep(1);
+        scnt=child.filelen/BUF_SIZE;
+        rcnt=child.filelen%BUF_SIZE;
+        total=0;
+
+        while(scnt>0) {
+            //Sleep(10);
+            //TRACE(_T("#7459 (%d) eMMC Burn 44444444 scnt %d \n"), id, scnt);
+            bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)pbuf, BUF_SIZE);
+            if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
+                delete []lpBuffer;
+                NucUsb.CloseWinUsbDevice(id);
+                TRACE(_T("XXX (%d) WaitForSingleObject error 3, scnt= %d\n"),id, scnt);
+                return FALSE;
+            }
+            if(bResult==FALSE) {
+                delete []lpBuffer;
+                NucUsb.CloseWinUsbDevice(id);
+                TRACE(_T("XXX (%d) eMMC Burn Write error. scnt= %d ,0x%x\n"),id, scnt, GetLastError());
+                return FALSE;
+            }
+
+            if(bResult==TRUE) {
+                pbuf+=BUF_SIZE;
+                total+=BUF_SIZE;
+                totalsize += BUF_SIZE;
+
+                pos=(int)(((float)(((float)totalsize/(float)file_len))*100));
+
+                bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
+                if(bResult==FALSE) {
+                    delete []lpBuffer;
+                    NucUsb.CloseWinUsbDevice(id);
+                    CString tmp;
+                    tmp.Format(_T("eMMC Burn ACK error imagenum=%d  scnt= %d  0x%x"),i, scnt, GetLastError());
+                    TRACE(_T("XXX (%d) %s !\n"), id, tmp);
+                    return FALSE;
+                }
+            }
+
+            if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
+                delete []lpBuffer;
+                NucUsb.CloseWinUsbDevice(id);
+                TRACE(_T("XXX (%d) WaitForSingleObject error 4. scnt= %d  0x%x\n"),id, scnt, GetLastError());
+                return FALSE;
+            }
+            scnt--;
+            if((pos!=prepos) || (pos==100)) {
+                prepos=pos;
+                if((scnt % 4 == 0) || pos == 100) {
+                    PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)(pos),0);
+                }
+            }
+        }
+
+        if(rcnt>0) {
+            Sleep(20);
+            //TRACE(_T("#7587 (%d) eMMC Burn 66666666  rcnt = %d\n"), id, rcnt);
+            bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)pbuf,rcnt);
+            if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
+                delete []lpBuffer;
+                NucUsb.CloseWinUsbDevice(id);
+                TRACE(_T("XXX (%d) WaitForSingleObject error 5. rcnt = %d  0x%x\n"),id, scnt, GetLastError());
+                return FALSE;
+            }
+            if(bResult==FALSE) {
+                delete []lpBuffer;
+                NucUsb.CloseWinUsbDevice(id);
+                TRACE(_T("XXX (%d) eMMC Burn Write error! rcnt = %d  0x%x\n"), id, rcnt, GetLastError());
+                return FALSE;
+            }
+
+            if(bResult==TRUE) {
+                pbuf+=rcnt;
+                total+=rcnt;
+                totalsize += rcnt;
+
+                bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
+                if(bResult==FALSE) {
+                    delete []lpBuffer;
+                    NucUsb.CloseWinUsbDevice(id);
+                    TRACE(_T("XXX (%d) eMMC Burn Read error! rcnt = %d  0x%x\n"), id, rcnt, GetLastError());
+                    return FALSE;
+
+                }
+            }
+
+            if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
+                delete []lpBuffer;
+                NucUsb.CloseWinUsbDevice(id);
+                TRACE(_T("XXX (%d) WaitForSingleObject error 6. rcnt = %d  0x%x\n"),id, rcnt, GetLastError());
+                return FALSE;
+            }
+
+            pos=(int)(((float)(((float)totalsize/(float)file_len))*100));
+            if(pos>=100) {
+                pos=100;
+            }
+
+            //TRACE("(%d) #7629 rcnt %d, pos =%d, prepos =%d\n", id, rcnt, pos, prepos);
+            if((pos!=prepos) || (pos==100)) {
+                prepos=pos;
+                PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)(pos),0);
+            }
+
+        }
+
+        bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&blockNum,4);
+        //Sleep(10);
+        if(bResult==FALSE) {
+            delete []lpBuffer;
+            NucUsb.CloseWinUsbDevice(id);
+            TRACE(_T("XXX (%d) eMMC Burn Read error. rcnt = %d  0x%x\n"), id, rcnt, GetLastError());
+            return FALSE;
+        }
+    }//for(int i=0;i<(int)(ppackhead->num);i++)
+#endif
+
+    delete []lpBuffer;
+    NucUsb.CloseWinUsbDevice(id);
+    return TRUE;
+
+}
+
+BOOL FastDlg::XUSB_FasteMMCVerify(int id, CString& portName, CString& m_VfypathName)
+{
+    BOOL bResult;
+    CString posstr;
+    CString tempstr;
+    int count=0;
+    FILE* fp;
+    int pos=0;
+    unsigned int total=0,file_len,scnt,rcnt,ack;
+    char* lpBuffer;
+    char temp[BUF_SIZE];
+    CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
+    PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)0,0);
+
+    //TRACE(_T("XUSB_FasteMMCVerify start (%d)  ,%s\n"), id, m_VfypathName);
+    /***********************************************/
+    bResult=NucUsb.EnableOneWinUsbDevice(id);
+    if(bResult==FALSE) {
+        //AfxMessageBox(_T("Please reset device and Re-connect now !!!\n"));
+        return FALSE;
+    }
+#if(0)
+    bResult=NucUsb.NUC_CheckFw(id);
+    if(bResult==FALSE) {
+        AfxMessageBox(_T("Please reset device and Re-connect now !!!\n"));
+        return FALSE;
+    }
+#endif
+    USHORT typeack;
+    bResult=NucUsb.NUC_SetType(id,MMC,(UCHAR *)&typeack,sizeof(typeack));
+    if(bResult==FALSE) {
+        NucUsb.CloseWinUsbDevice(id);
+        TRACE(_T("XXX (%d) eMMC Verify NUC_SetType error\n"),id);
+        return FALSE;
+    }
+
+    fp=_wfopen(m_VfypathName,_T("rb"));
+    if(!fp) {
+        NucUsb.CloseWinUsbDevice(id);
+        //AfxMessageBox(_T("File Open error\n"));
+        fclose(fp);
+        return FALSE;
+    }
+
+    fseek(fp,0,SEEK_END);
+    file_len=ftell(fp);
+    fseek(fp,0,SEEK_SET);
+    if(!file_len) {
+        NucUsb.CloseWinUsbDevice(id);
+        fclose(fp);
+        //AfxMessageBox(_T("File length is zero\n"));
+        return FALSE;
+    }
+
+    lpBuffer = new char[file_len]; //read file to buffer
+    memset(lpBuffer,0x00,file_len);
+    fread(lpBuffer,file_len,1,fp);
+    PACK_HEAD *ppackhead =(PACK_HEAD *)lpBuffer;
+
+    int imagenum = 0;
+    ppackhead->fileLength = (lpBuffer[7] << 24 | lpBuffer[6] << 16 | lpBuffer[5] << 8 | lpBuffer[4]);
+    ppackhead->num = (lpBuffer[11] << 24 | lpBuffer[10] << 16 | lpBuffer[9] << 8 | lpBuffer[8]);
+    imagenum = ppackhead->num;
+
+    char *pbuf = lpBuffer;
+    total+= sizeof(PACK_HEAD);
+    pbuf+= sizeof(PACK_HEAD);
+
+    PACK_CHILD_HEAD child;
+    ((CProgressCtrl *)GetDlgItem(iId_Array[id]))->SetRange(0,100);
+    ((CProgressCtrl *)GetDlgItem(iId_Array[id]))->SetBkColor(COLOR_VERIFY);
+    int posnum=0;
+    int prepos=0;
+    int uBootHeadLen = 16;
+
+    memset(m_fhead_emmc, 0x00, sizeof(NORBOOT_MMC_HEAD));
+    m_fhead_emmc->flag=PACK_VERIFY_ACTION;
+    //TRACE("lpBuffer[16~19] = 0x%x, 0x%x, 0x%x, 0x%x\n", (lpBuffer[16] & 0xff), lpBuffer[17], lpBuffer[18], lpBuffer[19]);
+    m_fhead_emmc->filelen= ((lpBuffer[19] & 0xff) << 24 | (lpBuffer[18] & 0xff) << 16 | (lpBuffer[17] & 0xff) << 8 | (lpBuffer[16] & 0xff));//216452;//(lpBuffer[19] << 24 | lpBuffer[18] << 16 | lpBuffer[17] << 8 | lpBuffer[16]); // child1 file len
+    m_fhead_emmc->flashoffset = ((lpBuffer[23] & 0xff) << 24 | (lpBuffer[22] & 0xff) << 16 | (lpBuffer[21] & 0xff) << 8 | (lpBuffer[20] & 0xff)); // child1 start address
+    //m_fhead_emmc->execaddr = 0;// Struct without execaddr
+    m_fhead_emmc->type = (lpBuffer[27] << 24 | lpBuffer[26] << 16 | lpBuffer[25] << 8 | lpBuffer[24]); // child1 image type
+    m_fhead_emmc->no = imagenum;
+    memcpy(temp,(unsigned char*)m_fhead_emmc,sizeof(NORBOOT_MMC_HEAD));
+
+    bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)temp, sizeof(NORBOOT_MMC_HEAD));
+    if(bResult==FALSE) {
+        delete []lpBuffer;
+        NucUsb.CloseWinUsbDevice(id);
+        fclose(fp);
+        TRACE(_T("XXX (%d) eMMC Verify head error. 0x%x\n"),id, GetLastError());
+        return FALSE;
+    }
+    Sleep(5);
+    bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
+    if(bResult==FALSE) {
+        delete []lpBuffer;
+        NucUsb.CloseWinUsbDevice(id);
+        fclose(fp);
+        TRACE(_T("XXX (%d) eMMC Verify Read ACK head error. 0x%x\n"),id, GetLastError());
+        return FALSE;
+    }
+
+    for(int i=0; i<(int)imagenum; i++) {
+        memcpy(&child,(char *)pbuf,sizeof(PACK_CHILD_HEAD));
+        memcpy(temp,(char *)pbuf,sizeof(PACK_CHILD_HEAD));
+
+        bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)temp, sizeof(PACK_CHILD_HEAD));
+        if(bResult==FALSE) {
+            delete []lpBuffer;
+            NucUsb.CloseWinUsbDevice(id);
+            fclose(fp);
+            TRACE(_T("XXX (%d) eMMC Verify Write error. 0x%x\n"),id, GetLastError());
+            return FALSE;
+        }
+
+        //Sleep(5);
+        bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
+        if(bResult==FALSE) {
+            delete []lpBuffer;
+            NucUsb.CloseWinUsbDevice(id);
+            fclose(fp);
+            TRACE(_T("XXX (%d) eMMC Verify Read error. 0x%x\n"),id, GetLastError());
+            return FALSE;
         }
         total+= sizeof(PACK_CHILD_HEAD);
         pbuf+= sizeof(PACK_CHILD_HEAD);
 
         int ddrlen;
         //UCHAR * ddrbuf;
+
         if(child.imagetype == UBOOT) {
-            //ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
             ddrlen = (((mainWnd->DDRLen+8+15)/16)*16);
+            //ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
             pbuf += 16 + mainWnd->DDRLen + uBootHeadLen;
             total+= 16 + mainWnd->DDRLen + uBootHeadLen;
-        }
 
-
-        if(child.imagetype == UBOOT) {
             // send DDR parameter Length
             bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)&ddrlen,4);
             Sleep(5);
             if(bResult==FALSE) {
-                fclose(fp);
                 delete []lpBuffer;
                 NucUsb.CloseWinUsbDevice(id);
-                //AfxMessageBox(_T("Write SPI head error\n"));
+                fclose(fp);
+                TRACE(_T("XXX (%d) eMMC Verify Write error. 0x%x\n"),id, GetLastError());
                 return FALSE;
             }
 
             bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
-            if(bResult==FALSE || ack!=0x85) {
-                fclose(fp);
+            if(bResult==FALSE) {
                 delete []lpBuffer;
                 NucUsb.CloseWinUsbDevice(id);
-                //AfxMessageBox(_T("ACK error !"));
+                fclose(fp);
+                TRACE(_T("XXX (%d) eMMC Verify Read error. 0x%x\n"),id, GetLastError());
                 return FALSE;
             }
+        }
 
+
+        if(child.imagetype == UBOOT) {
             scnt=(child.filelen-ddrlen-16)/BUF_SIZE;
             rcnt=(child.filelen-ddrlen-16)%BUF_SIZE;
         } else {
@@ -6521,831 +7223,130 @@ int FastDlg::XUSB_FastSPIVerify(int id, CString& portName, CString& m_pathName)
                 fread(temp,BUF_SIZE,1,fp);
             }
             bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)lpBuffer, BUF_SIZE);
-            if(WaitForSingleObject(m_ExitEventBurn[id], 0) != WAIT_TIMEOUT) {
+            if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
                 delete []lpBuffer;
-                fclose(fp);
                 NucUsb.CloseWinUsbDevice(id);
+                fclose(fp);
+                TRACE(_T("XXX (%d) WaitForSingleObject error 7,  0x%x\n"),id, GetLastError());
                 return FALSE;
             }
 
             if(bResult==TRUE) {
                 total+=BUF_SIZE;
                 pbuf+=BUF_SIZE;
-                totalsize += BUF_SIZE;
 
                 pos=(int)(((float)(((float)total/(float)file_len))*100));
                 posstr.Format(_T("%d%%"),pos);
 
                 if(DataCompare(temp,lpBuffer,BUF_SIZE))
                     ack=BUF_SIZE;
-                else
+                else {
+                    //TRACE("XXX (%d) i = %d, total = %d, scnt = %d\n", id, i, total, scnt);
                     ack=0;//compare error
+                }
+
                 bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)&ack,4);
                 if((bResult==FALSE)||(!ack)) {
                     delete []lpBuffer;
                     NucUsb.CloseWinUsbDevice(id);
                     fclose(fp);
+                    TRACE(_T("XXX (%d) eMMC Verify error. \n"),id, GetLastError());
                     return FALSE;
                 }
 
             } else {
-                fclose(fp);
                 delete []lpBuffer;
                 NucUsb.CloseWinUsbDevice(id);
+                fclose(fp);
+                TRACE(_T("XXX (%d) eMMC Verify error. 0x%x\n"),id, GetLastError());
                 return FALSE;
             }
 
-            if(WaitForSingleObject(m_ExitEventBurn[id], 0) != WAIT_TIMEOUT) {
-                fclose(fp);
+            if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
                 delete []lpBuffer;
                 NucUsb.CloseWinUsbDevice(id);
+                fclose(fp);
+                TRACE(_T("XXX (%d) WaitForSingleObject error 8,  0x%x\n"),id, GetLastError());
                 return FALSE;
             }
 
             scnt--;
-#if(0)
+
+            if(pos%5==0) {
+                prepos=pos;
+                PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)pos,0);
+            }
+        }
+
+        if(rcnt>0) {
+            memset((char *)&temp, 0xff, BUF_SIZE);
+            if(m_fhead_emmc->type != ENV) {
+                fseek(fp,total,SEEK_SET);
+                fread(temp,rcnt,1,fp);
+            } else {
+                fseek(fp,total,SEEK_SET);
+                fread(temp,BUF_SIZE,1,fp);
+            }
+            bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)lpBuffer,BUF_SIZE);
+            if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
+                delete []lpBuffer;
+                NucUsb.CloseWinUsbDevice(id);
+                fclose(fp);
+                TRACE(_T("XXX (%d) WaitForSingleObject error 9, 0x%x\n"),id, GetLastError());
+                return FALSE;
+            }
+
+            if(bResult==TRUE) {
+                total+=rcnt;
+                pbuf+=rcnt;
+                if(DataCompare(temp,lpBuffer,rcnt))
+                    ack=BUF_SIZE;
+                else {
+                    //TRACE("XXX i = %d, total = %d, rcnt = %d\n", i, total, rcnt);
+                    ack=0;//compare error
+                }
+
+                bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)&ack, 4);
+                if((bResult==FALSE)||(!ack)) {
+                    delete []lpBuffer;
+                    NucUsb.CloseWinUsbDevice(id);
+                    fclose(fp);
+                    TRACE(_T("XXX (%d) eMMC Verify error. 0x%x\n"),id, GetLastError());
+                    return FALSE;
+                }
+            } else {
+                delete []lpBuffer;
+                NucUsb.CloseWinUsbDevice(id);
+                fclose(fp);
+                TRACE(_T("XXX (%d) eMMC Verify error. 0x%x\n"),id, GetLastError());
+                return FALSE;
+            }
+
+            if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
+                delete []lpBuffer;
+                NucUsb.CloseWinUsbDevice(id);
+                fclose(fp);
+                TRACE(_T("XXX (%d) WaitForSingleObject error A,  0x%x\n"),id, GetLastError());
+                return FALSE;
+            }
+
+            pos=(int)(((float)(((float)total/(float)file_len))*100));
+
+            if(pos>=100) {
+                pos=100;
+            }
+            posstr.Format(_T("%d%%"),pos);
+
             if((pos!=prepos) || (pos==100)) {
                 prepos=pos;
-                if((scnt % 4 == 0) || pos == 100) {
-                    PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)(pos),0);
-                }
-#endif
-                if(pos%5==0) {
-                    prepos=pos;
-                    PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)pos,0);
-                }
-
-            }
-
-            if(rcnt>0) {
-                memset((char *)&temp, 0xff, BUF_SIZE);
-                if(m_fhead_spi->type != ENV) {
-                    fseek(fp,total,SEEK_SET);
-                    fread(temp,rcnt,1,fp);
-                } else {
-                    fseek(fp,total,SEEK_SET);
-                    fread(temp,BUF_SIZE,1,fp);
-                }
-                bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)lpBuffer,BUF_SIZE);
-                if(WaitForSingleObject(m_ExitEventBurn[id], 0) != WAIT_TIMEOUT) {
-                    fclose(fp);
-                    delete []lpBuffer;
-                    NucUsb.CloseWinUsbDevice(id);
-                    return FALSE;
-                }
-
-                if(bResult==TRUE) {
-                    total+=rcnt;
-                    pbuf+=rcnt;
-                    totalsize += rcnt;
-                    if(DataCompare(temp,lpBuffer,rcnt))
-                        ack=BUF_SIZE;
-                    else
-                        ack=0;//compare error
-
-                    bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)&ack, 4);
-                    if((bResult==FALSE)||(!ack)) {
-                        fclose(fp);
-                        delete []lpBuffer;
-                        NucUsb.CloseWinUsbDevice(id);
-                        return FALSE;
-
-                    }
-
-                } else {
-                    fclose(fp);
-                    delete []lpBuffer;
-                    NucUsb.CloseWinUsbDevice(id);
-                    return FALSE;
-                }
-
-                if(WaitForSingleObject(m_ExitEventBurn[id], 0) != WAIT_TIMEOUT) {
-                    fclose(fp);
-                    delete []lpBuffer;
-                    NucUsb.CloseWinUsbDevice(id);
-                    return FALSE;
-                }
-
-                pos=(int)(((float)(((float)total/(float)file_len))*100));
-                //pos=(int)(((float)(((float)totalsize/(float)file_len))*100));
-
-                if(pos>=100) {
-                    pos=100;
-                }
-                posstr.Format(_T("%d%%"),pos);
-
-                //if((pos!=prepos) || (pos==100)) {
-                if(pos%5==0) {
-                    prepos=pos;
-                    PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)pos,0);
-                }
+                PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)pos,0);
             }
         }
-
-        fclose(fp);
-        delete []lpBuffer;
-        NucUsb.CloseWinUsbDevice(id);
-        return TRUE;
-
     }
 
-
-    BOOL FastDlg::XUSB_FasteMMCErase(int id, CString& portName) {
-        BOOL bResult;
-        CString tempstr;
-        int count=0;
-        DWORD  iRet = 0x00;
-        unsigned int ack,erase_pos=0;
-        NORBOOT_MMC_HEAD *fhead;
-        char* lpBuffer;
-
-        CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
-        fhead=(NORBOOT_MMC_HEAD *)malloc(sizeof(NORBOOT_MMC_HEAD));
-
-        //TRACE(_T("XUSB_FasteMMCErase start (%d)\n"), id);
-        /***********************************************/
-        bResult=NucUsb.EnableOneWinUsbDevice(id);
-        if(bResult==FALSE) {
-            free(fhead);
-            //AfxMessageBox(_T("Please reset device and Re-connect now !!!\n"));
-            return FALSE;
-        }
-#if(0)
-        bResult=NucUsb.NUC_CheckFw(id);
-        if(bResult==FALSE) {
-            AfxMessageBox(_T("Please reset device and Re-connect now !!!\n"));
-            free(fhead);
-            return FALSE;
-        }
-#endif
-        USHORT typeack=0x0;
-        bResult=NucUsb.NUC_SetType(id,MMC,(UCHAR *)&typeack,sizeof(typeack));
-        if(bResult==FALSE) {
-            free(fhead);
-            NucUsb.CloseWinUsbDevice(id);
-            TRACE(_T("XXX Erase NUC_SetType error !!!\n"));
-            return FALSE;
-        }
-
-        lpBuffer = new char[BUF_SIZE];
-        memset((unsigned char*)fhead,0,sizeof(NORBOOT_MMC_HEAD));
-        fhead->flag=FORMAT_ACTION;
-        fhead->ReserveSize = 1;
-        memcpy(lpBuffer,(unsigned char*)fhead,sizeof(NORBOOT_MMC_HEAD));
-        free(fhead);
-
-        bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)lpBuffer, sizeof(NORBOOT_MMC_HEAD));
-        if(bResult==FALSE) {
-            delete []lpBuffer;
-            NucUsb.CloseWinUsbDevice(id);
-            TRACE(_T("(%d) XXX Erase eMMC head error\n"), id);
-            return FALSE;
-        }
-
-        bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
-        if(bResult==FALSE || ack!=0x85) {
-            delete []lpBuffer;
-            NucUsb.CloseWinUsbDevice(id);
-            TRACE(_T("(%d) XXX Erase Read ACK error ack= 0x%x   0x%x\n"), id, ack, GetLastError());
-            return FALSE;
-        }
-
-        erase_pos=0;
-        int wait_pos=0;
-        ((CProgressCtrl *)GetDlgItem(iId_Array[id]))->SetRange(0,100);
-        ((CProgressCtrl *)GetDlgItem(iId_Array[id]))->SetBkColor(COLOR_ERASE);
-
-        while(erase_pos!=100) {
-            if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
-                delete []lpBuffer;
-                NucUsb.CloseWinUsbDevice(id);
-                TRACE(_T("XXX (%d) WaitForSingleObject error. 0x%x \n"),id, GetLastError());
-                return FALSE;
-            }
-            Sleep(10);
-            bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
-            if(bResult=FALSE) {
-                delete []lpBuffer;
-                NucUsb.CloseWinUsbDevice(id);
-                TRACE(_T("XXX (%d) Erase Read ACK error ack=0x%x,  0x%x\n"), id, ack, GetLastError());
-                return FALSE;
-            }
-
-            if(!((ack>>16)&0xffff)) {
-                erase_pos=ack&0xffff;
-                PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)erase_pos,0);
-            } else {
-                delete []lpBuffer;
-                NucUsb.CloseWinUsbDevice(id);
-                TRACE(_T("XXX (%d) Erase error ack=0x%x,  0x%x\n"), id, ack, GetLastError());
-                return FALSE;
-            }
-
-            if(erase_pos==95) {
-                wait_pos++;
-                if(wait_pos>100) {
-                    delete []lpBuffer;
-                    NucUsb.CloseWinUsbDevice(id);
-                    TRACE(_T("XXX (%d) Erase error wait_pos=%d\n"), id, wait_pos);
-                    return FALSE;
-                }
-            }
-        }
-
-        delete []lpBuffer;
-        NucUsb.CloseWinUsbDevice(id);
-        return TRUE;
-    }
-
-    BOOL FastDlg::XUSB_FasteMMCBurn(int id, CString& portName,CString& m_pathName,int *len) {
-        BOOL bResult;
-        CString posstr;
-        CString tempstr;
-        int count=0;
-        FILE* fp;
-        int pos=0;
-        UCHAR burn_pos=0;
-        unsigned int total,file_len,scnt,rcnt;
-        unsigned int totalsize;
-        ULONG ack;
-        char* lpBuffer;
-        CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
-
-        //TRACE(_T("XUSB_FasteMMCBurn start (%d)  ,%s\n"), id, m_pathName);
-        bResult=NucUsb.EnableOneWinUsbDevice(id);
-        if(!bResult) {
-            //AfxMessageBox(_T("XXX Device Enable error\n"));
-            return FALSE;
-
-        }
-#if(0)
-        bResult=NucUsb.NUC_CheckFw(id);
-        if(bResult==FALSE) {
-            AfxMessageBox(_T("Please reset device and Re-connect now !!!\n"));
-            return FALSE;
-        }
-#endif
-        USHORT typeack=0x0;
-        bResult=NucUsb.NUC_SetType(id,MMC,(UCHAR *)&typeack,sizeof(typeack));
-        if(bResult==FALSE) {
-            NucUsb.CloseWinUsbDevice(id);
-            TRACE(_T("XXX (%d) Burn  NUC_SetType error \n"), id);
-            return FALSE;
-        }
-
-        fp=_wfopen(m_pathName,_T("rb"));
-        if(!fp) {
-            NucUsb.CloseWinUsbDevice(id);
-            fclose(fp);
-            AfxMessageBox(_T("File Open error\n"));
-            return FALSE;
-        }
-
-        fseek(fp,0,SEEK_END);
-        file_len=ftell(fp);
-        fseek(fp,0,SEEK_SET);
-        if(!file_len) {
-            NucUsb.CloseWinUsbDevice(id);
-            fclose(fp);
-            AfxMessageBox(_T("File length is zero\n"));
-            return FALSE;
-        }
-
-        unsigned int magic;
-        fread((unsigned char *)&magic,4,1,fp);
-        if(magic!=0x5) {
-            NucUsb.CloseWinUsbDevice(id);
-            fclose(fp);
-            AfxMessageBox(_T("Pack Image Format Error\n"));
-            return FALSE;
-        }
-
-        fseek(fp,0,SEEK_SET);
-        lpBuffer = new char[file_len]; //read file to buffer
-        memset(lpBuffer,0x00,file_len);
-        memset((unsigned char*)m_fhead_emmc,0,sizeof(NORBOOT_MMC_HEAD));
-        total=0;
-        m_fhead_emmc->flag=PACK_ACTION;
-        m_fhead_emmc->type=m_type;
-        m_fhead_emmc->filelen=file_len;
-        memcpy(lpBuffer,(unsigned char*)m_fhead_emmc,sizeof(NORBOOT_MMC_HEAD));
-        bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)lpBuffer, sizeof(NORBOOT_MMC_HEAD));
-        if(bResult==FALSE) {
-            delete []lpBuffer;
-            NucUsb.CloseWinUsbDevice(id);
-            fclose(fp);
-            TRACE(_T("XXX (%d) eMMC Burn file format error! 0x%x\n"), id, GetLastError());
-            return FALSE;
-        }
-
-        bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
-        if(bResult==FALSE) {
-            delete []lpBuffer;
-            NucUsb.CloseWinUsbDevice(id);
-            fclose(fp);
-            TRACE(_T("XXX (%d) eMMC Burn Read ACK error! 0x%x\n"), id, GetLastError());
-            return FALSE;
-        }
-
-        fread(lpBuffer,m_fhead_emmc->filelen,1,fp);
-        if(lpBuffer[0]!=0x5) {
-            delete []lpBuffer;
-            fclose(fp);
-            AfxMessageBox(_T("This file is not pack image"));
-            return FALSE;
-        }
-        fclose(fp);
-
-
-        char *pbuf = lpBuffer;
-        PACK_HEAD *ppackhead=(PACK_HEAD *)lpBuffer;
-        bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)pbuf, sizeof(PACK_HEAD));
-        Sleep(5);
-        if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
-            delete []lpBuffer;
-            NucUsb.CloseWinUsbDevice(id);
-            TRACE(_T("XXX (%d) WaitForSingleObject error 1\n"),id);
-            return FALSE;
-        }
-        if(bResult==FALSE) {
-            delete []lpBuffer;
-            NucUsb.CloseWinUsbDevice(id);
-            TRACE(_T("XXX (%d) eMMC Burn Write error! 0x%x\n"), id, GetLastError());
-            return FALSE;
-        }
-
-        bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
-        if(bResult==FALSE) {
-            delete []lpBuffer;
-            NucUsb.CloseWinUsbDevice(id);
-            TRACE(_T("XXX (%d) eMMC Burn Read error! 0x%x\n"), id, GetLastError());
-            return FALSE;
-        }
-
-        total+= sizeof(PACK_HEAD);
-        pbuf+= sizeof(PACK_HEAD);
-        PACK_CHILD_HEAD child;
-        ((CProgressCtrl *)GetDlgItem(iId_Array[id]))->SetRange(0,100);
-        ((CProgressCtrl *)GetDlgItem(iId_Array[id]))->SetBkColor(COLOR_BURN);
-        int posnum=0;
-        int prepos=0;
-
-#if !defined(BATCH_BURN)
-
-#else
-        unsigned int blockNum;
-        totalsize = 0;
-        for(int i=0; i<(int)(ppackhead->num); i++) {
-            total=0;
-            memcpy(&child,(char *)pbuf,sizeof(PACK_CHILD_HEAD));
-            bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)pbuf, sizeof(PACK_CHILD_HEAD));
-            if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
-                delete []lpBuffer;
-                NucUsb.CloseWinUsbDevice(id);
-                TRACE(_T("XXX (%d) WaitForSingleObject error 2. 0x%x\n"),id, bResult);
-                return FALSE;
-            }
-            if(bResult==FALSE) {
-                delete []lpBuffer;
-                NucUsb.CloseWinUsbDevice(id);
-                TRACE(_T("XXX (%d) eMMC Burn Write error! 0x%x\n"), id, GetLastError());
-                return FALSE;
-            }
-
-            bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
-            if(bResult==FALSE) {
-                delete []lpBuffer;
-                NucUsb.CloseWinUsbDevice(id);
-                TRACE(_T("XXX (%d) eMMC Burn Read error! 0x%x\n"), id, GetLastError());
-                return FALSE;
-            }
-
-            pbuf+= sizeof(PACK_CHILD_HEAD);
-            //Sleep(1);
-            scnt=child.filelen/BUF_SIZE;
-            rcnt=child.filelen%BUF_SIZE;
-            total=0;
-
-            while(scnt>0) {
-                //Sleep(10);
-                //TRACE(_T("#7459 (%d) eMMC Burn 44444444 scnt %d \n"), id, scnt);
-                bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)pbuf, BUF_SIZE);
-                if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
-                    delete []lpBuffer;
-                    NucUsb.CloseWinUsbDevice(id);
-                    TRACE(_T("XXX (%d) WaitForSingleObject error 3, scnt= %d\n"),id, scnt);
-                    return FALSE;
-                }
-                if(bResult==FALSE) {
-                    delete []lpBuffer;
-                    NucUsb.CloseWinUsbDevice(id);
-                    TRACE(_T("XXX (%d) eMMC Burn Write error. scnt= %d ,0x%x\n"),id, scnt, GetLastError());
-                    return FALSE;
-                }
-
-                if(bResult==TRUE) {
-                    pbuf+=BUF_SIZE;
-                    total+=BUF_SIZE;
-                    totalsize += BUF_SIZE;
-
-                    pos=(int)(((float)(((float)totalsize/(float)file_len))*100));
-
-                    bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
-                    if(bResult==FALSE) {
-                        delete []lpBuffer;
-                        NucUsb.CloseWinUsbDevice(id);
-                        CString tmp;
-                        tmp.Format(_T("eMMC Burn ACK error imagenum=%d  scnt= %d  0x%x"),i, scnt, GetLastError());
-                        TRACE(_T("XXX (%d) %s !\n"), id, tmp);
-                        return FALSE;
-                    }
-                }
-
-                if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
-                    delete []lpBuffer;
-                    NucUsb.CloseWinUsbDevice(id);
-                    TRACE(_T("XXX (%d) WaitForSingleObject error 4. scnt= %d  0x%x\n"),id, scnt, GetLastError());
-                    return FALSE;
-                }
-                scnt--;
-                if((pos!=prepos) || (pos==100)) {
-                    prepos=pos;
-                    if((scnt % 4 == 0) || pos == 100) {
-                        PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)(pos),0);
-                    }
-                }
-            }
-
-            if(rcnt>0) {
-                Sleep(20);
-                //TRACE(_T("#7587 (%d) eMMC Burn 66666666  rcnt = %d\n"), id, rcnt);
-                bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)pbuf,rcnt);
-                if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
-                    delete []lpBuffer;
-                    NucUsb.CloseWinUsbDevice(id);
-                    TRACE(_T("XXX (%d) WaitForSingleObject error 5. rcnt = %d  0x%x\n"),id, scnt, GetLastError());
-                    return FALSE;
-                }
-                if(bResult==FALSE) {
-                    delete []lpBuffer;
-                    NucUsb.CloseWinUsbDevice(id);
-                    TRACE(_T("XXX (%d) eMMC Burn Write error! rcnt = %d  0x%x\n"), id, rcnt, GetLastError());
-                    return FALSE;
-                }
-
-                if(bResult==TRUE) {
-                    pbuf+=rcnt;
-                    total+=rcnt;
-                    totalsize += rcnt;
-
-                    bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
-                    if(bResult==FALSE) {
-                        delete []lpBuffer;
-                        NucUsb.CloseWinUsbDevice(id);
-                        TRACE(_T("XXX (%d) eMMC Burn Read error! rcnt = %d  0x%x\n"), id, rcnt, GetLastError());
-                        return FALSE;
-
-                    }
-                }
-
-                if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
-                    delete []lpBuffer;
-                    NucUsb.CloseWinUsbDevice(id);
-                    TRACE(_T("XXX (%d) WaitForSingleObject error 6. rcnt = %d  0x%x\n"),id, rcnt, GetLastError());
-                    return FALSE;
-                }
-
-                pos=(int)(((float)(((float)totalsize/(float)file_len))*100));
-                if(pos>=100) {
-                    pos=100;
-                }
-
-                //TRACE("(%d) #7629 rcnt %d, pos =%d, prepos =%d\n", id, rcnt, pos, prepos);
-                if((pos!=prepos) || (pos==100)) {
-                    prepos=pos;
-                    PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)(pos),0);
-                }
-
-            }
-
-            bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&blockNum,4);
-            //Sleep(10);
-            if(bResult==FALSE) {
-                delete []lpBuffer;
-                NucUsb.CloseWinUsbDevice(id);
-                TRACE(_T("XXX (%d) eMMC Burn Read error. rcnt = %d  0x%x\n"), id, rcnt, GetLastError());
-                return FALSE;
-            }
-        }//for(int i=0;i<(int)(ppackhead->num);i++)
-#endif
-
-        delete []lpBuffer;
-        NucUsb.CloseWinUsbDevice(id);
-        return TRUE;
-
-    }
-
-    BOOL FastDlg::XUSB_FasteMMCVerify(int id, CString& portName, CString& m_VfypathName) {
-        BOOL bResult;
-        CString posstr;
-        CString tempstr;
-        int count=0;
-        FILE* fp;
-        int pos=0;
-        unsigned int total=0,file_len,scnt,rcnt,ack;
-        char* lpBuffer;
-        char temp[BUF_SIZE];
-        CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
-        PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)0,0);
-
-        //TRACE(_T("XUSB_FasteMMCVerify start (%d)  ,%s\n"), id, m_VfypathName);
-        /***********************************************/
-        bResult=NucUsb.EnableOneWinUsbDevice(id);
-        if(bResult==FALSE) {
-            //AfxMessageBox(_T("Please reset device and Re-connect now !!!\n"));
-            return FALSE;
-        }
-#if(0)
-        bResult=NucUsb.NUC_CheckFw(id);
-        if(bResult==FALSE) {
-            AfxMessageBox(_T("Please reset device and Re-connect now !!!\n"));
-            return FALSE;
-        }
-#endif
-        USHORT typeack;
-        bResult=NucUsb.NUC_SetType(id,MMC,(UCHAR *)&typeack,sizeof(typeack));
-        if(bResult==FALSE) {
-            NucUsb.CloseWinUsbDevice(id);
-            TRACE(_T("XXX (%d) eMMC Verify NUC_SetType error\n"),id);
-            return FALSE;
-        }
-
-        fp=_wfopen(m_VfypathName,_T("rb"));
-        if(!fp) {
-            NucUsb.CloseWinUsbDevice(id);
-            //AfxMessageBox(_T("File Open error\n"));
-            fclose(fp);
-            return FALSE;
-        }
-
-        fseek(fp,0,SEEK_END);
-        file_len=ftell(fp);
-        fseek(fp,0,SEEK_SET);
-        if(!file_len) {
-            NucUsb.CloseWinUsbDevice(id);
-            fclose(fp);
-            //AfxMessageBox(_T("File length is zero\n"));
-            return FALSE;
-        }
-
-        lpBuffer = new char[file_len]; //read file to buffer
-        memset(lpBuffer,0x00,file_len);
-        fread(lpBuffer,file_len,1,fp);
-        PACK_HEAD *ppackhead =(PACK_HEAD *)lpBuffer;
-
-        int imagenum = 0;
-        ppackhead->fileLength = (lpBuffer[7] << 24 | lpBuffer[6] << 16 | lpBuffer[5] << 8 | lpBuffer[4]);
-        ppackhead->num = (lpBuffer[11] << 24 | lpBuffer[10] << 16 | lpBuffer[9] << 8 | lpBuffer[8]);
-        imagenum = ppackhead->num;
-
-        char *pbuf = lpBuffer;
-        total+= sizeof(PACK_HEAD);
-        pbuf+= sizeof(PACK_HEAD);
-
-        PACK_CHILD_HEAD child;
-        ((CProgressCtrl *)GetDlgItem(iId_Array[id]))->SetRange(0,100);
-        ((CProgressCtrl *)GetDlgItem(iId_Array[id]))->SetBkColor(COLOR_VERIFY);
-        int posnum=0;
-        int prepos=0;
-        int uBootHeadLen = 16;
-
-        memset(m_fhead_emmc, 0x00, sizeof(NORBOOT_MMC_HEAD));
-        m_fhead_emmc->flag=PACK_VERIFY_ACTION;
-        //TRACE("lpBuffer[16~19] = 0x%x, 0x%x, 0x%x, 0x%x\n", (lpBuffer[16] & 0xff), lpBuffer[17], lpBuffer[18], lpBuffer[19]);
-        m_fhead_emmc->filelen= ((lpBuffer[19] & 0xff) << 24 | (lpBuffer[18] & 0xff) << 16 | (lpBuffer[17] & 0xff) << 8 | (lpBuffer[16] & 0xff));//216452;//(lpBuffer[19] << 24 | lpBuffer[18] << 16 | lpBuffer[17] << 8 | lpBuffer[16]); // child1 file len
-        m_fhead_emmc->flashoffset = ((lpBuffer[23] & 0xff) << 24 | (lpBuffer[22] & 0xff) << 16 | (lpBuffer[21] & 0xff) << 8 | (lpBuffer[20] & 0xff)); // child1 start address
-        //m_fhead_emmc->execaddr = 0;// Struct without execaddr
-        m_fhead_emmc->type = (lpBuffer[27] << 24 | lpBuffer[26] << 16 | lpBuffer[25] << 8 | lpBuffer[24]); // child1 image type
-        m_fhead_emmc->no = imagenum;
-        memcpy(temp,(unsigned char*)m_fhead_emmc,sizeof(NORBOOT_MMC_HEAD));
-
-        bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)temp, sizeof(NORBOOT_MMC_HEAD));
-        if(bResult==FALSE) {
-            delete []lpBuffer;
-            NucUsb.CloseWinUsbDevice(id);
-            fclose(fp);
-            TRACE(_T("XXX (%d) eMMC Verify head error. 0x%x\n"),id, GetLastError());
-            return FALSE;
-        }
-        Sleep(5);
-        bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
-        if(bResult==FALSE) {
-            delete []lpBuffer;
-            NucUsb.CloseWinUsbDevice(id);
-            fclose(fp);
-            TRACE(_T("XXX (%d) eMMC Verify Read ACK head error. 0x%x\n"),id, GetLastError());
-            return FALSE;
-        }
-
-        for(int i=0; i<(int)imagenum; i++) {
-            memcpy(&child,(char *)pbuf,sizeof(PACK_CHILD_HEAD));
-            memcpy(temp,(char *)pbuf,sizeof(PACK_CHILD_HEAD));
-
-            bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)temp, sizeof(PACK_CHILD_HEAD));
-            if(bResult==FALSE) {
-                delete []lpBuffer;
-                NucUsb.CloseWinUsbDevice(id);
-                fclose(fp);
-                TRACE(_T("XXX (%d) eMMC Verify Write error. 0x%x\n"),id, GetLastError());
-                return FALSE;
-            }
-
-            //Sleep(5);
-            bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
-            if(bResult==FALSE) {
-                delete []lpBuffer;
-                NucUsb.CloseWinUsbDevice(id);
-                fclose(fp);
-                TRACE(_T("XXX (%d) eMMC Verify Read error. 0x%x\n"),id, GetLastError());
-                return FALSE;
-            }
-            total+= sizeof(PACK_CHILD_HEAD);
-            pbuf+= sizeof(PACK_CHILD_HEAD);
-
-            int ddrlen;
-            //UCHAR * ddrbuf;
-
-            if(child.imagetype == UBOOT) {
-                ddrlen = (((mainWnd->DDRLen+8+15)/16)*16);
-                //ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
-                pbuf += 16 + mainWnd->DDRLen + uBootHeadLen;
-                total+= 16 + mainWnd->DDRLen + uBootHeadLen;
-
-                // send DDR parameter Length
-                bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)&ddrlen,4);
-                Sleep(5);
-                if(bResult==FALSE) {
-                    delete []lpBuffer;
-                    NucUsb.CloseWinUsbDevice(id);
-                    fclose(fp);
-                    TRACE(_T("XXX (%d) eMMC Verify Write error. 0x%x\n"),id, GetLastError());
-                    return FALSE;
-                }
-
-                bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
-                if(bResult==FALSE) {
-                    delete []lpBuffer;
-                    NucUsb.CloseWinUsbDevice(id);
-                    fclose(fp);
-                    TRACE(_T("XXX (%d) eMMC Verify Read error. 0x%x\n"),id, GetLastError());
-                    return FALSE;
-                }
-            }
-
-
-            if(child.imagetype == UBOOT) {
-                scnt=(child.filelen-ddrlen-16)/BUF_SIZE;
-                rcnt=(child.filelen-ddrlen-16)%BUF_SIZE;
-            } else {
-                scnt=child.filelen/BUF_SIZE;
-                rcnt=child.filelen%BUF_SIZE;
-            }
-
-            int prepos=0;
-            while(scnt>0) {
-
-                if(child.imagetype !=ENV) {
-                    fseek(fp,total,SEEK_SET);
-                    fread(temp,BUF_SIZE,1,fp);
-                } else {
-                    fseek(fp,total,SEEK_SET);
-                    fread(temp,BUF_SIZE,1,fp);
-                }
-                bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)lpBuffer, BUF_SIZE);
-                if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
-                    delete []lpBuffer;
-                    NucUsb.CloseWinUsbDevice(id);
-                    fclose(fp);
-                    TRACE(_T("XXX (%d) WaitForSingleObject error 7,  0x%x\n"),id, GetLastError());
-                    return FALSE;
-                }
-
-                if(bResult==TRUE) {
-                    total+=BUF_SIZE;
-                    pbuf+=BUF_SIZE;
-
-                    pos=(int)(((float)(((float)total/(float)file_len))*100));
-                    posstr.Format(_T("%d%%"),pos);
-
-                    if(DataCompare(temp,lpBuffer,BUF_SIZE))
-                        ack=BUF_SIZE;
-                    else {
-                        //TRACE("XXX (%d) i = %d, total = %d, scnt = %d\n", id, i, total, scnt);
-                        ack=0;//compare error
-                    }
-
-                    bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)&ack,4);
-                    if((bResult==FALSE)||(!ack)) {
-                        delete []lpBuffer;
-                        NucUsb.CloseWinUsbDevice(id);
-                        fclose(fp);
-                        TRACE(_T("XXX (%d) eMMC Verify error. \n"),id, GetLastError());
-                        return FALSE;
-                    }
-
-                } else {
-                    delete []lpBuffer;
-                    NucUsb.CloseWinUsbDevice(id);
-                    fclose(fp);
-                    TRACE(_T("XXX (%d) eMMC Verify error. 0x%x\n"),id, GetLastError());
-                    return FALSE;
-                }
-
-                if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
-                    delete []lpBuffer;
-                    NucUsb.CloseWinUsbDevice(id);
-                    fclose(fp);
-                    TRACE(_T("XXX (%d) WaitForSingleObject error 8,  0x%x\n"),id, GetLastError());
-                    return FALSE;
-                }
-
-                scnt--;
-
-                if(pos%5==0) {
-                    prepos=pos;
-                    PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)pos,0);
-                }
-            }
-
-            if(rcnt>0) {
-                memset((char *)&temp, 0xff, BUF_SIZE);
-                if(m_fhead_emmc->type != ENV) {
-                    fseek(fp,total,SEEK_SET);
-                    fread(temp,rcnt,1,fp);
-                } else {
-                    fseek(fp,total,SEEK_SET);
-                    fread(temp,BUF_SIZE,1,fp);
-                }
-                bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)lpBuffer,BUF_SIZE);
-                if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
-                    delete []lpBuffer;
-                    NucUsb.CloseWinUsbDevice(id);
-                    fclose(fp);
-                    TRACE(_T("XXX (%d) WaitForSingleObject error 9, 0x%x\n"),id, GetLastError());
-                    return FALSE;
-                }
-
-                if(bResult==TRUE) {
-                    total+=rcnt;
-                    pbuf+=rcnt;
-                    if(DataCompare(temp,lpBuffer,rcnt))
-                        ack=BUF_SIZE;
-                    else {
-                        //TRACE("XXX i = %d, total = %d, rcnt = %d\n", i, total, rcnt);
-                        ack=0;//compare error
-                    }
-
-                    bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)&ack, 4);
-                    if((bResult==FALSE)||(!ack)) {
-                        delete []lpBuffer;
-                        NucUsb.CloseWinUsbDevice(id);
-                        fclose(fp);
-                        TRACE(_T("XXX (%d) eMMC Verify error. 0x%x\n"),id, GetLastError());
-                        return FALSE;
-                    }
-                } else {
-                    delete []lpBuffer;
-                    NucUsb.CloseWinUsbDevice(id);
-                    fclose(fp);
-                    TRACE(_T("XXX (%d) eMMC Verify error. 0x%x\n"),id, GetLastError());
-                    return FALSE;
-                }
-
-                if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {
-                    delete []lpBuffer;
-                    NucUsb.CloseWinUsbDevice(id);
-                    fclose(fp);
-                    TRACE(_T("XXX (%d) WaitForSingleObject error A,  0x%x\n"),id, GetLastError());
-                    return FALSE;
-                }
-
-                pos=(int)(((float)(((float)total/(float)file_len))*100));
-
-                if(pos>=100) {
-                    pos=100;
-                }
-                posstr.Format(_T("%d%%"),pos);
-
-                if((pos!=prepos) || (pos==100)) {
-                    prepos=pos;
-                    PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)pos,0);
-                }
-            }
-        }
-
-        delete []lpBuffer;
-        fclose(fp);
-        NucUsb.CloseWinUsbDevice(id);
-        return TRUE;
-    }
-    /************** Fast End ************/
+    delete []lpBuffer;
+    fclose(fp);
+    NucUsb.CloseWinUsbDevice(id);
+    return TRUE;
+}
+/************** Fast End ************/
