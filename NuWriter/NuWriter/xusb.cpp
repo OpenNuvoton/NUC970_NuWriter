@@ -689,8 +689,8 @@ BOOL CSPIDlg::XUSB_Burn(CString& portName,CString& m_pathName,int *len)
         swscanf_s(m_execaddr,_T("%x"),&m_fhead->execaddr);
         swscanf_s(m_startblock,_T("%x"),&m_fhead->flashoffset);
         *len=file_len;
-        lpBuffer = new char[file_len]; //read file to buffer
-        memset(lpBuffer,0xff,file_len);
+        lpBuffer = new char[file_len+sizeof(NORBOOT_NAND_HEAD)]; //read file to buffer
+        memset(lpBuffer,0xff,file_len+sizeof(NORBOOT_NAND_HEAD));
         ((NORBOOT_NAND_HEAD *)m_fhead)->macaddr[7]=0;
         wcstombs( m_fhead->name, (wchar_t *)m_imagename.GetBuffer(), 16);
         m_fhead->type=m_type;
@@ -2108,8 +2108,8 @@ BOOL CMMCDlg::XUSB_Burn(CString& portName,CString& m_pathName,int *len)
         swscanf_s(m_execaddr,_T("%x"),&m_fhead->execaddr);
         swscanf_s(m_startblock,_T("%x"),&m_fhead->flashoffset);
         *len=file_len;
-        lpBuffer = new char[file_len]; //read file to buffer
-        memset(lpBuffer,0xff,file_len);
+        lpBuffer = new char[file_len+sizeof(NORBOOT_MMC_HEAD)]; //read file to buffer
+        memset(lpBuffer,0xff,file_len+sizeof(NORBOOT_MMC_HEAD));
         ((NORBOOT_MMC_HEAD *)m_fhead)->macaddr[7]=0;
         wcstombs( m_fhead->name, (wchar_t *)m_imagename.GetBuffer(), 16);
         m_fhead->type=m_type;
@@ -3496,8 +3496,8 @@ BOOL CNANDDlg::XUSB_Burn(CString& portName,CString& m_pathName,int *len,int *blo
         swscanf_s(m_execaddr,_T("%x"),&m_fhead->execaddr);
         swscanf_s(m_startblock,_T("%x"),&m_fhead->flashoffset);
         *len=file_len;
-        lpBuffer = new char[file_len]; //read file to buffer
-        memset(lpBuffer,0xff,file_len);
+        lpBuffer = new char[file_len+sizeof(NORBOOT_NAND_HEAD)]; //read file to buffer
+        memset(lpBuffer,0xff,file_len+sizeof(NORBOOT_NAND_HEAD));
         ((NORBOOT_NAND_HEAD *)m_fhead)->macaddr[7]=0;
         wcstombs( m_fhead->name, (wchar_t *)m_imagename.GetBuffer(), 16);
         m_fhead->type=m_type;
@@ -4016,8 +4016,8 @@ BOOL CNANDDlg::XUSB_BurnWithOOB(CString& portName,CString& m_pathName,int *len,i
         swscanf_s(m_execaddr,_T("%x"),&m_fhead->execaddr);
         swscanf_s(m_startblock,_T("%x"),&m_fhead->flashoffset);
         *len=file_len;
-        lpBuffer = new char[file_len]; //read file to buffer
-        memset(lpBuffer,0xff,file_len);
+        lpBuffer = new char[file_len+sizeof(NORBOOT_NAND_HEAD)]; //read file to buffer
+        memset(lpBuffer,0xff,file_len+sizeof(NORBOOT_NAND_HEAD));
         ((NORBOOT_NAND_HEAD *)m_fhead)->macaddr[7]=0;
         wcstombs( m_fhead->name, (wchar_t *)m_imagename.GetBuffer(), 16);
         m_fhead->type=DATA_OOB;
