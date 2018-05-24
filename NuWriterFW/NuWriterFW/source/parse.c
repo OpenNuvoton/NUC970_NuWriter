@@ -2524,6 +2524,7 @@ void UXmodem_NAND()
                 memmove(_ch,_ch+16+pNandImage->initSize,pNandImage->fileLength);
                 do {
                     usb_send(ptr,TRANSFER_LEN); //send data to PC
+                    while(Bulk_Out_Transfer_Size==0){}
                     usb_recv((unsigned char*)_ack,4); //recv data from PC
                     ptr += (*_ack);
                 } while((ptr-_ch)<(pNandImage->fileLength));
@@ -2542,6 +2543,7 @@ void UXmodem_NAND()
                     MSG_DEBUG("Read_NAND offblk=%d,len=%d\n",offblk,len);
                     do {
                         usb_send(ptr,TRANSFER_LEN); //send data to PC
+                        while(Bulk_Out_Transfer_Size==0){}
                         usb_recv((unsigned char*)_ack,4); //recv data from PC
                         ptr += (*_ack);
                         MSG_DEBUG("read size=0x%08x\n",(unsigned int)(ptr-_ch));
@@ -2666,6 +2668,7 @@ void UXmodem_NAND()
                     Read_Nand(DOWNLOAD_BASE,pNandImage->blockNo+offblk,len);
                     do {
                         usb_send(ptr,4096); //send data to PC
+                        while(Bulk_Out_Transfer_Size==0){}
                         usb_recv((unsigned char*)_ack,4); //recv data from PC
                         ptr += (*_ack);
                     } while((ptr-_ch)<len);
@@ -2677,9 +2680,11 @@ void UXmodem_NAND()
                     Read_Nand_Redunancy(DOWNLOAD_BASE,pNandImage->blockNo+offblk,len);
                     do {
                         usb_send(ptr,pSM->uPageSize); //send data to PC
+                        while(Bulk_Out_Transfer_Size==0){}
                         usb_recv((unsigned char*)_ack,4); //recv data from PC
                         ptr += (*_ack);
                         usb_send(ptr,pSM->uSpareSize); //send redunancy data to PC
+                        while(Bulk_Out_Transfer_Size==0){}
                         usb_recv((unsigned char*)_ack,4); //recv redunancy data from PC
                         ptr += (*_ack);
                     } while((ptr-_ch)<len);
@@ -2695,6 +2700,7 @@ void UXmodem_NAND()
         Read_Nand(DOWNLOAD_BASE,pNandImage->blockNo,pNandImage->fileLength);
         do {
             usb_send(ptr,4096);//send data to PC
+            while(Bulk_Out_Transfer_Size==0){}
             usb_recv((unsigned char*)_ack,4); //recv data from PC
             ptr += (*_ack);
         } while((ptr-_ch)<pNandImage->fileLength);
