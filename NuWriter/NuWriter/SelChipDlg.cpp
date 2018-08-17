@@ -34,25 +34,25 @@ void CSelChipDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CSelChipDlg, CDialog)
 	ON_BN_CLICKED(IDOK, &CSelChipDlg::OnBnClickedOk)
-	ON_CBN_SELCHANGE(IDC_COMBO1, &CSelChipDlg::OnCbnSelchangeCombo1)	
+	ON_CBN_SELCHANGE(IDC_COMBO1, &CSelChipDlg::OnCbnSelchangeCombo1)
 	ON_BN_CLICKED(IDC_CHECK1, &CSelChipDlg::OnBnClickedCheck1)
-	ON_WM_TIMER()	
+	ON_WM_TIMER()
 	ON_CBN_DROPDOWN(IDC_COMBO_DDR, &CSelChipDlg::OnCbnDropdownComboDdr)
 	ON_CBN_DROPDOWN(IDC_COMBO1, &CSelChipDlg::OnCbnDropdownCombo1)
 END_MESSAGE_MAP()
 
 
 // CSelChipDlg message handlers
-inline BOOL CSelChipDlg::OnInitDialog() 
+inline BOOL CSelChipDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	SetWindowPos(&this->wndTopMost,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE); 
-	CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);	
-	
+	SetWindowPos(&this->wndTopMost,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE);
+	CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
+
 	this->SetWindowText(PROJECT_NAME);
 
-	m_chip.AddString(_T("NUC970 series"));
-	m_chip.SetCurSel(0);	
+	m_chip.AddString(_T("NUC970/N9H30 series"));
+	m_chip.SetCurSel(0);
 
 	//init DDR & key dirctory------------------------------------------------
 	DDRBuf=NULL;
@@ -60,22 +60,22 @@ inline BOOL CSelChipDlg::OnInitDialog()
 	szDirForDDR=szDirForDDR+_T("sys_cfg\\");
 	//---Check ddr dirctory has how much *.ini-------------------------------
 	vector<CString> sList;
-	vector<CString>::iterator item;	
-	
-	mainWnd->LoadDirINI(szDirForDDR,_T(".ini"),sList);	
+	vector<CString>::iterator item;
+
+	mainWnd->LoadDirINI(szDirForDDR,_T(".ini"),sList);
 	int count=0;
-	for(item=sList.begin();item!=sList.end();item++)	
-		m_ddrtype.AddString(*item);			
-	m_ddrtype.SetCurSel(mainWnd->DDR_Idx);		
+	for(item=sList.begin();item!=sList.end();item++)
+		m_ddrtype.AddString(*item);
+	m_ddrtype.SetCurSel(mainWnd->DDR_Idx);
 	//-----------------------------------------------------------------------
 	DisplayFormat();
 
 	TimeString=_T("Continue(%d)");
 
-	
-	
+
+
 	if(mainWnd->TimeEn)
-	{		 
+	{
 		CString tmp;
 		Counter=mainWnd->Timeus/1000;
 		m_check.SetCheck(1);
@@ -87,7 +87,7 @@ inline BOOL CSelChipDlg::OnInitDialog()
 			SetTimer(0,1000,NULL);  //1 second to interrupt
 	}else
 		m_check.SetCheck(0);
-	
+
 	COLORREF col = RGB(0xFF, 0x00, 0xFF);
 	m_countinue.setBitmapId(IDB_CONTINUE, col);
 	m_countinue.setGradient(true);
@@ -105,7 +105,7 @@ void CSelChipDlg::DisplayFormat()
 #else
 	switch(m_chip.GetCurSel())
 	{
-		case NUC900_SERIES:		
+		case NUC900_SERIES:
 			m_ddr_static.EnableWindow(0);
 			m_ddrtype.EnableWindow(0);
 			break;
@@ -125,7 +125,7 @@ void CSelChipDlg::OnBnClickedOk()
 	mainWnd->TargetChip=m_chip.GetCurSel();
 	mainWnd->DDR_Idx=m_ddrtype.GetCurSel();
 
-	m_ddrtype.GetLBText(m_ddrtype.GetCurSel(),ddrName);		
+	m_ddrtype.GetLBText(m_ddrtype.GetCurSel(),ddrName);
 	mainWnd->DDRFileFullPath.Format(_T("%s%s"),szDirForDDR,ddrName);
 	mainWnd->DDRFileName.Format(_T("%s"),ddrName);
 	if(m_check.GetCheck()==TRUE)
@@ -147,7 +147,7 @@ void CSelChipDlg::OnTimer(UINT_PTR nIDEvent)
 	{
 		CString tmp;
 		Counter--;
-		tmp.Format(TimeString,Counter);		
+		tmp.Format(TimeString,Counter);
 		m_countinue.SetWindowText(tmp);
 	}else
 	{
@@ -176,13 +176,13 @@ void CSelChipDlg::OnBnClickedCheck1()
 	}else{
 		mainWnd->TimeEn=FALSE;
 		KillTimer(FALSE);
-		m_countinue.SetWindowText(_T("Continue"));		
+		m_countinue.SetWindowText(_T("Continue"));
 	}
-		
+
 }
 
 void CSelChipDlg::OnCbnDropdownComboDdr()
-{	
+{
 	KillTimer(0);
 }
 

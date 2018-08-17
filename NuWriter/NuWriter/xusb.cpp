@@ -5102,13 +5102,14 @@ BOOL CMTPDlg::XUSB_Burn(CString& portName,CString& m_pathName)
 
     memset(mainWnd->_FileLineBuff,0x00,LINE_BUFF_LEN);
 
-    if(m_mtp_option==0) {
+    if(m_mtp_option==0) { // AES
         buf=mainWnd->Get_OTP_KEY(m_pathName,&len);
         memcpy((char *)&fhead.KeyOTP[0],buf,len);
         fhead.KeyLen = len;
-    } else {
+    } else { // SHA
         unsigned char data[32];
-        buf=(char *)mainWnd->CalculateSHA(m_aesfilename);
+        //buf=(char *)mainWnd->CalculateSHA(m_aesfilename);
+        buf=(char *)mainWnd->CalculateSHA(m_pathName);
         for(int i=0; i<8; i++) {
             for(int j=0; j<4; j++)
                 data[i*4+j]=buf[i*4+(3-j)];
@@ -5132,7 +5133,7 @@ BOOL CMTPDlg::XUSB_Burn(CString& portName,CString& m_pathName)
     }
     fhead.Mode = m_mtp_mode;
 
-    if(m_mtp_mode==0)  //AES
+    if(m_mtp_option==0)  //AES
         fhead.Option = (1<<m_mtp_option) | ((1-m_mtp_encrypt)<<2)| 0x8;
     else { //SHA
         if(m_mtp_mode==1)
@@ -5147,15 +5148,19 @@ BOOL CMTPDlg::XUSB_Burn(CString& portName,CString& m_pathName)
     else
         fhead.Lock = 0;
 
-    lpBuffer = new char[BUF_SIZE];
-    memcpy(lpBuffer,(unsigned char*)&fhead,sizeof(NORBOOT_MTP_HEAD));
-    bResult=NucUsb.NUC_WritePipe(0,(UCHAR *)lpBuffer, sizeof(NORBOOT_MTP_HEAD));
-    if(bResult==FALSE) {
-        delete []lpBuffer;
-        NucUsb.NUC_CloseHandle();
-        AfxMessageBox(_T("Write MTP head error\n"));
-        return FALSE;
-    }
+	TRACE(_T("m_mtp_option= %d, m_mtp_mode=%d,m_mtp_encrypt=%d, fhead.Mode = %d, fhead.Option = %d,  fhead.Lock = %d\n"), m_mtp_option, m_mtp_mode, m_mtp_encrypt, fhead.Mode, fhead.Option, fhead.Lock);
+
+	lpBuffer = new char[BUF_SIZE];
+	memcpy(lpBuffer,(unsigned char*)&fhead,sizeof(NORBOOT_MTP_HEAD));
+	bResult=NucUsb.NUC_WritePipe(0,(UCHAR *)lpBuffer, sizeof(NORBOOT_MTP_HEAD));
+	if(bResult==FALSE)
+	{
+		delete []lpBuffer;
+		NucUsb.NUC_CloseHandle();
+		AfxMessageBox(_T("Write MTP head error\n"));
+		return FALSE;
+	}
+
     Sleep(50);
     bResult=NucUsb.NUC_ReadPipe(0,(UCHAR *)&ack,4);
     if(bResult==FALSE) {
@@ -5167,7 +5172,6 @@ BOOL CMTPDlg::XUSB_Burn(CString& portName,CString& m_pathName)
 
     pos=100;
     PostMessage(WM_MTP_PROGRESS,(LPARAM)pos,0);
-
 
     delete []lpBuffer;
     NucUsb.NUC_CloseHandle();

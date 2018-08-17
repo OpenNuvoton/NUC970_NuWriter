@@ -270,6 +270,12 @@
 #define IDC_DOWNPROGRESS6               4013
 #define IDC_DOWNPROGRESS7               4014
 #define IDC_DOWNPROGRESS8               4015
+#define IDC_MTP_M11                     4016
+#define IDC_MTP_M12                     4017
+#define IDC_MTP_SHAFILENAME             4018
+#define IDC_PACK_MTP_M11                4019
+#define IDC_PACK_MTP_M12                4020
+#define IDC_PACK_MTP_SHAFILENAME        4021
 
 // Next default values for new objects
 // 

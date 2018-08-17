@@ -267,7 +267,7 @@ void CPACKDlg::OnBnClickedPackAdd()
             ImageEnc.push_back(szDirForKEY);
         } else {
             CString temp,KeyName;
-            temp=m_packtab2.m_aesfilename;
+            temp=m_packtab2.m_shafilename;
             if(temp.ReverseFind('.')>0)
                 temp=temp.Mid(0,temp.ReverseFind('.'));
             else
@@ -275,7 +275,7 @@ void CPACKDlg::OnBnClickedPackAdd()
 
 
             KeyName = temp.Mid(temp.ReverseFind('\\')+1,temp.GetLength());
-            ImageEnc.push_back(m_packtab2.m_aesfilename);
+            ImageEnc.push_back(m_packtab2.m_shafilename);
             enc=KeyName;
             option=_T("SHA");
         }
@@ -1206,37 +1206,47 @@ void CPACKDlg::OnNMDblclkPackImagelist(NMHDR *pNMHDR, LRESULT *pResult)
         ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_M1))->SetCheck(FALSE);
         ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_M2))->SetCheck(FALSE);
         ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_M3))->SetCheck(FALSE);
+        ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_M11))->SetCheck(FALSE);
+        ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_M12))->SetCheck(FALSE);
         switch(m_packtab2.m_mtp_mode) {
-        case 0:
+        case 0: /*  USB */
             ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_M0))->SetCheck(TRUE);
             break;
-        case 1:
+        case 1: /*  eMMC/USB without SHA  */
             ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_M1))->SetCheck(TRUE);
+            ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_M11))->SetCheck(TRUE);
             break;
-        case 2:
+        case 2: /*  NAND  */
             ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_M2))->SetCheck(TRUE);
             break;
-        case 3:
+        case 3: /*  SPI Flash/USB with SHA  */
             ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_M3))->SetCheck(TRUE);
+            ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_M12))->SetCheck(TRUE);
             break;
         }
 
+        /* AES, SHA */
         m_packtab2.m_mtp_option=PACK_Option(mtp_val);
         ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_A0))->SetCheck(FALSE);
         ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_A1))->SetCheck(FALSE);
         ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_A2))->SetCheck(FALSE);
+        GetDlgItem(IDC_MTP_COMBO_ENCRYPT)->ShowWindow(SW_HIDE);
+        GetDlgItem(IDC_MTP_SHAFILENAME)->ShowWindow(SW_HIDE);
         switch(m_packtab2.m_mtp_option) {
         case 0:
             ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_A0))->SetCheck(TRUE);
+            GetDlgItem(IDC_MTP_COMBO_ENCRYPT)->ShowWindow(SW_SHOW);
             break;
         case 1:
             ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_A1))->SetCheck(TRUE);
+            GetDlgItem(IDC_MTP_SHAFILENAME)->ShowWindow(SW_SHOW);
             break;
         case 2:
             ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_A2))->SetCheck(TRUE);
             break;
         }
 
+        /* ENABLE, DISABLE */
         m_packtab2.m_mtp_encrypt=PACK_Encrypt(mtp_val);
         ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_ENABLE ))->SetCheck(FALSE);
         ((CButton *)m_packtab2.GetDlgItem(IDC_PACK_MTP_DISABLE))->SetCheck(FALSE);

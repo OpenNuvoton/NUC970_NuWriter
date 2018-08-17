@@ -23,7 +23,7 @@ public:
 protected:
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-    
+
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedPackMtpModify();
@@ -36,6 +36,7 @@ public:
 	FooButton m_modify;
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	CString m_aesfilename;
+	CString m_shafilename;
 };
 
 #endif //__PACTAB2_H__
