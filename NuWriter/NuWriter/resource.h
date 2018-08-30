@@ -46,6 +46,7 @@
 #define IDD_PACK_TAB2                   160
 #define IDD_ERASE                       163
 #define IDD_FAST                        164
+#define IDD_DIALOG_NANDINFO             165
 #define IDC_COMBO_TYPE                  1001
 #define IDC_RECONNECT                   1002
 #define IDC_VERSION                     1003
@@ -254,6 +255,7 @@
 #define IDC_COMBO_FAST_ID               1193
 #define IDC_RSTBTN                      1194
 #define IDC_ALLRSTBTN                   1195
+#define IDC_STATIC_NAND                 1196
 #define IDC_DOWNLOADSTATUS              4000
 #define IDC_DOWNLOADSTATUS2             4001
 #define IDC_DOWNLOADSTATUS3             4002
@@ -276,12 +278,19 @@
 #define IDC_PACK_MTP_M11                4019
 #define IDC_PACK_MTP_M12                4020
 #define IDC_PACK_MTP_SHAFILENAME        4021
+#define IDC_NAND_USRCONFIG              4023
+#define IDC_STATIC_NANDINFO1            4024
+#define IDC_STATIC_NANDINFO2            4025
+#define IDC_EDIT_NANDINFO1              4026
+#define IDC_EDIT_NANDINFO2              4027
+#define IDC_STATIC_FAST_NANDINFO        4028
+#define IDC_FAST_NAND_USRCONFIG         4029
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        165
+#define _APS_NEXT_RESOURCE_VALUE        166
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         1196
 #define _APS_NEXT_SYMED_VALUE           101

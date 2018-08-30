@@ -69,6 +69,7 @@
 #include "ReportCtrl.h"
 #include "AddFileDialog.h"
 #include "FooButton.h"
+#include <afxcontrolbars.h>
 #define COLOR_DOWNLOAD RGB(0, 255, 0)
 #define COLOR_ERASE RGB(0, 0, 255)
 #define COLOR_BURN RGB(255, 0, 0)

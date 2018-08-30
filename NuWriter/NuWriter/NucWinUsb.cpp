@@ -509,7 +509,7 @@ BOOL CNucWinUsb::EnableOneWinUsbDevice(int id)
 
     //TRACE("EnableOneWinUsbDevice id=%d\n",id);
     if(WinUsbHandle[id].HandlesOpen == TRUE) {
-        //TRACE("Device %d has been enabled by other thread\n",id);
+        TRACE("XXX Device %d has been enabled by other thread\n",id);
         //CloseHandle(WinUsbHandle[id].hDeviceHandle);
         //WinUsb_Free(WinUsbHandle[id].hUSBHandle);
 #if(0)
@@ -565,7 +565,7 @@ BOOL CNucWinUsb::GetOneUSBDeviceSpeed( int id )
 
     bResult = WinUsb_QueryDeviceInformation(WinUsbHandle[id].hUSBHandle, DEVICE_SPEED, &length, &DeviceSpeed);
     if(!bResult) {
-        //TRACE("Error getting device speed: %d.\n", GetLastError());
+        TRACE("Error getting device speed: %d.\n", GetLastError());
         return bResult;
     }
     if(DeviceSpeed == LowSpeed) {

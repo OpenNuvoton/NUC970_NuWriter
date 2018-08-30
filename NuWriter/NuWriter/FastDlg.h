@@ -97,4 +97,6 @@ public:
     afx_msg void OnBnClickedRadioFastNand();
     afx_msg void OnBnClickedRadioFastSpi();
     afx_msg void OnBnClickedRadioFastemmc();
+	CButton m_nandflashInfo_check;
+	afx_msg void OnBnClickedFastNandUsrconfig();
 };

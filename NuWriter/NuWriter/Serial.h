@@ -65,6 +65,7 @@ typedef struct _INFO_T
 	DWORD   Nand_uBlockPerFlash;
 	DWORD	Nand_uBadBlockCount;
 	DWORD   Nand_uSpareSize;
+	DWORD   Nand_uIsUserConfig;
 	DWORD   SPI_ID;
 	DWORD   EMMC_uBlock;
 	DWORD   EMMC_uReserved;

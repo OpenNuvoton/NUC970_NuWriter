@@ -6,6 +6,7 @@
 #include "FastDlg.h"
 #include "afxdialogex.h"
 #include "NuWriterDlg.h"
+#include "NandInfoDlg.h"
 
 // FastDlg 對話方塊
 #define TYPE_NAND    0
@@ -40,10 +41,11 @@ FastDlg::~FastDlg()
 
 void FastDlg::DoDataExchange(CDataExchange* pDX)
 {
-    CDialog::DoDataExchange(pDX);
-    DDX_Text(pDX, IDC_FAST_IMAGENAME, m_imagename);
-    DDX_Radio(pDX, IDC_RADIO_FAST_NAND, m_type);
-    DDX_Control(pDX, IDC_COMBO_FAST_ID, m_FastDeviceID);
+	CDialog::DoDataExchange(pDX);
+	DDX_Text(pDX, IDC_FAST_IMAGENAME, m_imagename);
+	DDX_Radio(pDX, IDC_RADIO_FAST_NAND, m_type);
+	DDX_Control(pDX, IDC_COMBO_FAST_ID, m_FastDeviceID);
+	DDX_Control(pDX, IDC_FAST_NAND_USRCONFIG, m_nandflashInfo_check);
 }
 
 
@@ -70,6 +72,7 @@ BEGIN_MESSAGE_MAP(FastDlg, CDialog)
     ON_BN_CLICKED(IDC_RADIO_FAST_NAND, &FastDlg::OnBnClickedRadioFastNand)
     ON_BN_CLICKED(IDC_RADIO_FAST_SPI, &FastDlg::OnBnClickedRadioFastSpi)
     ON_BN_CLICKED(IDC_RADIO_FAST_eMMC, &FastDlg::OnBnClickedRadioFastemmc)
+	ON_BN_CLICKED(IDC_FAST_NAND_USRCONFIG, &FastDlg::OnBnClickedFastNandUsrconfig)
 END_MESSAGE_MAP()
 
 
@@ -116,6 +119,7 @@ BOOL FastDlg::OnInitDialog()
 
 
     m_FastDeviceID.SetCurSel(0);
+	GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(FALSE);
     UpdateData(FALSE);
     return TRUE;  // return TRUE unless you set the focus to a control
 
@@ -241,16 +245,19 @@ BOOL FastDlg::InitFile(int flag)
         switch(_wtoi(tmp)) {
         case 0: {
             ((CButton *)GetDlgItem(IDC_RADIO_FAST_NAND))->SetCheck(TRUE);
+			GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(TRUE);
             timeoutsec = NAND_TIMEOUT_SEC;
             break;
         }
         case 1: {
             ((CButton *)GetDlgItem(IDC_RADIO_FAST_SPI))->SetCheck(TRUE);
+			GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(FALSE);
             timeoutsec = SPI_TIMEOUT_SEC;
             break;
         }
         case 2: {
             ((CButton *)GetDlgItem(IDC_RADIO_FAST_eMMC))->SetCheck(TRUE);
+			GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(FALSE);
             timeoutsec = MMC_TIMEOUT_SEC;
             break;
         }
@@ -265,12 +272,15 @@ BOOL FastDlg::InitFile(int flag)
         switch (m_type) {
         case 0:
             timeoutsec = NAND_TIMEOUT_SEC;
+			GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(TRUE);
             break;
         case 1:
             timeoutsec = SPI_TIMEOUT_SEC;
+			GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(FALSE);
             break;
         case 2:
             timeoutsec = MMC_TIMEOUT_SEC;
+			GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(FALSE);
             break;
         }
         TRACE(_T("InitFile(1) m_type = %s, timeoutsec = %d\n"), tmp, timeoutsec);
@@ -1031,6 +1041,7 @@ void FastDlg::OnBnClickedRadioFastNand()
     // TODO: 在此加入控制項告知處理常式程式碼
     m_type = 0;
     timeoutsec = NAND_TIMEOUT_SEC;
+	GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(TRUE);
     TRACE(_T("Nand timeoutsec =%d, m_type = %d\n"), timeoutsec, m_type);
 }
 
@@ -1040,6 +1051,7 @@ void FastDlg::OnBnClickedRadioFastSpi()
     // TODO: 在此加入控制項告知處理常式程式碼
     m_type = 1;
     timeoutsec = SPI_TIMEOUT_SEC;
+	GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(FALSE);
     TRACE(_T("SPI timeoutsec =%d, m_type = %d\n"), timeoutsec, m_type);
 }
 
@@ -1049,5 +1061,25 @@ void FastDlg::OnBnClickedRadioFastemmc()
     // TODO: 在此加入控制項告知處理常式程式碼
     m_type = 2;
     timeoutsec = MMC_TIMEOUT_SEC;
+	GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(FALSE);
     TRACE(_T("eMMC timeoutsec =%d, m_type = %d\n"), timeoutsec, m_type);
+}
+
+
+void FastDlg::OnBnClickedFastNandUsrconfig()
+{
+	// TODO: 在此加入控制項告知處理常式程式碼
+	CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
+	CNandInfoDlg nandinfo_dlg;   
+    int i;
+
+    TRACE(_T("FastDlg::OnBnClickedFastNandUsrconfig  mainWnd->g_iDeviceNum =%d\n"), mainWnd->g_iDeviceNum);    
+	if(m_nandflashInfo_check.GetCheck()==TRUE)
+	{
+	    nandinfo_dlg.DoModal();
+	}
+    
+    for(i = 0; i<mainWnd->g_iDeviceNum; i++) {
+	    mainWnd->OneDeviceInfo(i);// Update nand parameters	
+	}
 }

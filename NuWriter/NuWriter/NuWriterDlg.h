@@ -34,7 +34,7 @@ extern "C" {
 #include "NucWinUsb.h"
 #include "afxwin.h"
 
-#define PROJECT_NAME _T("Nuvoton NuWriter v1.1")
+#define PROJECT_NAME _T("Nuvoton NuWriter v2.0")
 //for AES ------------------
 #define LINE_BUFF_LEN            4096
 
@@ -148,6 +148,10 @@ public:
     int DtbEn;
     BOOL OneDeviceInfo(int id);
     afx_msg void OnBnClickedCancel();
+	BOOL FWDownload(int id);
+	BOOL DDRtoDevice(int id, char *buf,unsigned int len);
+	BOOL XUSB(int id, CString& m_BinName);
+	void ShowDeviceConnectState(BOOL isConnect);
 };
 
 #endif

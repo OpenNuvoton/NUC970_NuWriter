@@ -40,6 +40,11 @@ extern int usiEraseSector(UINT32 addr, UINT32 secCount);
 extern int ChangeSpiImageType(UINT32 imageNo, UINT32 imageType);
 extern int DelSpiImage(UINT32 imageNo);
 extern int DelSpiSector(UINT32 start, UINT32 len);
+
+extern INT16 usiReadID(void);
+extern UINT32 Custom_uBlockPerFlash;
+extern UINT32 Custom_uPagePerBlock;
+UINT32 g_uIsUserConfig;
 //-------------------------
 #define PACK_Mode(val)      (((val)&0xF   )>> 0)
 #define PACK_Option(val)    (((val)&0xF0  )>> 4)
@@ -2347,9 +2352,10 @@ void UXmodem_NAND()
     MSG_DEBUG("download image to NAND flash...\n");
     /* TODO: initial NAND */
     fmiNandInit();
-    MSG_DEBUG("uPageSize=%d\n",pSM->uPageSize);
-    MSG_DEBUG("uPagePerBlock=%d\n",pSM->uPagePerBlock);
-
+    sysprintf("g_uIsUserConfig=%d\n",g_uIsUserConfig);
+    sysprintf("UXmodem_NAND BlockPerFlash=%d\n",pSM->uBlockPerFlash);
+    sysprintf("UXmodem_NAND PagePerBlock=%d\n",pSM->uPagePerBlock);
+    sysprintf("UXmodem_NAND PageSize=%d\n",pSM->uPageSize);
     memset((char *)&nandImage, 0, sizeof(FW_NAND_IMAGE_T));
     pNandImage = (FW_NAND_IMAGE_T *)&nandImage;
 
@@ -2524,7 +2530,7 @@ void UXmodem_NAND()
                 memmove(_ch,_ch+16+pNandImage->initSize,pNandImage->fileLength);
                 do {
                     usb_send(ptr,TRANSFER_LEN); //send data to PC
-                    while(Bulk_Out_Transfer_Size==0){}
+                    while(Bulk_Out_Transfer_Size==0) {}
                     usb_recv((unsigned char*)_ack,4); //recv data from PC
                     ptr += (*_ack);
                 } while((ptr-_ch)<(pNandImage->fileLength));
@@ -2543,7 +2549,7 @@ void UXmodem_NAND()
                     MSG_DEBUG("Read_NAND offblk=%d,len=%d\n",offblk,len);
                     do {
                         usb_send(ptr,TRANSFER_LEN); //send data to PC
-                        while(Bulk_Out_Transfer_Size==0){}
+                        while(Bulk_Out_Transfer_Size==0) {}
                         usb_recv((unsigned char*)_ack,4); //recv data from PC
                         ptr += (*_ack);
                         MSG_DEBUG("read size=0x%08x\n",(unsigned int)(ptr-_ch));
@@ -2668,7 +2674,7 @@ void UXmodem_NAND()
                     Read_Nand(DOWNLOAD_BASE,pNandImage->blockNo+offblk,len);
                     do {
                         usb_send(ptr,4096); //send data to PC
-                        while(Bulk_Out_Transfer_Size==0){}
+                        while(Bulk_Out_Transfer_Size==0) {}
                         usb_recv((unsigned char*)_ack,4); //recv data from PC
                         ptr += (*_ack);
                     } while((ptr-_ch)<len);
@@ -2680,11 +2686,11 @@ void UXmodem_NAND()
                     Read_Nand_Redunancy(DOWNLOAD_BASE,pNandImage->blockNo+offblk,len);
                     do {
                         usb_send(ptr,pSM->uPageSize); //send data to PC
-                        while(Bulk_Out_Transfer_Size==0){}
+                        while(Bulk_Out_Transfer_Size==0) {}
                         usb_recv((unsigned char*)_ack,4); //recv data from PC
                         ptr += (*_ack);
                         usb_send(ptr,pSM->uSpareSize); //send redunancy data to PC
-                        while(Bulk_Out_Transfer_Size==0){}
+                        while(Bulk_Out_Transfer_Size==0) {}
                         usb_recv((unsigned char*)_ack,4); //recv redunancy data from PC
                         ptr += (*_ack);
                     } while((ptr-_ch)<len);
@@ -2700,7 +2706,7 @@ void UXmodem_NAND()
         Read_Nand(DOWNLOAD_BASE,pNandImage->blockNo,pNandImage->fileLength);
         do {
             usb_send(ptr,4096);//send data to PC
-            while(Bulk_Out_Transfer_Size==0){}
+            while(Bulk_Out_Transfer_Size==0) {}
             usb_recv((unsigned char*)_ack,4); //recv data from PC
             ptr += (*_ack);
         } while((ptr-_ch)<pNandImage->fileLength);
@@ -2900,15 +2906,14 @@ typedef struct _info {
     UINT32  Nand_uBlockPerFlash;
     UINT32  Nand_uBadBlockCount;
     UINT32  Nand_uSpareSize;
+    UINT32  Nand_uIsUserConfig;
     UINT32  SPI_ID;
     UINT32  EMMC_uBlock;
     UINT32  EMMC_uReserved;
     UINT32  MTP_uNumber;
 } INFO_T;
 
-extern INT16 usiReadID(void);
-extern UINT32 Custom_uBlockPerFlash;
-extern UINT32 Custom_uPagePerBlock;
+
 void UXmodem_INFO()
 {
     //int i;
@@ -2923,16 +2928,22 @@ void UXmodem_INFO()
             break;
         }
     }
-    Custom_uPagePerBlock = info.Nand_uPagePerBlock;
+
+    if(info.Nand_uIsUserConfig == 1)
+        g_uIsUserConfig = 1;
+    else
+        g_uIsUserConfig = 0;
+
     Custom_uBlockPerFlash = info.Nand_uBlockPerFlash;
-    MSG_DEBUG("Nand_uPagePerBlock=%d\n",Custom_uPagePerBlock);
-    MSG_DEBUG("Nand_uBlockPerFlash=%d\n",Custom_uBlockPerFlash);
+    Custom_uPagePerBlock = info.Nand_uPagePerBlock;
+    MSG_DEBUG("g_uIsUserConfig %d -> Nand_uBlockPerFlash=%d, Nand_uPagePerBlock=%d\n", g_uIsUserConfig, Custom_uBlockPerFlash, Custom_uPagePerBlock);
     MSG_DEBUG("Get INFO flash Image ...\n");
 
     if (usiInit()) {
         info.SPI_ID=usiReadID();
     }
     if(!fmiNandInit()) {
+        info.Nand_uBlockPerFlash=pSM->uBlockPerFlash;
         info.Nand_uPagePerBlock=pSM->uPagePerBlock;
         info.Nand_uPageSize=pSM->uPageSize;
         info.Nand_uBadBlockCount=pSM->uBadBlockCount;
@@ -2940,7 +2951,7 @@ void UXmodem_INFO()
 #ifndef MSG_DEBUG_EN
         sysDelay(5);
 #else
-        MSG_DEBUG("uPagePerBlock =%d, uPageSize=%d\n",info.Nand_uPagePerBlock,info.Nand_uPageSize);
+        sysprintf("BlockPerFlash=%d, PagePerBlock=%d, PageSize=%d\n",info.Nand_uBlockPerFlash, info.Nand_uPagePerBlock, info.Nand_uPageSize);
 #endif
     }
 

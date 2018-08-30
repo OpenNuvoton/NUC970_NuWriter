@@ -83,6 +83,7 @@ public:
     BOOL CNucWinUsb::NUC_BulkOutTest(int id,UCHAR *buf,ULONG len);
     BOOL NUC_ResetFW(int id);
     HANDLE m_hReadEvent;
+	int retrycnt[8];
 
 protected:
     BOOL GetDeviceHandle(void);

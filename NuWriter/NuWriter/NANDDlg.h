@@ -81,4 +81,6 @@ public:
 	char *encbuf;
 	unsigned int enclen;
 	afx_msg void OnBnClickedNandTypeA();
+	afx_msg void OnBnClickedNandUsrconfig();
+	CButton m_nandflash_check;
 };

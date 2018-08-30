@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "NuWriter.h"
 #include "NuWriterDlg.h"
+#include "NANDDlg.h"
+#include "NandInfoDlg.h"
 
 
 // CNANDDlg dialog
@@ -30,25 +32,26 @@ CNANDDlg::~CNANDDlg()
 
 void CNANDDlg::DoDataExchange(CDataExchange* pDX)
 {
-    CDialog::DoDataExchange(pDX);
-    DDX_Control(pDX, IDC_NAND_IMAGELIST, m_imagelist);
-    DDX_Text(pDX, IDC_NAND_IMAGENAME_A, m_imagename);
-    DDX_Control(pDX, IDC_NAND_PROGRESS, m_progress);
+	CDialog::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_NAND_IMAGELIST, m_imagelist);
+	DDX_Text(pDX, IDC_NAND_IMAGENAME_A, m_imagename);
+	DDX_Control(pDX, IDC_NAND_PROGRESS, m_progress);
 
-    DDX_Text(pDX, IDC_NAND_FLASHOFFSET_A, m_startblock);
-    DDV_MaxChars(pDX, m_startblock, 8);
-    DDX_Text(pDX, IDC_NAND_EXECADDR_A, m_execaddr);
-    DDV_MaxChars(pDX, m_execaddr, 8);
+	DDX_Text(pDX, IDC_NAND_FLASHOFFSET_A, m_startblock);
+	DDV_MaxChars(pDX, m_startblock, 8);
+	DDX_Text(pDX, IDC_NAND_EXECADDR_A, m_execaddr);
+	DDV_MaxChars(pDX, m_execaddr, 8);
 
-    DDX_Control(pDX, IDC_NAND_DOWNLOAD, m_burn);
-    DDX_Control(pDX, IDC_NAND_VERIFY, m_verify);
-    DDX_Control(pDX, IDC_NAND_READ, m_read);
-    DDX_Control(pDX, IDC_NAND_ERASEALL, m_eraseall);
-    DDX_Control(pDX, IDC_NAND_BROWSE, m_browse);
-    DDX_Control(pDX, IDC_NAND_ENC_E, m_nand_enc_check);
-    DDX_Control(pDX, IDC_NAND_COMBO_ENCRYPT, m_combo_encrypt);
-    DDX_Radio(pDX, IDC_NAND_TYPE_A, m_type);
-    DDX_Control(pDX, IDC_NAND_STATUS, m_status);
+	DDX_Control(pDX, IDC_NAND_DOWNLOAD, m_burn);
+	DDX_Control(pDX, IDC_NAND_VERIFY, m_verify);
+	DDX_Control(pDX, IDC_NAND_READ, m_read);
+	DDX_Control(pDX, IDC_NAND_ERASEALL, m_eraseall);
+	DDX_Control(pDX, IDC_NAND_BROWSE, m_browse);
+	DDX_Control(pDX, IDC_NAND_ENC_E, m_nand_enc_check);
+	DDX_Control(pDX, IDC_NAND_COMBO_ENCRYPT, m_combo_encrypt);
+	DDX_Radio(pDX, IDC_NAND_TYPE_A, m_type);
+	DDX_Control(pDX, IDC_NAND_STATUS, m_status);
+	DDX_Control(pDX, IDC_NAND_USRCONFIG, m_nandflash_check);
 }
 
 
@@ -61,6 +64,7 @@ BEGIN_MESSAGE_MAP(CNANDDlg, CDialog)
     ON_BN_CLICKED(IDC_NAND_ENC_E, &CNANDDlg::OnBnClickedNandEncE)
     ON_MESSAGE(WM_NAND_PROGRESS,ShowStatus)
     ON_WM_SHOWWINDOW()
+	ON_BN_CLICKED(IDC_NAND_USRCONFIG, &CNANDDlg::OnBnClickedNandUsrconfig)
 END_MESSAGE_MAP()
 
 
@@ -209,9 +213,22 @@ void CNANDDlg::OnBnClickedNandDownload()
 
 
     _stscanf_s(m_startblock,_T("%x"),&_startblock);
+	CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
+	CNandInfoDlg* nandinfoWnd=(CNandInfoDlg*)(AfxGetApp()->m_pMainWnd);
+	CString tmp;
+	if(m_nandflash_check.GetCheck()==TRUE) // user configure
+	{
+		CString tmp;
+	    tmp.Format(_T("NAND parameters by User Configure.\nBlockPerFlash =%d, PagePerBlock = %d"),mainWnd->m_info.Nand_uBlockPerFlash, mainWnd->m_info.Nand_uPagePerBlock);
+		TRACE(_T("User Configure: %s\n"), tmp);
+		AfxMessageBox(tmp);
+	}
+	else
+	{
+		TRACE(_T("Auto Detect: BlockPerFlash =%d, PagePerBlock = %d\n"),  mainWnd->m_info.Nand_uBlockPerFlash, mainWnd->m_info.Nand_uPagePerBlock);
+	}
 
 
-    CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
     unsigned int val=mainWnd->m_info.Nand_uPagePerBlock * mainWnd->m_info.Nand_uPageSize;
 
     if(mainWnd->ChipWriteWithOOB!=1) {
@@ -746,4 +763,17 @@ void CNANDDlg::OnShowWindow(BOOL bShow, UINT nStatus)
     //UpdateData (TRUE);
 }
 
+void CNANDDlg::OnBnClickedNandUsrconfig()
+{
+	// TODO: 在此加入控制項告知處理常式程式碼
+	CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
+	CNandInfoDlg nandinfo_dlg;
+	
+	if(m_nandflash_check.GetCheck()==TRUE)
+	{
+	    nandinfo_dlg.DoModal();
+	}
 
+	mainWnd->GetDlgItem(IDC_RECONNECT)->EnableWindow(FALSE);
+	mainWnd->OneDeviceInfo(0);// Update nand parameters
+}

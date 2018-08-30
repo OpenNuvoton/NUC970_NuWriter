@@ -14,6 +14,9 @@
 #define SAVE 0
 
 #define AUTO_DOWNLOAD
+
+#define RETRYCNT 5
+
 // CAboutDlg dialog used for App About
 
 class CAboutDlg : public CDialog
@@ -106,6 +109,26 @@ void CNuWriterDlg::FastMode_ProgressControl(int num, BOOL isHIDEType)
             ((CStatic *)mainWnd->GetDlgItem((IDC_STATIC_FAST_DEV1+i)))->ShowWindow(SW_SHOW);
         }
     }
+}
+
+void CNuWriterDlg::ShowDeviceConnectState(BOOL isConnect)
+{
+    COLORREF col = RGB(0xFF, 0x00, 0xFF);
+	
+	if(isConnect)
+	{
+        m_portName.Format(_T("Nuvoton VCOM"));
+	    m_reconnect.setBitmapId(IDB_RECONNECT0, col);
+        m_reconnect.setGradient(true);
+		m_burntext.SetWindowText(_T("Device Connected"));
+	}
+	else
+	{
+	    m_portName="";
+	    m_reconnect.setBitmapId(IDB_RECONNECT1, col);
+	    m_reconnect.setGradient(true);
+	    m_burntext.SetWindowText(_T(" Disconnected"));
+	}
 }
 
 BOOL CNuWriterDlg::OnInitDialog()
@@ -223,6 +246,7 @@ BOOL CNuWriterDlg::OnInitDialog()
 
     INItoSaveOrLoad(SAVE);
 
+	GetDlgItem(IDC_RECONNECT)->EnableWindow(FALSE);
     COLORREF col = RGB(0xFF, 0x00, 0xFF);
     m_reconnect.setBitmapId(IDB_RECONNECT0, col);
     m_reconnect.setGradient(true);
@@ -231,18 +255,15 @@ BOOL CNuWriterDlg::OnInitDialog()
 
     CString tempText;
     if(!g_iDeviceNum) {
-        m_portName="";
-        tempText=" Disconnected";
-        m_reconnect.setBitmapId(IDB_RECONNECT1, col);
-        m_reconnect.setGradient(true);
+		ShowDeviceConnectState(0);//Disconnected
+	    GetDlgItem(IDC_RECONNECT)->EnableWindow(TRUE);
     } else {
-        //tempText.Format(_T(" %d Device Connected"),g_iDeviceNum);
-        tempText.Format(_T("Device Connected"));
-        m_portName.Format(_T("Nuvoton VCOM"));
+		ShowDeviceConnectState(1);//Connected
+	    GetDlgItem(IDC_RECONNECT)->EnableWindow(TRUE);
     }
 
     g_iCurDevNum =  g_iDeviceNum;
-    m_burntext.SetWindowText(tempText);
+    //m_burntext.SetWindowText(tempText);
 
 #ifdef AUTO_DOWNLOAD
     CString t_type;
@@ -251,14 +272,10 @@ BOOL CNuWriterDlg::OnInitDialog()
         m_initdlg.SetData();
         m_initdlg.DoModal();
         if(m_initdlg.GetVersion() == _T("xxxx"))
-            //if(!g_iDeviceNum)
+        //if(!g_iDeviceNum)
         {
-            m_portName="";
-            tempText=_T(" Disconnected");
-            m_burntext.SetWindowText(tempText);
-            GetDlgItem(IDC_RECONNECT)->EnableWindow(TRUE);
-            m_reconnect.setBitmapId(IDB_RECONNECT1, col);
-            m_reconnect.setGradient(true);
+			ShowDeviceConnectState(0);//Disconnected
+			GetDlgItem(IDC_RECONNECT)->EnableWindow(TRUE);
             g_iCurDevNum -= 1;
             g_iDeviceNum -= 1;
 
@@ -275,9 +292,6 @@ BOOL CNuWriterDlg::OnInitDialog()
     }
 
 #endif
-
-    //if(DDRBuf!=NULL)
-    //    free(DDRBuf);
 
     delete [] charPathName;
     delete pNewFont;
@@ -348,12 +362,8 @@ void CNuWriterDlg::OnBnClickedReconnect()
     g_iDeviceNum = NucUsb.UsbDevice_Detect();
     if(!g_iDeviceNum) {
         AfxMessageBox(_T("No VCOM Port found !"));
-        m_portName="";
-        tempText=_T(" Disconnected");
-        m_burntext.SetWindowText(tempText);
-        GetDlgItem(IDC_RECONNECT)->EnableWindow(TRUE);
-        m_reconnect.setBitmapId(IDB_RECONNECT1, col);
-        m_reconnect.setGradient(true);
+		ShowDeviceConnectState(0);//Disconnected
+	    GetDlgItem(IDC_RECONNECT)->EnableWindow(TRUE);
         g_iCurDevNum = 0;
         g_iDeviceNum = 0;
 
@@ -364,30 +374,24 @@ void CNuWriterDlg::OnBnClickedReconnect()
         //AfxMessageBox(_T("Please reset device and Re-connect now !!!\n"));
         return ;
     } else {
-        //tempText.Format(_T(" %d Device Connected"),g_iDeviceNum);
-        tempText.Format(_T("Device Connected"));
-        m_portName.Format(_T("Nuvoton VCOM"));
+        ShowDeviceConnectState(1);//Connected
         if( !t_type.Compare(_T("Mass Production")) ) {
             FastMode_ProgressControl(8, 1); // HIDE
         }
     }
-    m_burntext.SetWindowText(tempText);
-    m_reconnect.setBitmapId(IDB_RECONNECT0, col);
-    m_reconnect.setGradient(true);
+    // m_burntext.SetWindowText(tempText);
+    // m_reconnect.setBitmapId(IDB_RECONNECT0, col);
+    // m_reconnect.setGradient(true);
 
 #ifdef AUTO_DOWNLOAD
     DDRBuf =NULL;
     m_initdlg.SetData();
     m_initdlg.DoModal();
     iDevice=0;
-#if 1
+
     if(m_initdlg.GetVersion() == _T("xxxx") || g_iDeviceNum == 0) {
-        m_portName="";
-        tempText=_T(" Disconnected");
-        m_burntext.SetWindowText(tempText);
-        GetDlgItem(IDC_RECONNECT)->EnableWindow(TRUE);
-        m_reconnect.setBitmapId(IDB_RECONNECT1, col);
-        m_reconnect.setGradient(true);
+		ShowDeviceConnectState(0);//Disconnected
+	    GetDlgItem(IDC_RECONNECT)->EnableWindow(TRUE);
         g_iCurDevNum -= 1;
         g_iDeviceNum -= 1;
 
@@ -395,10 +399,7 @@ void CNuWriterDlg::OnBnClickedReconnect()
             FastMode_ProgressControl(8, 1); // HIDE
         }
 
-        //if(DDRBuf!=NULL)
-        //    free(DDRBuf);
         //AfxMessageBox(_T("Please reset device and Re-connect now !!!\n"));
-
         return;
     } else {
         m_version.SetWindowText(m_initdlg.GetVersion());
@@ -406,16 +407,12 @@ void CNuWriterDlg::OnBnClickedReconnect()
         g_iDeviceNum = NucUsb.WinUsbNumber;
     }
 
-#else
-    m_version.SetWindowText(m_initdlg.GetVersion());
-#endif
-
 #endif
 
     CString tmpstr;
     m_burntext.GetWindowText(tmpstr);
 
-    GetDlgItem(IDC_RECONNECT)->EnableWindow(TRUE);
+    //GetDlgItem(IDC_RECONNECT)->EnableWindow(TRUE);
 
     if(m_gtype.GetCurSel()==0) /* SDRAM mode */
         m_SubForms.GetSubForm(0)->PostMessage(WM_SDRAM_PROGRESS,(LPARAM)0,0);
@@ -435,8 +432,6 @@ void CNuWriterDlg::OnBnClickedReconnect()
         mainWnd->GetDlgItem(IDC_BTN_FAST_START)->EnableWindow(TRUE);
     }
 
-    //if(DDRBuf!=NULL)
-    //    free(DDRBuf);
 }
 
 void CNuWriterDlg::OnDestroy()
@@ -645,7 +640,7 @@ void CNuWriterDlg::OnCbnSelchangeComboType()
     m_type.SetWindowText(title);
     m_SubForms.ShowSubForm(m_gtype.GetCurSel());
 
-    CString t_type;
+    CString t_type, str;
     m_gtype.GetWindowText(t_type);
     if( !t_type.Compare(_T("NAND")) ) {
         CDialog * mainWnd=m_SubForms.GetSubForm(m_gtype.GetCurSel());
@@ -660,6 +655,37 @@ void CNuWriterDlg::OnCbnSelchangeComboType()
         }
         ((CNANDDlg *)mainWnd)->m_status.SetWindowText(tmp);
 
+		if(m_info.Nand_uBlockPerFlash == 1023)
+			m_info.Nand_uBlockPerFlash = 1024;
+		else if(m_info.Nand_uBlockPerFlash == 2047)
+			m_info.Nand_uBlockPerFlash = 2048;
+		else if(m_info.Nand_uBlockPerFlash == 4095)
+			m_info.Nand_uBlockPerFlash = 4096;
+		else if(m_info.Nand_uBlockPerFlash == 8191)
+			m_info.Nand_uBlockPerFlash = 8192;
+			
+        if(((CNANDDlg *)mainWnd)->m_nandflash_check.GetCheck()!=TRUE) // Auto Detect
+		{
+			m_info.Nand_uIsUserConfig = 0;
+		    str.Format(_T("%d"), m_info.Nand_uBlockPerFlash);
+		    m_inifile.SetValue(_T("NAND_INFO"),_T("uBlockPerFlash"),str);
+		    m_inifile.WriteFile();
+		    str.Format(_T("%d"), m_info.Nand_uPagePerBlock);
+		    m_inifile.SetValue(_T("NAND_INFO"),_T("uPagePerBlock"),str);
+		    m_inifile.WriteFile();
+		}
+		else // User Config
+		{
+            m_info.Nand_uIsUserConfig = 1;
+			m_info.Nand_uBlockPerFlash=_wtoi(m_inifile.GetValue(_T("NAND_INFO"),_T("uBlockPerFlash")));
+			str.Format(_T("%d"), m_info.Nand_uBlockPerFlash);
+		    m_inifile.SetValue(_T("NAND_INFO"),_T("uBlockPerFlash"),str);
+		    m_inifile.WriteFile();
+            m_info.Nand_uPagePerBlock=_wtoi(m_inifile.GetValue(_T("NAND_INFO"),_T("uPagePerBlock")));		
+			str.Format(_T("%d"), m_info.Nand_uPagePerBlock);
+		    m_inifile.SetValue(_T("NAND_INFO"),_T("uPagePerBlock"),str);
+		    m_inifile.WriteFile();
+		}
     }
 
     if( !t_type.Compare(_T("PACK")) ) {
@@ -699,6 +725,38 @@ void CNuWriterDlg::OnCbnSelchangeComboType()
     if( !t_type.Compare(_T("Mass Production")) ) {
         CDialog * mainWnd=m_SubForms.GetSubForm(m_gtype.GetCurSel());
 
+		if(m_info.Nand_uBlockPerFlash == 1023)
+			m_info.Nand_uBlockPerFlash = 1024;
+		else if(m_info.Nand_uBlockPerFlash == 2047)
+			m_info.Nand_uBlockPerFlash = 2048;
+		else if(m_info.Nand_uBlockPerFlash == 4095)
+			m_info.Nand_uBlockPerFlash = 4096;
+		else if(m_info.Nand_uBlockPerFlash == 8191)
+			m_info.Nand_uBlockPerFlash = 8192;
+			
+        if(((FastDlg *)mainWnd)->m_nandflashInfo_check.GetCheck()!=TRUE) // Auto Detect
+		{
+			m_info.Nand_uIsUserConfig = 0;
+		    str.Format(_T("%d"), m_info.Nand_uBlockPerFlash);
+		    m_inifile.SetValue(_T("NAND_INFO"),_T("uBlockPerFlash"),str);
+		    m_inifile.WriteFile();
+		    str.Format(_T("%d"), m_info.Nand_uPagePerBlock);
+		    m_inifile.SetValue(_T("NAND_INFO"),_T("uPagePerBlock"),str);
+		    m_inifile.WriteFile();
+		}
+		else // User Config
+		{
+            m_info.Nand_uIsUserConfig = 1;
+			m_info.Nand_uBlockPerFlash=_wtoi(m_inifile.GetValue(_T("NAND_INFO"),_T("uBlockPerFlash")));
+			str.Format(_T("%d"), m_info.Nand_uBlockPerFlash);
+		    m_inifile.SetValue(_T("NAND_INFO"),_T("uBlockPerFlash"),str);
+		    m_inifile.WriteFile();
+            m_info.Nand_uPagePerBlock=_wtoi(m_inifile.GetValue(_T("NAND_INFO"),_T("uPagePerBlock")));		
+			str.Format(_T("%d"), m_info.Nand_uPagePerBlock);
+		    m_inifile.SetValue(_T("NAND_INFO"),_T("uPagePerBlock"),str);
+		    m_inifile.WriteFile();
+		}
+		
         for(i=0; i< NucUsb.WinUsbNumber; i++) {
             ((CProgressCtrl *)mainWnd->GetDlgItem(IDC_FAST_PROGRESS1 + i))->ShowWindow(SW_SHOW);
             ((CStatic *)mainWnd->GetDlgItem((IDC_STATIC_FAST_MSG1+i)))->ShowWindow(SW_SHOW);
@@ -950,8 +1008,29 @@ BOOL CNuWriterDlg:: Info()
         return FALSE;
     }
 
-    m_info.Nand_uPagePerBlock =  Nand_uPagePerBlock;
-    m_info.Nand_uBlockPerFlash = Nand_uBlockPerFlash;
+#if(1)
+	CString t_type;
+    m_gtype.GetWindowText(t_type);
+	if( !t_type.Compare(_T("NAND")) ) {
+        CDialog * mainWnd=m_SubForms.GetSubForm(m_gtype.GetCurSel());
+		if(((CNANDDlg *)mainWnd)->m_nandflash_check.GetCheck()!=TRUE)
+		{
+			m_info.Nand_uIsUserConfig = 0;
+			m_info.Nand_uPagePerBlock =  Nand_uPagePerBlock;
+            m_info.Nand_uBlockPerFlash = Nand_uBlockPerFlash;
+		}
+		else
+		{
+			m_info.Nand_uIsUserConfig = 1;
+		    m_info.Nand_uPagePerBlock=_wtoi(m_inifile.GetValue(_T("NAND_INFO"),_T("uPagePerBlock")));
+			m_info.Nand_uBlockPerFlash=_wtoi(m_inifile.GetValue(_T("NAND_INFO"),_T("uBlockPerFlash")));
+		}
+		
+		TRACE(_T("Info: BlockPerFlash =%d, PagePerBlock = %d\n"),  m_info.Nand_uBlockPerFlash, m_info.Nand_uPagePerBlock);
+    }	
+#endif
+    //m_info.Nand_uPagePerBlock =  Nand_uPagePerBlock;
+    //m_info.Nand_uBlockPerFlash = Nand_uBlockPerFlash;
     bResult=NucUsb.NUC_WritePipe(0,(UCHAR *)&m_info, sizeof(INFO_T));
     if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT) bResult=FALSE;
     if(bResult!=TRUE)	bResult=FALSE;
@@ -968,14 +1047,48 @@ BOOL CNuWriterDlg:: Info()
 
 BOOL CNuWriterDlg::OneDeviceInfo(int id)
 {
-    BOOL bResult;
+    BOOL bResult, bRet;
+    int count=0;
 
-    bResult=NucUsb.EnableOneWinUsbDevice(id);
-    if(!bResult) {
-        NucUsb.CloseWinUsbDevice(id);
+	COLORREF col = RGB(0xFF, 0x00, 0xFF);
+	ResetEvent(m_ExitEvent[id]);
+
+	bRet = FALSE;
+	for(count =0; count < RETRYCNT; count++) {
+        bResult=NucUsb.EnableOneWinUsbDevice(id);
+        if(!bResult) {
+            bResult =NucUsb.NUC_ResetFW(id);
+            Sleep(100);//for Mass production
+            if(bResult == FALSE) {
+                TRACE(_T("XXXX (%d) RESET NUC970 failed\n"), id);
+                continue;
+            }
+            Sleep(200);//for Mass production
+            bResult = FWDownload(id);
+            Sleep(200);//for Mass production
+            if(bResult == FALSE) {
+                TRACE(_T("XXXX (%d) Download FW failed\n"), id);
+                continue;
+            }
+        }
+		else
+		{
+			bRet = TRUE;
+			//GetDlgItem(IDC_RECONNECT)->EnableWindow(TRUE);
+			break;
+		}
+    } 
+
+	if(bRet == FALSE) // Retry Fail
+	{
+        TRACE(_T("XXX (%d) EnableOneWinUsbDevice RETRY ERROR\n"), id);
+	    NucUsb.CloseWinUsbDevice(id);
+		ShowDeviceConnectState(0);//Disconnected
+	    GetDlgItem(IDC_RECONNECT)->EnableWindow(TRUE);
         //AfxMessageBox(_T("Please reset device and Re-connect now !!!\n"));
         return FALSE;
-    }
+	}
+
 
 #if(0)
     bResult=NucUsb.NUC_CheckFw(id);
@@ -989,12 +1102,55 @@ BOOL CNuWriterDlg::OneDeviceInfo(int id)
     USHORT typeack;
     bResult=NucUsb.NUC_SetType(id,INFO,(UCHAR *)&typeack,sizeof(typeack));
     if(bResult==FALSE) {
-        NucUsb.CloseWinUsbDevice(id);
+	    NucUsb.CloseWinUsbDevice(id);
+		ShowDeviceConnectState(0);//Disconnected
+	    GetDlgItem(IDC_RECONNECT)->EnableWindow(TRUE);
         return FALSE;
     }
 
-    m_info.Nand_uPagePerBlock =  Nand_uPagePerBlock;
-    m_info.Nand_uBlockPerFlash = Nand_uBlockPerFlash;
+#if(1)
+	CString t_type;
+    m_gtype.GetWindowText(t_type);
+	if( !t_type.Compare(_T("NAND")) ) {
+        CDialog * mainWnd=m_SubForms.GetSubForm(m_gtype.GetCurSel());
+		if(((CNANDDlg *)mainWnd)->m_nandflash_check.GetCheck()!=TRUE)
+		{
+			m_info.Nand_uIsUserConfig = 0;
+			m_info.Nand_uPagePerBlock =  Nand_uPagePerBlock;
+            m_info.Nand_uBlockPerFlash = Nand_uBlockPerFlash;
+		}
+		else
+		{
+		    m_info.Nand_uIsUserConfig = 1;
+			m_info.Nand_uPagePerBlock=_wtoi(m_inifile.GetValue(_T("NAND_INFO"),_T("uPagePerBlock")));
+			m_info.Nand_uBlockPerFlash=_wtoi(m_inifile.GetValue(_T("NAND_INFO"),_T("uBlockPerFlash")));
+		}
+		
+		//TRACE(_T("OneDeviceInfo: IsUserConfig =%d, BlockPerFlash =%d, PagePerBlock = %d\n"),  m_info.Nand_uIsUserConfig, m_info.Nand_uBlockPerFlash, m_info.Nand_uPagePerBlock);
+    }
+
+    if( !t_type.Compare(_T("Mass Production")) ) {
+        CDialog * mainWnd=m_SubForms.GetSubForm(m_gtype.GetCurSel());
+
+        if(((FastDlg *)mainWnd)->m_nandflashInfo_check.GetCheck()!=TRUE) // Auto Detect
+		{
+			m_info.Nand_uIsUserConfig = 0;
+			m_info.Nand_uPagePerBlock =  Nand_uPagePerBlock;
+            m_info.Nand_uBlockPerFlash = Nand_uBlockPerFlash;
+		}
+		else // User Config
+		{
+		    m_info.Nand_uIsUserConfig = 1;
+			m_info.Nand_uPagePerBlock=_wtoi(m_inifile.GetValue(_T("NAND_INFO"),_T("uPagePerBlock")));
+			m_info.Nand_uBlockPerFlash=_wtoi(m_inifile.GetValue(_T("NAND_INFO"),_T("uBlockPerFlash")));
+		}
+		//TRACE(_T("OneDeviceInfo: IsUserConfig =%d, BlockPerFlash =%d, PagePerBlock = %d\n"),  m_info.Nand_uIsUserConfig, m_info.Nand_uBlockPerFlash, m_info.Nand_uPagePerBlock);
+    }	
+	
+#endif
+	//m_info.Nand_uPagePerBlock =  Nand_uPagePerBlock;
+    //m_info.Nand_uBlockPerFlash = Nand_uBlockPerFlash;
+
     bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)&m_info, sizeof(INFO_T));
     if(WaitForSingleObject(m_ExitEvent[id], 0) != WAIT_TIMEOUT) bResult=FALSE;
     if(bResult!=TRUE)	bResult=FALSE;
@@ -1002,9 +1158,11 @@ BOOL CNuWriterDlg::OneDeviceInfo(int id)
     bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&m_info, sizeof(INFO_T));
     if(WaitForSingleObject(m_ExitEvent[id], 0) != WAIT_TIMEOUT) bResult=FALSE;
     if(bResult!=TRUE)	bResult=FALSE;
-
+    TRACE(_T("OneDeviceInfo: IsUserConfig =%d, BlockPerFlash =%d, PagePerBlock = %d\n"),  m_info.Nand_uIsUserConfig, m_info.Nand_uBlockPerFlash, m_info.Nand_uPagePerBlock);
     NucUsb.CloseWinUsbDevice(id);
     OnCbnSelchangeComboType();
+
+	GetDlgItem(IDC_RECONNECT)->EnableWindow(TRUE);
     return bResult;
 }
 
@@ -1024,9 +1182,10 @@ unsigned WINAPI CNuWriterDlg::Info_proc(void* args)
 #else
     TRACE("Info_proc:: %d   %d\n",pThis->g_iDeviceNum, NucUsb.WinUsbNumber);
     //if(pThis->g_iDeviceNum < NucUsb.WinUsbNumber) {
+	if(pThis->iDevice < pThis->g_iDeviceNum) {
         TRACE("Info_proc:idevice =%d\n",pThis->iDevice);
         pThis->OneDeviceInfo(pThis->iDevice++);
-    //}
+    }
 #endif
     return 0;
 }
@@ -1036,6 +1195,288 @@ void CNuWriterDlg::GetInfo()
     HANDLE hThread;
     hThread=(HANDLE)_beginthreadex(NULL,0,Info_proc,(void*)this,0,&Thread1);
 }
+
+BOOL CNuWriterDlg:: FWDownload(int id)
+{
+    int i=0;
+    TCHAR path[MAX_PATH];
+    GetModuleFileName(NULL, path, MAX_PATH);
+    CString temp=path;
+    CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
+    BOOL bResult=1;
+
+	COLORREF col = RGB(0xFF, 0x00, 0xFF);
+    m_reconnect.setBitmapId(IDB_RECONNECT0, col);
+    m_reconnect.setGradient(true);
+    m_exit.setBitmapId(IDB_EXIT, col);
+    m_exit.setGradient(true);
+
+    temp = temp.Left(temp.ReverseFind('\\') + 1);
+    CString filename=NULL;
+
+    switch(mainWnd->DDRFileName.GetAt(8)) {
+    case '5':
+        filename.Format(_T("%sxusb.bin"),temp);
+        break;
+    case '6':
+        filename.Format(_T("%sxusb64.bin"),temp);
+        break;
+    case '7':
+        filename.Format(_T("%sxusb128.bin"),temp);
+        break;
+    default:
+        filename.Format(_T("%sxusb16.bin"),temp);
+        break;
+    };
+
+    bResult = XUSB(id, filename);
+	
+    if(!bResult) {
+		ShowDeviceConnectState(0);//Disconnected
+	    GetDlgItem(IDC_RECONNECT)->EnableWindow(TRUE);
+        NucUsb.CloseWinUsbDevice(id);
+    }
+
+    return bResult;
+}
+
+DWORD GetFWRamAddress(FILE* fp)
+{
+    BINHEADER head;
+    UCHAR SIGNATURE[]= {'W','B',0x5A,0xA5};
+
+    fread((CHAR*)&head,sizeof(head),1,fp);
+
+    if(head.signature==*(DWORD*)SIGNATURE) {
+        return head.address;
+    } else
+        return 0xFFFFFFFF;
+}
+
+BOOL CNuWriterDlg::DDRtoDevice(int id, char *buf,unsigned int len)
+{
+    BOOL bResult;
+    char *pbuf;
+    unsigned int scnt,rcnt,ack;
+    AUTOTYPEHEAD head;
+
+    head.address=DDRAddress;  // 0x10
+    head.filelen=len;	// NUC972DF62Y.ini length = 368
+
+    //TRACE(_T("(%d)  0x%x,  %d\n"), id, head.address, head.filelen);
+    bResult=NucUsb.NUC_WritePipe(id,(unsigned char*)&head,sizeof(AUTOTYPEHEAD));
+    if(bResult==FALSE) {
+        TRACE(_T("XXX (%d) CNuWriterDlg::DDRtoDevice error.  0x%x\n"), id, GetLastError());
+        goto failed;
+    }
+    Sleep(5);
+    pbuf=buf;
+
+    scnt=len/BUF_SIZE;
+    rcnt=len%BUF_SIZE;
+    while(scnt>0) {
+        bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)pbuf,BUF_SIZE);
+        if(bResult==TRUE) {
+            bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
+
+            if(bResult==FALSE || (int)ack==(BUF_SIZE+1)) {
+
+                if(bResult==TRUE && (int)ack==(BUF_SIZE+1)) {
+                    // xub.bin is running on device
+                    NucUsb.CloseWinUsbDevice(id);
+                    return FW_CODE;
+                } else
+                    goto failed;
+            }
+        } else {
+            NucUsb.CloseWinUsbDevice(id);
+            //TRACE(_T("(%d) DDRtoDevice scnt%d error! 0x%x\n"), id, scnt, GetLastError());
+            return FALSE;
+        }
+
+        scnt--;
+        pbuf+=BUF_SIZE;
+    }
+
+    if(rcnt>0) {
+        bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)pbuf,rcnt);
+        if(bResult==TRUE) {
+            bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
+            if(bResult==FALSE || (int)ack==(BUF_SIZE+1)) {
+
+                if(bResult==TRUE && (int)ack==(BUF_SIZE+1)) {
+                    // xub.bin is running on device
+                    NucUsb.CloseWinUsbDevice(id);
+                    return FW_CODE;
+                } else
+                    goto failed;
+            }
+        } else {
+            NucUsb.CloseWinUsbDevice(id);
+            //TRACE(_T("XXX (%d) DDRtoDevice rcnt%d error! 0x%x\n"), id, rcnt, GetLastError());
+            return FALSE;
+        }
+    }
+
+    bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
+    if(bResult==TRUE && ack==0x55AA55AA)
+        return TRUE;
+
+failed:
+    NucUsb.CloseWinUsbDevice(id);
+    return FALSE;
+}
+
+// FW bin download
+BOOL CNuWriterDlg::XUSB(int id, CString& m_BinName)
+{
+    BOOL bResult;
+    CString posstr, str;
+    CString tempstr;
+    int count=0;
+    FILE* fp;
+    int pos=0;
+    AUTOTYPEHEAD fhead;
+    XBINHEAD xbinhead;  // 16bytes for IBR using
+    DWORD version;
+    unsigned int total,file_len,scnt,rcnt,ack;
+			
+    /***********************************************/
+    //TRACE(_T("CNuWriterDlg::XUSB (%d), %s\n"), id, m_BinName);
+    bResult=NucUsb.EnableOneWinUsbDevice(id);
+    if(!bResult) {
+        TRACE(_T("XXX (%d) NuWriterDlg.cpp  XUSB Device Open error\n"),id);
+        //AfxMessageBox(str);
+        return FALSE;
+    }
+
+    int fw_flag[8];
+    fw_flag[id]=DDRtoDevice(id, ShareDDRBuf,DDRLen);
+
+    if(fw_flag[id]==FALSE) {
+        NucUsb.WinUsbNumber -= 1;
+        NucUsb.CloseWinUsbDevice(id);
+        return FALSE;
+    }
+
+    ULONG cbSize = 0;
+    unsigned char* lpBuffer = new unsigned char[BUF_SIZE];
+    fp=_wfopen(m_BinName,_T("rb"));
+
+    if(!fp) {
+        delete []lpBuffer;
+        NucUsb.CloseWinUsbDevice(id);
+        fclose(fp);
+        AfxMessageBox(_T("Bin File Open error\n"));
+        //TRACE(_T("XXX Bin File Open error\n"));
+        return FALSE;
+    }
+
+    fread((char*)&xbinhead,sizeof(XBINHEAD),1,fp);
+    version=xbinhead.version;
+
+    if(fw_flag[id]==FW_CODE) {
+        fclose(fp);
+        delete []lpBuffer;
+        NucUsb.CloseWinUsbDevice(id);
+        return TRUE;
+    }
+
+    //Get File Length
+    fseek(fp,0,SEEK_END);
+    file_len=ftell(fp)-sizeof(XBINHEAD);
+    fseek(fp,0,SEEK_SET);
+
+    if(!file_len) {
+        fclose(fp);
+        delete []lpBuffer;
+        NucUsb.CloseWinUsbDevice(id);
+        TRACE(_T("File length is zero\n"));
+        return FALSE;
+    }
+
+    fhead.filelen = file_len;
+    fhead.address = GetFWRamAddress(fp);//0x8000;
+
+    if(fhead.address==0xFFFFFFFF) {
+        delete []lpBuffer;
+        NucUsb.CloseWinUsbDevice(id);
+        fclose(fp);
+        TRACE(_T("Invalid Image !\n"));
+        return FALSE;
+    }
+
+    memcpy(lpBuffer,(unsigned char*)&fhead,sizeof(fhead)); // 8 bytes
+    bResult=NucUsb.NUC_WritePipe(id,(unsigned char*)&fhead,sizeof(fhead));
+    if(bResult==FALSE) {
+        delete []lpBuffer;
+        NucUsb.CloseWinUsbDevice(id);
+        fclose(fp);
+        return FALSE;
+    }
+    scnt=file_len/BUF_SIZE;
+    rcnt=file_len%BUF_SIZE;
+
+    total=0;
+    //TRACE(_T("(%d) FW scnt %d    rcnt = %d\n"), id, scnt, rcnt);
+    while(scnt>0) {
+        fread(lpBuffer,BUF_SIZE,1,fp);
+        bResult=NucUsb.NUC_WritePipe(id,lpBuffer,BUF_SIZE);
+        if(bResult==TRUE) {
+            total+=BUF_SIZE;
+
+            scnt--;
+
+            bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
+            if(bResult==FALSE || (int)ack!=BUF_SIZE) {
+                delete []lpBuffer;
+                NucUsb.CloseWinUsbDevice(id);
+                fclose(fp);
+
+                if(bResult==TRUE && (int)ack==(BUF_SIZE+1)) {
+                    // xub.bin is running on device
+                    return TRUE;
+                } else
+                    return FALSE;
+            }
+        } else {
+            delete []lpBuffer;
+            NucUsb.CloseWinUsbDevice(id);
+            fclose(fp);
+            //TRACE(_T("XXX (%d) FW scnt error. 0x%x\n"), id, GetLastError());
+            return FALSE;
+        }
+    }
+
+    memset(lpBuffer,0x0,BUF_SIZE);
+    if(rcnt>0) {
+        fread(lpBuffer,rcnt,1,fp);
+        bResult=NucUsb.NUC_WritePipe(id,lpBuffer,BUF_SIZE);
+        if(bResult==TRUE) {
+            total+=rcnt;
+            bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&ack,4);
+            if(bResult==FALSE) {
+                delete []lpBuffer;
+                NucUsb.CloseWinUsbDevice(id);
+                fclose(fp);
+                return FALSE;
+            }
+        } else {
+            delete []lpBuffer;
+            NucUsb.CloseWinUsbDevice(id);
+            fclose(fp);
+            //TRACE(_T("XXX (%d) FW rcnt error. 0x%x\n"), id, GetLastError());
+            return FALSE;
+        }
+    }
+
+    delete []lpBuffer;
+    NucUsb.CloseWinUsbDevice(id);
+    fclose(fp);
+
+    return TRUE;
+}
+
 
 #define CRC32POLY 0x04c11db7
 static const unsigned long crc32_table[256] = {

@@ -248,6 +248,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\NandInfoDlg.cpp"
+				>
+			</File>			
+			<File
 				RelativePath=".\NucWinUsb.cpp"
 				>
 			</File>
@@ -373,6 +377,10 @@
 				RelativePath=".\NANDDlg.h"
 				>
 			</File>
+			<File
+				RelativePath=".\NandInfoDlg.h"
+				>
+			</File>				
 			<File
 				RelativePath=".\NucWinUsb.h"
 				>

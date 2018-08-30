@@ -7,44 +7,43 @@
  * @note
  * Copyright (C) 2012-2014 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
- #include "config.h"
- #include "usbd.h"
- #include "sdglue.h"
- #include "filesystem.h"  //for eMMC format test
+#include "config.h"
+#include "usbd.h"
+#include "sdglue.h"
+#include "filesystem.h"  //for eMMC format test
 
 extern void ParseFlashType(void);
 extern UINT32 eMMCBlockSize;
 
 UINT32 PLL_Get(UINT32 reg,UINT srcclk)
 {
-  UINT32 N,M,P;
-  N =((inpw(reg) & 0x007F)>>0)+1;
-  M =((inpw(reg) & 0x1F80)>>7)+1;
-  P =((inpw(reg) & 0xE000)>>13)+1;
-  return (srcclk*N/(M*P));
+    UINT32 N,M,P;
+    N =((inpw(reg) & 0x007F)>>0)+1;
+    M =((inpw(reg) & 0x1F80)>>7)+1;
+    P =((inpw(reg) & 0xE000)>>13)+1;
+    return (srcclk*N/(M*P));
 }
 void CPU_Info(void)
 {
-		UINT32 system=12;		
-		UINT32 cpu,pclk;
-		switch( ((inpw(REG_CLKDIV0) & (0x3<<3))>>3))
-		{
-			case 0:
-					system=12;
-					break;
-			case 1:		
-					return;					
-			case 2: /* ACLKout */
-					system=PLL_Get(REG_APLLCON,system);
-					break;				
-			case 3: /* UCLKout */
-					system=PLL_Get(REG_UPLLCON,system);
-					break;
-		}
-		system= ( system/(((inpw(REG_CLKDIV0) & (0x7<<0))>>0)+1) )/ (((inpw(REG_CLKDIV0) & (0xF<<8))>>8)+1);
-		cpu   =	(system/(((inpw(REG_CLKDIV0) & (0xf<<16))>>16)+1));
-		pclk  = ((system)/(((inpw(REG_CLKDIV0) & (0xf<<24))>>24)+1))/2;
-		sysprintf("CPU: %dMHz, DDR: %dMHz, SYS: %dMHz, PCLK: %dMHz\n",cpu,system/2,system,pclk);
+    UINT32 system=12;
+    UINT32 cpu,pclk;
+    switch( ((inpw(REG_CLKDIV0) & (0x3<<3))>>3)) {
+    case 0:
+        system=12;
+        break;
+    case 1:
+        return;
+    case 2: /* ACLKout */
+        system=PLL_Get(REG_APLLCON,system);
+        break;
+    case 3: /* UCLKout */
+        system=PLL_Get(REG_UPLLCON,system);
+        break;
+    }
+    system= ( system/(((inpw(REG_CLKDIV0) & (0x7<<0))>>0)+1) )/ (((inpw(REG_CLKDIV0) & (0xF<<8))>>8)+1);
+    cpu   = (system/(((inpw(REG_CLKDIV0) & (0xf<<16))>>16)+1));
+    pclk  = ((system)/(((inpw(REG_CLKDIV0) & (0xf<<24))>>24)+1))/2;
+    sysprintf("CPU: %dMHz, DDR: %dMHz, SYS: %dMHz, PCLK: %dMHz\n",cpu,system/2,system,pclk);
 }
 /*----------------------------------------------------------------------------
   MAIN function
@@ -84,10 +83,10 @@ int main()
     outpw(0xB8003124, 0x4000);
 
 
-    sysInitializeUART();    
-    MSG_DEBUG("0x%x\n", inpw(REG_USBD_PHY_CTL));   
+    sysInitializeUART();
+    MSG_DEBUG("0x%x\n", inpw(REG_USBD_PHY_CTL));
 
-    sysprintf("=======================================\n");		
+    sysprintf("=======================================\n");
     sysprintf("Run firmware code\n");
     CPU_Info();
 
@@ -95,26 +94,27 @@ int main()
     udcInit();
 
     /* start Timer 0 */
-    #if 1
+#if 1
     sysSetTimerReferenceClock(TIMER0, 12000000);
     sysStartTimer(TIMER0, 100, PERIODIC_MODE);
-    #endif
+#endif
 
     fmiHWInit();
+    sysDelay(10);//For connection stability
 
-    #if 1 /* SD Init */    
+#if 1 /* SD Init */
     _sd_ReferenceClock = 12000;    // kHz
     eMMCBlockSize=fmiInitSDDevice();
+    sysDelay(10); //For connection stability
     MSG_DEBUG("eMMCBlockSize=%08x\n",eMMCBlockSize);
 //  pmbr=create_mbr(eMMCBlockSize,30);
 //  FormatFat32(pmbr,0);
 //  while(1);
-    #endif
+#endif
 
     sysprintf("Parse NuWriter command line\n");
     sysprintf("=======================================\n");
-    while(1)
-    {
+    while(1) {
         ParseFlashType();
     }
 

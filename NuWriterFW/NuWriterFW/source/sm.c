@@ -22,6 +22,11 @@
 #define BCH_PARITY_LEN_T24 45
 
 #define ERASE_WITH_0XF0
+
+#define NAND_EXTRA_512          16
+#define NAND_EXTRA_2K           64
+#define NAND_EXTRA_4K           128
+#define NAND_EXTRA_8K           376
 /*-----------------------------------------------------------------------------*/
 
 // global variables
@@ -30,6 +35,7 @@ FMI_SM_INFO_T SMInfo, *pSM;
 FW_UPDATE_INFO_T FWInfo;
 extern int volatile _usbd_IntraROM;
 extern void SendAck(UINT32 status);
+extern UINT32 g_uIsUserConfig;
 
 INT fmiSMCheckRB()
 {
@@ -61,7 +67,7 @@ INT fmiSM_Reset(void)
 
 VOID fmiSM_Initial(FMI_SM_INFO_T *pSM)
 {
-    outpw(REG_SMCSR,  inpw(REG_SMCSR) | 0x800080);	// enable ECC
+    outpw(REG_SMCSR,  inpw(REG_SMCSR) | 0x800080);  // enable ECC
 
     //--- Set register to disable Mask ECC feature
     outpw(REG_SMREACTL, inpw(REG_SMREACTL) & ~0xffff0000);
@@ -93,6 +99,8 @@ UINT32 Custom_uPagePerBlock;
 INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
 {
     UINT32 tempID[5],u32PowerOn,IsID=0;
+    UINT8 name[6][16] = {"T24","T4","T8","T12","T15","XXX"};
+    UINT8 BCHAlgoIdx;
 
     if (pSM->bIsInResetState == FALSE) {
         if (fmiSM_Reset() < 0)
@@ -109,12 +117,22 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
     tempID[3] = inpw(REG_SMDATA);
     tempID[4] = inpw(REG_SMDATA);
 
-    MSG_DEBUG("ID[0]=0x%2x, ID[1]=0x%2x\n",tempID[0], tempID[1]);
-    MSG_DEBUG("ID[2]=0x%2x, ID[3]=0x%2x\n",tempID[2], tempID[3]);
+    sysprintf("SM ID [%x][%x][%x][%x]\n", tempID[0], tempID[1], tempID[2], tempID[3]);
     MSG_DEBUG("ID[4]=0x%2x\n",tempID[4]);
+
+    /* Without Power-On-Setting for NAND */
+    pSM->uPagePerBlock = 32;
+    pSM->uPageSize = 512;
+    pSM->uNandECC = BCH_T4;
+    pSM->bIsMulticycle = TRUE;
+    pSM->uSpareSize = 8;
+    pSM->uBlockPerFlash  = Custom_uBlockPerFlash-1; // block index with 0-base. = physical blocks - 1
+    pSM->uPagePerBlock   = Custom_uPagePerBlock;
+    MSG_DEBUG("Default[0x%x 0x%x] -> BlockPerFlash=%d, PagePerBlock=%d, PageSize=%d\n", tempID[1], tempID[3], pSM->uBlockPerFlash, pSM->uPagePerBlock, pSM->uPageSize);
+
     switch (tempID[1]) {
         /* page size 512B */
-    case 0x79:  // 128M
+    case 0x79:  // 128M v
         pSM->uBlockPerFlash = 8191;
         pSM->uPagePerBlock = 32;
         pSM->uSectorPerBlock = 32;
@@ -124,7 +142,7 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
         pSM->uSpareSize = 16;
         break;
 
-    case 0x76:  // 64M
+    case 0x76:  // 64M v
         pSM->uBlockPerFlash = 4095;
         pSM->uPagePerBlock = 32;
         pSM->uSectorPerBlock = 32;
@@ -134,7 +152,7 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
         pSM->uSpareSize = 16;
         break;
 
-    case 0x75:  // 32M
+    case 0x75:  // 32M v
         pSM->uBlockPerFlash = 2047;
         pSM->uPagePerBlock = 32;
         pSM->uSectorPerBlock = 32;
@@ -144,7 +162,7 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
         pSM->uSpareSize = 16;
         break;
 
-    case 0x73:  // 16M
+    case 0x73:  // 16M v
         pSM->uBlockPerFlash = 1023;
         pSM->uPagePerBlock = 32;
         pSM->uSectorPerBlock = 32;
@@ -155,8 +173,8 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
         break;
 
         /* page size 2KB */
-    case 0xf1:  // 128M
-    case 0xd1:  // 128M
+    case 0xf1:  // 128M v
+    case 0xd1:  // 128M v
         pSM->uBlockPerFlash = 1023;
         pSM->uPagePerBlock = 64;
         pSM->uSectorPerBlock = 256;
@@ -166,9 +184,11 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
         pSM->uSpareSize = 64;
         break;
 
-    case 0xda:  // 256M
+    case 0xda:  // 256M v
+        pSM->uBlockPerFlash = 1023;
+        pSM->uPagePerBlock = 64;
         if ((tempID[3] & 0x33) == 0x11) {
-            pSM->uBlockPerFlash = 2047;
+            pSM->uBlockPerFlash = 1023;
             pSM->uPagePerBlock = 64;
             pSM->uSectorPerBlock = 256;
         } else if ((tempID[3] & 0x33) == 0x21) {
@@ -182,7 +202,8 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
         pSM->uSpareSize = 64;
         break;
 
-    case 0xdc:  // 512M
+    case 0xdc:  // 512M v
+        pSM->uBlockPerFlash = 64;
         if((tempID[0]==0x98) && (tempID[1]==0xDC) &&(tempID[2]==0x90)&&(tempID[3]==0x26)&&(tempID[4]==0x76)) {
             pSM->uBlockPerFlash = 2047;
             pSM->uPagePerBlock = 64;
@@ -208,7 +229,7 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
         pSM->uSpareSize = 64;
         break;
 
-    case 0xd3:  // 1024M
+    case 0xd3:  // 1024M v
         if ((tempID[3] & 0x33) == 0x32) {
             pSM->uBlockPerFlash = 2047;
             pSM->uPagePerBlock = 128;
@@ -230,6 +251,13 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
             pSM->uPageSize = 2048;
             pSM->uNandECC = BCH_T4;
             pSM->uSpareSize = 64;
+        } else if ((tempID[3] & 0x3) == 0x3) {
+            pSM->uBlockPerFlash = 4095;//?
+            pSM->uPagePerBlock = 128;
+            pSM->uSectorPerBlock = 512;//?
+            pSM->uPageSize = 8192;
+            pSM->uNandECC = BCH_T12;
+            pSM->uSpareSize = 368;
         } else if ((tempID[3] & 0x33) == 0x22) {
             pSM->uBlockPerFlash = 4095;
             pSM->uPagePerBlock = 64;
@@ -241,7 +269,7 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
         pSM->bIsMulticycle = TRUE;
         break;
 
-    case 0xd5:  // 2048M
+    case 0xd5:  // 2048M v
         // H27UAG8T2A
         if ((tempID[0]==0xAD)&&(tempID[2] == 0x94)&&(tempID[3] == 0x25)) {
             pSM->uBlockPerFlash = 4095;
@@ -298,6 +326,14 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
             pSM->uNandECC = BCH_T4;
             pSM->bIsMLCNand = TRUE;
             pSM->uSpareSize = 64;
+        } else if ((tempID[3] & 0x3) == 0x3) {
+            pSM->uBlockPerFlash = 8191;//?
+            pSM->uPagePerBlock = 128;
+            pSM->uSectorPerBlock = 512;//?
+            pSM->uPageSize = 8192;
+            pSM->uNandECC = BCH_T12;
+            pSM->bIsMLCNand = TRUE;
+            pSM->uSpareSize = 368;
         }
         pSM->bIsMulticycle = TRUE;
         break;
@@ -322,67 +358,117 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
 
     /* Using PowerOn setting*/
     u32PowerOn = inpw(REG_PWRON);
-    if((u32PowerOn&0x3C0)!=0x3C0 ) {
+    //if((u32PowerOn&0x3C0)!=0x3C0 ) {
+    if ((u32PowerOn & 0xC0) != 0xC0) { /* PageSize PWRON[7:6] */
         const UINT16 BCH12_SPARE[3] = { 92,184,368};/* 2K, 4K, 8K */
         const UINT16 BCH15_SPARE[3] = {116,232,464};/* 2K, 4K, 8K */
         const UINT16 BCH24_SPARE[3] = { 90,180,360};/* 2K, 4K, 8K */
         unsigned int volatile gu_fmiSM_PageSize;
         unsigned int volatile g_u32ExtraDataSize;
 
-        MSG_DEBUG("Using PoowerOn setting 0x%x\n",u32PowerOn);
-        if ((u32PowerOn & 0xC0) != 0xC0) {	/* PWRON[7:6] */
-            gu_fmiSM_PageSize = 1024 << (((u32PowerOn >> 6) & 0x3) + 1);
-            switch(gu_fmiSM_PageSize) {
-            case 2048:
-                MSG_DEBUG("2KB\n");
-                break;
-            case 4096:
-                MSG_DEBUG("4KB\n");
-                break;
-            case 8192:
-                MSG_DEBUG("8KB\n");
-                break;
-            }
-        } else
-            gu_fmiSM_PageSize=2048;
+        sysprintf("Using PowerOn setting(0x%x): ", (u32PowerOn>>6)&0xf);
+        gu_fmiSM_PageSize = 1024 << (((u32PowerOn >> 6) & 0x3) + 1);
+        switch(gu_fmiSM_PageSize) {
+        case 2048:
+            sysprintf(" PageSize = 2KB ");
+            pSM->uPagePerBlock   = 64;
+            pSM->uNandECC        = BCH_T4;
+            break;
+        case 4096:
+            sysprintf(" PageSize = 4KB ");
+            pSM->uPagePerBlock   = 128;
+            pSM->uNandECC        = BCH_T8;
+            break;
+        case 8192:
+            sysprintf(" PageSize = 8KB ");
+            pSM->uPagePerBlock   = 128;
+            pSM->uNandECC        = BCH_T12;
+            break;
+        }
 
-        if((u32PowerOn & 0x300) != 0x300) {	/* PWRON[9:8] */
+        if((u32PowerOn & 0x300) != 0x300) { /* ECC PWRON[9:8] */
             switch((u32PowerOn & 0x300)) {
             case 0x000:
-                MSG_DEBUG("T12\n");
+                sysprintf(" ECC = T12\n");
                 g_u32ExtraDataSize = BCH12_SPARE[gu_fmiSM_PageSize >> 12] + 8;
                 pSM->uNandECC = BCH_T12;
                 break;
             case 0x100:
-                MSG_DEBUG("T15\n");
+                sysprintf(" ECC = T15\n");
                 g_u32ExtraDataSize = BCH15_SPARE[gu_fmiSM_PageSize >> 12] + 8;
                 pSM->uNandECC = BCH_T15;
                 break;
             case 0x200:
-                MSG_DEBUG("T24\n");
+                sysprintf(" ECC = T24\n");
                 g_u32ExtraDataSize = BCH24_SPARE[gu_fmiSM_PageSize >> 12] + 8;
                 pSM->uNandECC = BCH_T24;
                 break;
             }
         } else {
-            MSG_DEBUG("T12\n");
-            g_u32ExtraDataSize = BCH12_SPARE[gu_fmiSM_PageSize >> 12] + 8;
+            sysprintf(" ECC = XXX\n");
+            switch(gu_fmiSM_PageSize) {
+            case 512:
+                g_u32ExtraDataSize = NAND_EXTRA_512;
+                break;
+            case 2048:
+                g_u32ExtraDataSize = NAND_EXTRA_2K;
+                break;
+            case 4096:
+                g_u32ExtraDataSize = NAND_EXTRA_4K;
+                break;
+            case 8192:
+                g_u32ExtraDataSize = NAND_EXTRA_8K;
+                break;
+            }
         }
 
-        pSM->uBlockPerFlash  = Custom_uBlockPerFlash-1;        // block index with 0-base. = physical blocks - 1
-        pSM->uPagePerBlock   = Custom_uPagePerBlock;
+        if(g_uIsUserConfig == 1) {
+            pSM->uBlockPerFlash = Custom_uBlockPerFlash-1;
+            pSM->uPagePerBlock = Custom_uPagePerBlock;
+            sysprintf("Custom_uBlockPerFlash= %d, Custom_uPagePerBlock= %d\n", Custom_uBlockPerFlash, Custom_uPagePerBlock);
+        }
+
         pSM->uPageSize       = gu_fmiSM_PageSize;
         pSM->uSectorPerBlock = pSM->uPageSize / 512 * pSM->uPagePerBlock;
         pSM->bIsMulticycle   = TRUE;
         pSM->uSpareSize      = g_u32ExtraDataSize;
         pSM->bIsMLCNand      = TRUE;
+        sysprintf("User Configure:\nBlockPerFlash= %d, PagePerBlock= %d\n", pSM->uBlockPerFlash, pSM->uPagePerBlock);
+
     } else {
         if(IsID==1) {
-            MSG_DEBUG("SM ID not support!![%x][%x]\n", tempID[0], tempID[1]);
+            sysprintf("SM ID not support!! [%x][%x][%x][%x]\n", tempID[0], tempID[1], tempID[2], tempID[3]);
             return Fail;
+        } else {
+            if(g_uIsUserConfig == 1) {
+                pSM->uBlockPerFlash = Custom_uBlockPerFlash-1;
+                pSM->uPagePerBlock = Custom_uPagePerBlock;
+                sysprintf("Custom_uBlockPerFlash= %d, Custom_uPagePerBlock= %d\n", Custom_uBlockPerFlash, Custom_uPagePerBlock);
+            }
+            sysprintf("Auto Detect:\nBlockPerFlash= %d, PagePerBlock= %d\n", pSM->uBlockPerFlash, pSM->uPagePerBlock);
         }
     }
-
+    switch(pSM->uNandECC) {
+    case BCH_T24:
+        BCHAlgoIdx = 0;
+        break;
+    case BCH_T4:
+        BCHAlgoIdx = 1;
+        break;
+    case BCH_T8:
+        BCHAlgoIdx = 2;
+        break;
+    case BCH_T12:
+        BCHAlgoIdx = 3;
+        break;
+    case BCH_T15:
+        BCHAlgoIdx = 4;
+        break;
+    default:
+        BCHAlgoIdx = 5;
+        break;
+    }
+    sysprintf("PageSize= %d, ECC= %s, ExtraDataSize= %d, SectorPerBlock= %d\n\n", pSM->uPageSize, name[BCHAlgoIdx], pSM->uSpareSize, pSM->uSectorPerBlock);
     MSG_DEBUG("SM ID [%x][%x][%x][%x]\n", tempID[0], tempID[1], tempID[2], tempID[3]);
     return Successful;
 }
@@ -400,18 +486,18 @@ INT fmiSM2BufferM_large_page(UINT32 uPage, UINT32 ucColAddr)
     while(!(inpw(REG_SMISR) & 0x40000));
     outpw(REG_SMISR, 0x400);
 
-    outpw(REG_SMCMD, 0x00);		// read command
-    outpw(REG_SMADDR, ucColAddr);	                // CA0 - CA7
-    outpw(REG_SMADDR, (ucColAddr >> 8) & 0xFF);	    // CA8 - CA11
-    outpw(REG_SMADDR, uPage & 0xff);	            // PA0 - PA7
+    outpw(REG_SMCMD, 0x00);     // read command
+    outpw(REG_SMADDR, ucColAddr);                   // CA0 - CA7
+    outpw(REG_SMADDR, (ucColAddr >> 8) & 0xFF);     // CA8 - CA11
+    outpw(REG_SMADDR, uPage & 0xff);                // PA0 - PA7
 
     if (!pSM->bIsMulticycle)
         outpw(REG_SMADDR, ((uPage >> 8) & 0xff)|0x80000000);    // PA8 - PA15
     else {
-        outpw(REG_SMADDR, (uPage >> 8) & 0xff);		        // PA8 - PA15
+        outpw(REG_SMADDR, (uPage >> 8) & 0xff);             // PA8 - PA15
         outpw(REG_SMADDR, ((uPage >> 16) & 0xff)|0x80000000);   // PA16 - PA18
     }
-    outpw(REG_SMCMD, 0x30);		// read command
+    outpw(REG_SMCMD, 0x30);     // read command
 
     if (!fmiSMCheckRB())
         return FMI_SM_RB_ERR;
@@ -453,11 +539,11 @@ INT fmiCheckInvalidBlockExcept0xF0(FMI_SM_INFO_T *pSM, UINT32 BlockNo)
         if (blockStatus != 0xFF && blockStatus != 0xF0 ) {
             sysprintf("ERROR: blockStatus != 0xFF(0x%2x)\n", blockStatus);
             fmiSM_Reset();
-            return 1;	// invalid block
+            return 1;   // invalid block
         }
     } else {
         fmiSM_Reset();
-        return 1;	// invalid block
+        return 1;   // invalid block
     }
 
     fmiSM_Reset();
@@ -491,11 +577,11 @@ INT fmiCheckInvalidBlock(FMI_SM_INFO_T *pSM, UINT32 BlockNo)
         blockStatus = inpw(REG_SMDATA) & 0xff;
         if (blockStatus != 0xFF) {
             fmiSM_Reset();
-            return 1;	// invalid block
+            return 1;   // invalid block
         }
     } else {
         fmiSM_Reset();
-        return 1;	// invalid block
+        return 1;   // invalid block
     }
 
     fmiSM_Reset();
@@ -549,7 +635,7 @@ INT fmiSM_BlockErase(FMI_SM_INFO_T *pSM, UINT32 uBlock)
     {
         sysprintf("ERROR: storage error\n");
         return -1;  // storage error
-    } else {        
+    } else {
         return Fail;
     }
     return Successful;
@@ -596,21 +682,21 @@ INT fmiMarkBadBlock(FMI_SM_INFO_T *pSM, UINT32 BlockNo)
 
     /* check if MLC NAND */
     if (pSM->bIsMLCNand == TRUE) {
-        uSector = (BlockNo+1) * pSM->uPagePerBlock - 1;	// write last page
+        uSector = (BlockNo+1) * pSM->uPagePerBlock - 1; // write last page
         ucColAddr = pSM->uPageSize;
 
         // send command
-        outpw(REG_SMCMD, 0x80);		// serial data input command
-        outpw(REG_SMADDR, ucColAddr);	// CA0 - CA7
-        outpw(REG_SMADDR, (ucColAddr >> 8) & 0xff);	// CA8 - CA11
-        outpw(REG_SMADDR, uSector & 0xff);	// PA0 - PA7
+        outpw(REG_SMCMD, 0x80);     // serial data input command
+        outpw(REG_SMADDR, ucColAddr);   // CA0 - CA7
+        outpw(REG_SMADDR, (ucColAddr >> 8) & 0xff); // CA8 - CA11
+        outpw(REG_SMADDR, uSector & 0xff);  // PA0 - PA7
         if (!pSM->bIsMulticycle)
-            outpw(REG_SMADDR, ((uSector >> 8) & 0xff)|0x80000000);		// PA8 - PA15
+            outpw(REG_SMADDR, ((uSector >> 8) & 0xff)|0x80000000);      // PA8 - PA15
         else {
-            outpw(REG_SMADDR, (uSector >> 8) & 0xff);		// PA8 - PA15
-            outpw(REG_SMADDR, ((uSector >> 16) & 0xff)|0x80000000);		// PA16 - PA17
+            outpw(REG_SMADDR, (uSector >> 8) & 0xff);       // PA8 - PA15
+            outpw(REG_SMADDR, ((uSector >> 16) & 0xff)|0x80000000);     // PA16 - PA17
         }
-        outpw(REG_SMDATA, 0xf0);	// mark bad block (use 0xf0 instead of 0x00 to differ from Old (Factory) Bad Blcok Mark)
+        outpw(REG_SMDATA, 0xf0);    // mark bad block (use 0xf0 instead of 0x00 to differ from Old (Factory) Bad Blcok Mark)
         outpw(REG_SMCMD, 0x10);
 
         if (! fmiSMCheckRB())
@@ -620,26 +706,26 @@ INT fmiMarkBadBlock(FMI_SM_INFO_T *pSM, UINT32 BlockNo)
         return 0;
     }
     /* SLC check the 2048 byte of 1st or 2nd page per block */
-    else {	// SLC
-        uSector = BlockNo * pSM->uPagePerBlock;		// write lst page
+    else {  // SLC
+        uSector = BlockNo * pSM->uPagePerBlock;     // write lst page
         if (pSM->uPageSize == 512) {
-            ucColAddr = 0;			// write 4096th byte
+            ucColAddr = 0;          // write 4096th byte
             goto _mark_512;
         } else
             ucColAddr = pSM->uPageSize;
 
         // send command
-        outpw(REG_SMCMD, 0x80);		// serial data input command
-        outpw(REG_SMADDR, ucColAddr);	// CA0 - CA7
-        outpw(REG_SMADDR, (ucColAddr >> 8) & 0xff);	// CA8 - CA11
-        outpw(REG_SMADDR, uSector & 0xff);	// PA0 - PA7
+        outpw(REG_SMCMD, 0x80);     // serial data input command
+        outpw(REG_SMADDR, ucColAddr);   // CA0 - CA7
+        outpw(REG_SMADDR, (ucColAddr >> 8) & 0xff); // CA8 - CA11
+        outpw(REG_SMADDR, uSector & 0xff);  // PA0 - PA7
         if (!pSM->bIsMulticycle)
-            outpw(REG_SMADDR, ((uSector >> 8) & 0xff)|0x80000000);		// PA8 - PA15
+            outpw(REG_SMADDR, ((uSector >> 8) & 0xff)|0x80000000);      // PA8 - PA15
         else {
-            outpw(REG_SMADDR, (uSector >> 8) & 0xff);		// PA8 - PA15
-            outpw(REG_SMADDR, ((uSector >> 16) & 0xff)|0x80000000);		// PA16 - PA17
+            outpw(REG_SMADDR, (uSector >> 8) & 0xff);       // PA8 - PA15
+            outpw(REG_SMADDR, ((uSector >> 16) & 0xff)|0x80000000);     // PA16 - PA17
         }
-        outpw(REG_SMDATA, 0xf0);	// mark bad block (use 0xf0 instead of 0x00 to differ from Old (Factory) Bad Blcok Mark)
+        outpw(REG_SMDATA, 0xf0);    // mark bad block (use 0xf0 instead of 0x00 to differ from Old (Factory) Bad Blcok Mark)
         outpw(REG_SMCMD, 0x10);
 
         if (! fmiSMCheckRB())
@@ -650,23 +736,23 @@ INT fmiMarkBadBlock(FMI_SM_INFO_T *pSM, UINT32 BlockNo)
 
 _mark_512:
 
-        outpw(REG_SMCMD, 0x50);		// point to redundant area
-        outpw(REG_SMCMD, 0x80);		// serial data input command
-        outpw(REG_SMADDR, ucColAddr);	// CA0 - CA7
-        outpw(REG_SMADDR, uSector & 0xff);	// PA0 - PA7
+        outpw(REG_SMCMD, 0x50);     // point to redundant area
+        outpw(REG_SMCMD, 0x80);     // serial data input command
+        outpw(REG_SMADDR, ucColAddr);   // CA0 - CA7
+        outpw(REG_SMADDR, uSector & 0xff);  // PA0 - PA7
         if (!pSM->bIsMulticycle)
-            outpw(REG_SMADDR, ((uSector >> 8) & 0xff)|0x80000000);		// PA8 - PA15
+            outpw(REG_SMADDR, ((uSector >> 8) & 0xff)|0x80000000);      // PA8 - PA15
         else {
-            outpw(REG_SMADDR, (uSector >> 8) & 0xff);		// PA8 - PA15
-            outpw(REG_SMADDR, ((uSector >> 16) & 0xff)|0x80000000);		// PA16 - PA17
+            outpw(REG_SMADDR, (uSector >> 8) & 0xff);       // PA8 - PA15
+            outpw(REG_SMADDR, ((uSector >> 16) & 0xff)|0x80000000);     // PA16 - PA17
         }
 
-        outpw(REG_SMDATA, 0xf0);	// 512
+        outpw(REG_SMDATA, 0xf0);    // 512
         outpw(REG_SMDATA, 0xff);
         outpw(REG_SMDATA, 0xff);
         outpw(REG_SMDATA, 0xff);
-        outpw(REG_SMDATA, 0xf0);	// 516
-        outpw(REG_SMDATA, 0xf0);	// 517
+        outpw(REG_SMDATA, 0xf0);    // 516
+        outpw(REG_SMDATA, 0xf0);    // 517
         outpw(REG_SMCMD, 0x10);
         if (! fmiSMCheckRB())
             return FMI_SM_RB_ERR;
@@ -743,19 +829,18 @@ INT fmiSM_ChipErase(UINT32 uChipSel)
                 badBlock++;
             }
             /* send status */
-            SendAck((i*100) / pSM->uBlockPerFlash);			
-        } 
-#ifndef ERASE_WITH_0XF0        
-        else if (fmiCheckInvalidBlock(pSM, i) == -1) 
+            SendAck((i*100) / pSM->uBlockPerFlash);
+        }
+#ifndef ERASE_WITH_0XF0
+        else if (fmiCheckInvalidBlock(pSM, i) == -1)
 #else
-        else if (fmiCheckInvalidBlockExcept0xF0(pSM, i) == -1) 
+        else if (fmiCheckInvalidBlockExcept0xF0(pSM, i) == -1)
 #endif
-		{
-		    badBlock = -1;
+        {
+            badBlock = -1;
             /* send status */
             SendAck(0xffff);
-        }
-        else {
+        } else {
             badBlock++;
             /* send status */
             SendAck((i*100) / pSM->uBlockPerFlash);
@@ -799,21 +884,21 @@ INT fmiSM_Write_large_page_oob(UINT32 uSector, UINT32 ucColAddr, UINT32 uSAddr,U
     outpw(REG_SMISR, 0x400);
 
     // send command
-    outpw(REG_SMCMD, 0x80);		                // serial data input command
-    outpw(REG_SMADDR, ucColAddr);	            // CA0 - CA7
-    outpw(REG_SMADDR, (ucColAddr >> 8) & 0x3f);	// CA8 - CA12
-    outpw(REG_SMADDR, uSector & 0xff);	        // PA0 - PA7
+    outpw(REG_SMCMD, 0x80);                     // serial data input command
+    outpw(REG_SMADDR, ucColAddr);               // CA0 - CA7
+    outpw(REG_SMADDR, (ucColAddr >> 8) & 0x3f); // CA8 - CA12
+    outpw(REG_SMADDR, uSector & 0xff);          // PA0 - PA7
 
     if (!pSM->bIsMulticycle)
         outpw(REG_SMADDR, ((uSector >> 8) & 0xff)|0x80000000);  // PA8 - PA15
     else {
-        outpw(REG_SMADDR, (uSector >> 8) & 0xff);		    // PA8 - PA15
+        outpw(REG_SMADDR, (uSector >> 8) & 0xff);           // PA8 - PA15
         outpw(REG_SMADDR, ((uSector >> 16) & 0xff)|0x80000000); // PA16 - PA17
     }
 
-    outpw(REG_SMISR, 0x1);	        // clear DMA flag
-    outpw(REG_SMISR, 0x4);	        // clear ECC_FIELD flag
-    outpw(REG_SMISR, 0x8);	        // clear Region Protect flag
+    outpw(REG_SMISR, 0x1);          // clear DMA flag
+    outpw(REG_SMISR, 0x4);          // clear ECC_FIELD flag
+    outpw(REG_SMISR, 0x8);          // clear Region Protect flag
     outpw(REG_SMCSR, inpw(REG_SMCSR) | 0x10);    // auto write redundancy data to NAND after page data written
     outpw(REG_SMCSR, inpw(REG_SMCSR) | 0x4);     // begin to write one page data to NAND flash
 
@@ -823,7 +908,7 @@ INT fmiSM_Write_large_page_oob(UINT32 uSector, UINT32 ucColAddr, UINT32 uSAddr,U
     }
 
     outpw(REG_SMISR, 0x1);  // clear DMA flag
-    outpw(REG_SMCMD, 0x10);	// auto program command
+    outpw(REG_SMCMD, 0x10); // auto program command
 
     if (!fmiSMCheckRB())
         return FMI_SM_RB_ERR;
@@ -835,8 +920,8 @@ INT fmiSM_Write_large_page_oob(UINT32 uSector, UINT32 ucColAddr, UINT32 uSAddr,U
         return Fail;
     }
 
-    outpw(REG_SMCMD, 0x70);		    // status read command
-    if (inpw(REG_SMDATA) & 0x01) {	// 1:fail; 0:pass
+    outpw(REG_SMCMD, 0x70);         // status read command
+    if (inpw(REG_SMDATA) & 0x01) {  // 1:fail; 0:pass
         sysprintf("ERROR: fmiSM_Write_large_page(): data error!!\n");
         return FMI_SM_STATE_ERROR;
     }
@@ -870,7 +955,7 @@ INT fmiSM_Write_large_page_oob2(UINT32 uSector, UINT32 ucColAddr, UINT32 uSAddr)
 
 INT fmiSM_Write_large_page(UINT32 uSector, UINT32 ucColAddr, UINT32 uSAddr)
 {
-    outpw(REG_NAND_DMACSAR, uSAddr);	// set DMA transfer starting address
+    outpw(REG_NAND_DMACSAR, uSAddr);    // set DMA transfer starting address
 
     // set the spare area configuration
     /* write byte 2050, 2051 as used page */
@@ -881,21 +966,21 @@ INT fmiSM_Write_large_page(UINT32 uSector, UINT32 ucColAddr, UINT32 uSAddr)
     outpw(REG_SMISR, 0x400);
 
     // send command
-    outpw(REG_SMCMD, 0x80);		                // serial data input command
-    outpw(REG_SMADDR, ucColAddr);	            // CA0 - CA7
-    outpw(REG_SMADDR, (ucColAddr >> 8) & 0x3f);	// CA8 - CA12
-    outpw(REG_SMADDR, uSector & 0xff);	        // PA0 - PA7
+    outpw(REG_SMCMD, 0x80);                     // serial data input command
+    outpw(REG_SMADDR, ucColAddr);               // CA0 - CA7
+    outpw(REG_SMADDR, (ucColAddr >> 8) & 0x3f); // CA8 - CA12
+    outpw(REG_SMADDR, uSector & 0xff);          // PA0 - PA7
 
     if (!pSM->bIsMulticycle)
         outpw(REG_SMADDR, ((uSector >> 8) & 0xff)|0x80000000);  // PA8 - PA15
     else {
-        outpw(REG_SMADDR, (uSector >> 8) & 0xff);		    // PA8 - PA15
+        outpw(REG_SMADDR, (uSector >> 8) & 0xff);           // PA8 - PA15
         outpw(REG_SMADDR, ((uSector >> 16) & 0xff)|0x80000000); // PA16 - PA17
     }
 
-    outpw(REG_SMISR, 0x1);	        // clear DMA flag
-    outpw(REG_SMISR, 0x4);	        // clear ECC_FIELD flag
-    outpw(REG_SMISR, 0x8);	        // clear Region Protect flag
+    outpw(REG_SMISR, 0x1);          // clear DMA flag
+    outpw(REG_SMISR, 0x4);          // clear ECC_FIELD flag
+    outpw(REG_SMISR, 0x8);          // clear Region Protect flag
     outpw(REG_SMCSR, inpw(REG_SMCSR) | 0x10);    // auto write redundancy data to NAND after page data written
     outpw(REG_SMCSR, inpw(REG_SMCSR) | 0x4);     // begin to write one page data to NAND flash
 
@@ -905,7 +990,7 @@ INT fmiSM_Write_large_page(UINT32 uSector, UINT32 ucColAddr, UINT32 uSAddr)
     }
 
     outpw(REG_SMISR, 0x1);  // clear DMA flag
-    outpw(REG_SMCMD, 0x10);	// auto program command
+    outpw(REG_SMCMD, 0x10); // auto program command
 
     if (!fmiSMCheckRB())
         return FMI_SM_RB_ERR;
@@ -917,8 +1002,8 @@ INT fmiSM_Write_large_page(UINT32 uSector, UINT32 ucColAddr, UINT32 uSAddr)
         return Fail;
     }
 
-    outpw(REG_SMCMD, 0x70);		    // status read command
-    if (inpw(REG_SMDATA) & 0x01) {	// 1:fail; 0:pass
+    outpw(REG_SMCMD, 0x70);         // status read command
+    if (inpw(REG_SMDATA) & 0x01) {  // 1:fail; 0:pass
         sysprintf("ERROR: fmiSM_Write_large_page(): data error!!\n");
         return FMI_SM_STATE_ERROR;
     }
@@ -1102,9 +1187,9 @@ INT fmiSM_Read_move_data_ecc_check(UINT32 uDAddr)
         return -1;     // don't work for 512 bytes page
     }
 
-    outpw(REG_NAND_DMACSAR, uDAddr);	// set DMA transfer starting address
-    outpw(REG_SMISR, 0x1);	            // clear DMA flag
-    outpw(REG_SMISR, 0x4);	            // clear ECC_FIELD flag
+    outpw(REG_NAND_DMACSAR, uDAddr);    // set DMA transfer starting address
+    outpw(REG_SMISR, 0x1);              // clear DMA flag
+    outpw(REG_SMISR, 0x4);              // clear ECC_FIELD flag
     outpw(REG_SMCSR, inpw(REG_SMCSR) | 0x2);    // begin to move data by DMA
 
     //--- waiting for DMA transfer stop since complete or ECC error
@@ -1144,7 +1229,7 @@ INT fmiSM_Read_move_data_ecc_check(UINT32 uDAddr)
                     uStatus >>= 8;  // next field
                 }
             }
-            outpw(REG_SMISR, 0x4);	   	// clear ECC_FIELD_IF to resume DMA transfer
+            outpw(REG_SMISR, 0x4);      // clear ECC_FIELD_IF to resume DMA transfer
         }
 
         if (inpw(REG_SMISR) & 0x1) {    // wait to finish DMAC transfer.
@@ -1186,7 +1271,7 @@ INT fmiHWInit(void)
         outpw(REG_NAND_DMACCSR, DMAC_CSR_SWRST | DMAC_CSR_EN);
         while(inpw(REG_NAND_DMACCSR) & DMAC_CSR_SWRST);
 
-        outpw(REG_NAND_FMICSR, FMI_CSR_SWRST);		// reset FMI engine
+        outpw(REG_NAND_FMICSR, FMI_CSR_SWRST);      // reset FMI engine
         while(inpw(REG_NAND_FMICSR) & FMI_CSR_SWRST);
 
         _usbd_bIsFMIInit = TRUE;
@@ -1213,8 +1298,8 @@ INT fmiNandInit(void)
     outpw(REG_SMCSR, inpw(REG_SMCSR) & ~0x02030000 | 0x04000000);
 
     outpw(REG_SMTCR, 0x20305);
-    outpw(REG_SMCSR, (inpw(REG_SMCSR) & ~0x30000) | 0x00000);	//512 byte
-    outpw(REG_SMCSR, inpw(REG_SMCSR) |  0x100);	//protect RA 3 byte
+    outpw(REG_SMCSR, (inpw(REG_SMCSR) & ~0x30000) | 0x00000);   //512 byte
+    outpw(REG_SMCSR, inpw(REG_SMCSR) |  0x100); //protect RA 3 byte
     outpw(REG_SMCSR, inpw(REG_SMCSR) | 0x10);
 
     memset((char *)&SMInfo, 0, sizeof(FMI_SM_INFO_T));
