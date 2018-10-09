@@ -359,8 +359,13 @@ INT16 usiReadID()
 
     //sysprintf("ID=0x%08x\n",id);
    if( (id & 0xffff) == 0xc218) Enable4ByteFlag=1;
-	 if( (id & 0xffff) == 0x1C18) Enable4ByteFlag=1;
+   if( (id & 0xffff) == 0x1C18) Enable4ByteFlag=1;
    if( (id & 0xffff) == 0xEF18) Enable4ByteFlag=1; //Winbond 25q256fvfg
+   if( (id & 0xffff) == 0xC818) Enable4ByteFlag=1; //GD 32MB
+   if(Enable4ByteFlag ==1)
+   {
+       sysprintf("Enable4ByteFlag  ID=0x%08x\n",id);
+   }
 #endif
 	return id;
 }
