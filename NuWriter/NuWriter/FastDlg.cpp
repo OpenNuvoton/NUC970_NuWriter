@@ -119,7 +119,10 @@ BOOL FastDlg::OnInitDialog()
 
 
     m_FastDeviceID.SetCurSel(0);
-	GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(FALSE);
+	if(m_type == TYPE_NAND)	
+	    GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(TRUE);
+	else
+	    GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(FALSE);
     UpdateData(FALSE);
     return TRUE;  // return TRUE unless you set the focus to a control
 
@@ -247,18 +250,21 @@ BOOL FastDlg::InitFile(int flag)
             ((CButton *)GetDlgItem(IDC_RADIO_FAST_NAND))->SetCheck(TRUE);
 			GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(TRUE);
             timeoutsec = NAND_TIMEOUT_SEC;
+			m_type = TYPE_NAND;
             break;
         }
         case 1: {
             ((CButton *)GetDlgItem(IDC_RADIO_FAST_SPI))->SetCheck(TRUE);
 			GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(FALSE);
             timeoutsec = SPI_TIMEOUT_SEC;
+			m_type = TYPE_SPI;
             break;
         }
         case 2: {
             ((CButton *)GetDlgItem(IDC_RADIO_FAST_eMMC))->SetCheck(TRUE);
 			GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(FALSE);
             timeoutsec = MMC_TIMEOUT_SEC;
+			m_type = TYPE_EMMC;
             break;
         }
         }
@@ -273,14 +279,17 @@ BOOL FastDlg::InitFile(int flag)
         case 0:
             timeoutsec = NAND_TIMEOUT_SEC;
 			GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(TRUE);
+			m_type = TYPE_NAND;
             break;
         case 1:
             timeoutsec = SPI_TIMEOUT_SEC;
 			GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(FALSE);
+			m_type = TYPE_SPI;
             break;
         case 2:
             timeoutsec = MMC_TIMEOUT_SEC;
 			GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(FALSE);
+			m_type = TYPE_EMMC;
             break;
         }
         TRACE(_T("InitFile(1) m_type = %s, timeoutsec = %d\n"), tmp, timeoutsec);
@@ -381,7 +390,7 @@ BOOL FastDlg:: FastBurn(int id, int storagetype)
         return false;
     }
 
-    return true;
+    return ret;//true;
 }
 
 int FastDlg:: FastVerify(int id, int storagetype)
@@ -452,7 +461,6 @@ void FastDlg::Start(int id)
             //else
             //    TRACE(_T("RESET(%d) NUC970 FW PASS\n"), id);
 
-            //TRACE(_T("#### Reconnect (%d)\n"), id);
             Sleep(200);//for Mass production
             bResult = FWDownload(id);
             Sleep(200);//for Mass production
@@ -467,22 +475,41 @@ void FastDlg::Start(int id)
         retrycnt[id]++;
         //TRACE(_T("(%d) RETRY Count= %d, flag = %d\n"), id, retrycnt[id], timeoutflag[id]);
         ((CStatic *)GetDlgItem((IDC_STATIC_FAST_MSG1+id)))->SetWindowText(_T("Erase ..."));
-        ret = FastErase(id, m_type);
-        if (ret != 1) {
-            continue;
-        }
+		if(m_type != TYPE_SPI)
+		{
+            ret = FastErase(id, m_type);
+            if (ret != 1) {
+                continue;
+            }
+		}
 
-        ((CProgressCtrl *)GetDlgItem(iId_Array[id]))->SetRange(0,0);
-        ((CStatic *)GetDlgItem((IDC_STATIC_FAST_MSG1+id)))->SetWindowText(_T("Download ..."));
-        ret = FastBurn(id, m_type);
-        if (ret != 1) {
+		((CProgressCtrl *)GetDlgItem(iId_Array[id]))->SetRange(0,0);
+		((CStatic *)GetDlgItem((IDC_STATIC_FAST_MSG1+id)))->SetWindowText(_T("Download ..."));
+		ret = FastBurn(id, m_type);
+        if (ret == ERR_PACK_FORMAT) { // Image is not pack format
+			((CProgressCtrl *)GetDlgItem(iId_Array[id]))->SetRange(0,0);
+            AfxMessageBox(_T("This file is not pack image\n"));
+			goto _fail_stop;
+        }
+        else if (ret == ERR_DDRINI_DATACOM) { // DDR Init VS. pack image ini data compare error
+			((CProgressCtrl *)GetDlgItem(iId_Array[id]))->SetRange(0,0);
+            AfxMessageBox(_T("DDR Init select error\n"));
+			goto _fail_stop;
+        }		
+		else if (ret != 1) {
             continue;
         }
 
         ((CProgressCtrl *)GetDlgItem(iId_Array[id]))->SetRange(0,0);
         ((CStatic *)GetDlgItem((IDC_STATIC_FAST_MSG1+id)))->SetWindowText(_T("Verify ..."));
         ret=FastVerify(id, m_type);
-        if (ret != 1) {
+        if (ret == ERR_VERIFY_DATACOM) { // data compare error
+			((CProgressCtrl *)GetDlgItem(iId_Array[id]))->SetRange(0,0);
+            AfxMessageBox(_T("Verify error\n"));
+			//break;
+			goto _fail_stop;
+        }
+		else if (ret != 1) {
             continue;
         }
 
@@ -495,6 +522,7 @@ void FastDlg::Start(int id)
         }
     }
 
+_fail_stop:
     if (bSuccess == FALSE) {
         ((CStatic *)GetDlgItem((IDC_STATIC_FAST_MSG1+id)))->SetWindowText(_T("Fail"));
     }
@@ -518,6 +546,11 @@ void FastDlg::OnBnClickedBtnFastStart()
         AfxMessageBox(_T("Please input image file"));
         return;
     }
+
+	if(m_type == TYPE_NAND)	
+	    GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(TRUE);
+	else
+	    GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(FALSE);
 
     mainWnd->GetDlgItem(IDC_COMPORT)->GetWindowText(connectText);
     GetDlgItem(IDC_BTN_FAST_START)->GetWindowText(dlgText);
@@ -1039,7 +1072,7 @@ BOOL FastDlg::XUSB(int id, CString& m_BinName)
 void FastDlg::OnBnClickedRadioFastNand()
 {
     // TODO: 在此加入控制項告知處理常式程式碼
-    m_type = 0;
+    m_type = TYPE_NAND;
     timeoutsec = NAND_TIMEOUT_SEC;
 	GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(TRUE);
     TRACE(_T("Nand timeoutsec =%d, m_type = %d\n"), timeoutsec, m_type);
@@ -1049,7 +1082,7 @@ void FastDlg::OnBnClickedRadioFastNand()
 void FastDlg::OnBnClickedRadioFastSpi()
 {
     // TODO: 在此加入控制項告知處理常式程式碼
-    m_type = 1;
+    m_type = TYPE_SPI;
     timeoutsec = SPI_TIMEOUT_SEC;
 	GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(FALSE);
     TRACE(_T("SPI timeoutsec =%d, m_type = %d\n"), timeoutsec, m_type);
@@ -1059,7 +1092,7 @@ void FastDlg::OnBnClickedRadioFastSpi()
 void FastDlg::OnBnClickedRadioFastemmc()
 {
     // TODO: 在此加入控制項告知處理常式程式碼
-    m_type = 2;
+    m_type = TYPE_EMMC;
     timeoutsec = MMC_TIMEOUT_SEC;
 	GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(FALSE);
     TRACE(_T("eMMC timeoutsec =%d, m_type = %d\n"), timeoutsec, m_type);

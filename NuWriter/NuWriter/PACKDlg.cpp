@@ -218,7 +218,7 @@ void CPACKDlg::OnBnClickedPackAdd()
                 int ddrlen;
                 UCHAR * ddrbuf;
                 //ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
-                ddrbuf=DDR2Buf(mainWnd->ShareDDRBuf,mainWnd->DDRLen,&ddrlen);//cfli0409
+                ddrbuf=DDR2Buf(mainWnd->ShareDDRBuf,mainWnd->DDRLen,&ddrlen);
                 total+=(ddrlen+16);
             }
 
@@ -1040,7 +1040,7 @@ BOOL CPACKDlg::InitFile(int flag)
                     int ddrlen;
                     UCHAR * ddrbuf;
                     //ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
-                    ddrbuf=DDR2Buf(mainWnd->ShareDDRBuf,mainWnd->DDRLen,&ddrlen);//cfli0409
+                    ddrbuf=DDR2Buf(mainWnd->ShareDDRBuf,mainWnd->DDRLen,&ddrlen);
                     total+=(ddrlen+16);
                 }
 

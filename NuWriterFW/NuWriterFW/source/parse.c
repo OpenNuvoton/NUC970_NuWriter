@@ -45,6 +45,7 @@ extern INT16 usiReadID(void);
 extern UINT32 Custom_uBlockPerFlash;
 extern UINT32 Custom_uPagePerBlock;
 UINT32 g_uIsUserConfig;
+extern volatile unsigned char Enable4ByteFlag;
 //-------------------------
 #define PACK_Mode(val)      (((val)&0xF   )>> 0)
 #define PACK_Option(val)    (((val)&0xF0  )>> 4)
@@ -431,6 +432,17 @@ int Burn_SPI(UINT32 len,UINT32 imageoffset)
     blockCount = len / SPI_BLOCK_SIZE;
     offset = imageoffset;
     for (i=0; i<blockCount; i++) {
+	    MSG_DEBUG("Burn_SPI  offset=0x%x(%d)\n", offset, offset);
+        Enable4ByteFlag = 0;
+        // 4Byte Address Mode (>16MByte)
+        if((offset + SPI_BLOCK_SIZE) >= (16*1024*1024))
+            Enable4ByteFlag = 1;
+        if(len >= (16*1024*1024))
+            Enable4ByteFlag = 1;
+
+        if(Enable4ByteFlag)
+            MSG_DEBUG("Enable4ByteFlag %d:  offset=0x%08x(%d)\n", Enable4ByteFlag, offset, offset);
+
         usiEraseSector(offset, 1);
         usiWrite(offset, SPI_BLOCK_SIZE, (UINT16 *)spiSourceAddr);
 
@@ -442,6 +454,16 @@ int Burn_SPI(UINT32 len,UINT32 imageoffset)
         SendAck((tmplen * 95) / len);
     }
     if ((len % (SPI_BLOCK_SIZE)) != 0) {
+	    MSG_DEBUG("446 Burn_SPI  offset=0x%x(%d)\n", offset, offset);
+        // 4Byte Address Mode (>16MByte)
+		Enable4ByteFlag = 0;
+        if((offset + SPI_BLOCK_SIZE) >= (16*1024*1024))
+            Enable4ByteFlag = 1;
+        if(offset >= (16*1024*1024))
+            Enable4ByteFlag = 1;
+
+        if(Enable4ByteFlag)
+            MSG_DEBUG("Enable4ByteFlag %d:  offset=0x%08x(%d)\n", Enable4ByteFlag, offset, offset);		
         len = len - blockCount*SPI_BLOCK_SIZE;
         usiEraseSector(offset, 1);
         usiWrite(offset, len, (UINT16 *)spiSourceAddr);
@@ -460,7 +482,7 @@ int Burn_FastSPI(UINT32 len,UINT32 imageoffset)
     //unsigned char infoBuf[1024];
     //unsigned char *pInfo;
     //pInfo = (UINT8 *)((UINT32)infoBuf | NON_CACHE);
-    MSG_DEBUG("Burn_FastSPI: len=%d     imageoffset= %d\n", len, imageoffset);
+    MSG_DEBUG("Burn_FastSPI: len=%d     imageoffset= 0x%08x(%d)\n", len, imageoffset, imageoffset);
     /* set up interface */
     if (usiInit() < 0) {
         SendAck(0xFFFFFFFF);
@@ -472,6 +494,23 @@ int Burn_FastSPI(UINT32 len,UINT32 imageoffset)
     offset = imageoffset;
     for (i=0; i<blockCount; i++) {
         //usiEraseSector(offset, 1);
+        //sysprintf("Burn_FastSPI  offset=0x%x(%d)\n", offset, offset);
+        Enable4ByteFlag = 0;
+        // 4Byte Address Mode (>16MByte)
+        if((offset + SPI_BLOCK_SIZE) >= (16*1024*1024))
+        {
+            Enable4ByteFlag = 1;
+            //_spi_type = 0;
+        }
+        if(len >= (16*1024*1024))
+        {
+            Enable4ByteFlag = 1;
+            //_spi_type = 0;
+        }
+
+        if(Enable4ByteFlag)
+            MSG_DEBUG("Burn_FastSPI Enable4ByteFlag %d  blockCount:%d offset=0x%08x(%d)\n", Enable4ByteFlag, i, offset, offset);
+
         usiWrite(offset, SPI_BLOCK_SIZE, (UINT16 *)spiSourceAddr);
 
         spiSourceAddr += SPI_BLOCK_SIZE;
@@ -482,6 +521,23 @@ int Burn_FastSPI(UINT32 len,UINT32 imageoffset)
         SendAck((tmplen * 95) / len);
     }
     if ((len % (SPI_BLOCK_SIZE)) != 0) {
+
+        // 4Byte Address Mode (>16MByte)
+		Enable4ByteFlag = 0;
+        if((offset + SPI_BLOCK_SIZE) >= (16*1024*1024))
+        {
+            Enable4ByteFlag = 1;
+            //_spi_type = 0;
+        }
+        if(offset >= (16*1024*1024))
+        {
+            Enable4ByteFlag = 1;
+            //_spi_type = 0;
+        }
+
+        if(Enable4ByteFlag)
+            MSG_DEBUG("Burn_FastSPI Enable4ByteFlag %d: len=0x%x  offset=0x%08x(%d)\n", Enable4ByteFlag, len, offset, offset);
+
         len = len - blockCount*SPI_BLOCK_SIZE;
         //usiEraseSector(offset, 1);
         usiWrite(offset, len, (UINT16 *)spiSourceAddr);
@@ -620,10 +676,19 @@ void UXmodem_SPI(void)
 
         _ch=((unsigned char*)(((unsigned int)DOWNLOAD_BASE)|NON_CACHE));
         ptr=_ch;
-        MSG_DEBUG("offset=%d,flashOffset=%d,fileLength=%d\n",offset,pSpiImage->flashOffset,pSpiImage->fileLength);
+        MSG_DEBUG("offset=0x%08x(%d),flashOffset=0x%08x(%d),fileLength=%d\n",offset, offset, pSpiImage->flashOffset, pSpiImage->flashOffset, pSpiImage->fileLength);
         memset(ptr, 0, pSpiImage->fileLength);
         offset=0;
         do {
+            //4Byte Address Mode (>16MByte)
+			Enable4ByteFlag = 0;
+            // if(pSpiImage->fileLength >= (16*1024*1024))
+                // Enable4ByteFlag = 1;
+            if((pSpiImage->flashOffset + offset + TRANSFER_LEN) >= (16*1024*1024))
+                Enable4ByteFlag = 1;
+
+            if(Enable4ByteFlag)
+                MSG_DEBUG("VERIFY_MODE  Enable4ByteFlag %d:  offset=0x%08x(%d)\n", Enable4ByteFlag, offset, offset);
 
             if (pSpiImage->flashOffset == 0)
                 usiRead(pSpiImage->flashOffset+16+offset+((FW_NOR_IMAGE_T *)pSpiImage)->initSize, TRANSFER_LEN, (UINT8 *)(DOWNLOAD_BASE));
@@ -684,6 +749,17 @@ void UXmodem_SPI(void)
 
             //MSG_DEBUG("=======> imageNo=%d, pSpiImage->flashOffset =0x%x [%d]\n",i, pSpiImage->flashOffset, pSpiImage->flashOffset);
             do {
+
+                //4Byte Address Mode (>16MByte)
+				Enable4ByteFlag = 0;
+                if(pSpiImage->fileLength >= (16*1024*1024))
+                    Enable4ByteFlag = 1;
+                if((pSpiImage->flashOffset + offset + TRANSFER_LEN) >= (16*1024*1024))
+                    Enable4ByteFlag = 1;
+
+                if(Enable4ByteFlag)
+                    MSG_DEBUG("PACK_VERIFY_MODE  Enable4ByteFlag %d:  pSpiImage->flashOffset=0x%08x(%d)  offset=0x%08x(%d)\n", Enable4ByteFlag, pSpiImage->flashOffset, pSpiImage->flashOffset, offset, offset);
+
                 if (offset == 0) {
                     if (ppack.imagetype == UBOOT) {   // system image
                         pSpiImage->fileLength = pSpiImage->fileLength - 16 - ddrlen;
@@ -734,6 +810,15 @@ void UXmodem_SPI(void)
         remain=pSpiImage->fileLength;
         offset=pSpiImage->flashOffset;
         while(TRANSFER_LEN<remain) {
+
+			Enable4ByteFlag = 0;
+            // if(pSpiImage->fileLength >= (16*1024*1024))
+                // Enable4ByteFlag = 1;
+            if((offset + TRANSFER_LEN) >= (16*1024*1024))
+                Enable4ByteFlag = 1;
+
+            if(Enable4ByteFlag)
+                MSG_DEBUG("Enable4ByteFlag %d:  offset=0x%08x(%d)\n", Enable4ByteFlag, offset, offset);
             memset(ptr, 0, TRANSFER_LEN);
             usiRead(offset, TRANSFER_LEN , ptr);
             usb_send(ptr,TRANSFER_LEN); //send data to PC
@@ -743,6 +828,15 @@ void UXmodem_SPI(void)
         }
 
         if(remain>0) {
+            //4Byte Address Mode (>16MByte)
+			Enable4ByteFlag = 0;
+            // if(pSpiImage->fileLength >= (16*1024*1024))
+                // Enable4ByteFlag = 1;
+            if((offset + TRANSFER_LEN) >= (16*1024*1024))
+                Enable4ByteFlag = 1;
+
+            if(Enable4ByteFlag)
+                MSG_DEBUG("Enable4ByteFlag %d:  offset=0x%08x(%d)\n", Enable4ByteFlag, offset, offset);		
             memset(ptr, 0, TRANSFER_LEN);
             usiRead(offset, remain , ptr);
             usb_send(ptr,TRANSFER_LEN); //send data to PC
@@ -796,8 +890,8 @@ void UXmodem_SPI(void)
                     }
                 } while((ptr-_ch)<ppack.filelen);
                 if(ppack.imagetype!=PMTP) {
-                    //Burn_SPI(ppack.filelen,((ppack.startaddr+SPI_BLOCK_SIZE-1)/SPI_BLOCK_SIZE)*SPI_BLOCK_SIZE);
-                    Burn_FastSPI(ppack.filelen,((ppack.startaddr+SPI_BLOCK_SIZE-1)/SPI_BLOCK_SIZE)*SPI_BLOCK_SIZE);
+                    Burn_SPI(ppack.filelen,((ppack.startaddr+SPI_BLOCK_SIZE-1)/SPI_BLOCK_SIZE)*SPI_BLOCK_SIZE);
+                    //Burn_FastSPI(ppack.filelen,((ppack.startaddr+SPI_BLOCK_SIZE-1)/SPI_BLOCK_SIZE)*SPI_BLOCK_SIZE);
 
                 } else { /* if(ppack.imagetype==PMTP) */
                     UINT32 m_mtp_mode,m_mtp_option,m_mtp_encrypt,m_mtp_enable,j;

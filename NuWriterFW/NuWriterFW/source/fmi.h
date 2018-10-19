@@ -15,7 +15,7 @@
 
 #define SPI_HEAD_ADDR 4 //Blocks
 
-static volatile unsigned char Enable4ByteFlag=0;
+//static volatile unsigned char Enable4ByteFlag=0;
 
 //#define DMAC_SCATTER_GETTER
 //#define _USE_DAT3_DETECT_

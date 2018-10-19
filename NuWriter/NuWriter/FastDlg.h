@@ -43,6 +43,7 @@ public:
     int m_Downloadcnt;
     int m_Successcnt;
     int InitFlag;
+	int flashType;
     NORBOOT_NAND_HEAD *m_fhead_nand;
     NORBOOT_NAND_HEAD *m_fhead_spi;
     NORBOOT_MMC_HEAD *m_fhead_emmc;

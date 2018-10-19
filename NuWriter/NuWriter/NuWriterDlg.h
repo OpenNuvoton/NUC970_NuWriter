@@ -34,9 +34,18 @@ extern "C" {
 #include "NucWinUsb.h"
 #include "afxwin.h"
 
-#define PROJECT_NAME _T("Nuvoton NuWriter v2.0")
+#define PROJECT_NAME _T("Nuvoton NuWriter v2.01")
 //for AES ------------------
 #define LINE_BUFF_LEN            4096
+
+#define PACK_FORMAT_HEADER (16)
+#define BOOT_HEADER        (16)  // 0x20 'T' 'V' 'N'
+#define DDR_INITIAL_MARKER  (4)  // 0x55 0xAA 0x55 0xAA
+#define DDR_COUNTER         (4)  // DDR parameter length
+
+#define ERR_PACK_FORMAT     (4)  // Mass production mode:Image is not pack format
+#define ERR_VERIFY_DATACOM  (2)  // Mass production mode:Verify data compare error
+#define ERR_DDRINI_DATACOM  (3)  // Mass production mode:DDR vs pack image ini data compare error
 
 
 // CNuWriterDlg dialog

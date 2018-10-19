@@ -18,6 +18,8 @@ int sstSpiWrite(UINT32 addr, UINT32 len, UINT8 *buf);
 int usiEnable4ByteAddressMode(void);
 int usiDisable4ByteAddressMode(void);
 
+volatile unsigned char Enable4ByteFlag=0;
+
 spiflash_t spiflash[]={
 	{0xEF, wbSpiWrite},
 	{0xBF, sstSpiWrite},
@@ -74,23 +76,23 @@ int usiCheckBusy()
 	// status command
 	outpw(REG_USI_Tx0, 0x05);
 	usiTxLen(0, 8);
-	usiActive();	
+	usiActive();
 	// get status
 	while(1)
 	{
 		outpw(REG_USI_Tx0, 0xff);
 		usiTxLen(0, 8);
-		usiActive();				
+		usiActive();
 		if (((inpw(REG_USI_Rx0) & 0xff) & 0x01) != 0x01)
 			break;
-	}	
+	}
 	outpw(REG_USI_SSR, inpw(REG_USI_SSR) & 0xfe);	// CS0
 
 	return Successful;
 }
 
 /*
-	addr: memory address 
+	addr: memory address
 	len: byte count
 	buf: buffer to put the read back data
 */
@@ -263,7 +265,7 @@ int usiEraseSector(UINT32 addr, UINT32 secCount)
 		// check status
 		usiCheckBusy();
 	}
-	
+
 	if(Enable4ByteFlag==1)	usiDisable4ByteAddressMode();
 	return Successful;
 }
@@ -272,7 +274,7 @@ extern void SendAck(UINT32 status);
 int usiEraseAll()
 {
 	unsigned int count;
-	
+
 	usiWriteEnable();
 
 	outpw(REG_USI_SSR, inpw(REG_USI_SSR) | 0x01);	// CS0
@@ -347,7 +349,7 @@ INT16 usiReadID()
 		if( spiflash[i].PID == ((id & 0xff00) >> 8) )
 		{
 			_spi_type=i;
-			break;		
+			break;
 		}
 		i++;
 	}
@@ -361,10 +363,10 @@ INT16 usiReadID()
    if( (id & 0xffff) == 0xc218) Enable4ByteFlag=1;
    if( (id & 0xffff) == 0x1C18) Enable4ByteFlag=1;
    if( (id & 0xffff) == 0xEF18) Enable4ByteFlag=1; //Winbond 25q256fvfg
-   if( (id & 0xffff) == 0xC818) Enable4ByteFlag=1; //GD 32MB
+   //if( (id & 0xffff) == 0xC818) Enable4ByteFlag=1; //GD 32MB
    if(Enable4ByteFlag ==1)
    {
-       sysprintf("Enable4ByteFlag  ID=0x%08x\n",id);
+       sysprintf("Enable4ByteFlag  ID=0x%08x   _spi_type =%d\n",id, _spi_type);
    }
 #endif
 	return id;
@@ -420,19 +422,19 @@ int usiInit()
 	int volatile tick;
 	if (_usbd_bIsSPIInit == FALSE)
 	{
-		#if 0		
+		#if 0
 		outpw(REG_CLKEN, (inpw(REG_CLKEN) | 0x20000000)); /* enable SPI clock */
-		outpw(REG_MFSEL, ((inpw(REG_MFSEL) & 0xFFFC3FFF) | 0x00028000)); /* select USI function pins */ 		
-		#endif				   
-				
-		outpw(REG_MFP_GPB_L, inpw(REG_MFP_GPB_L) | 0xBB000000);  
-		outpw(REG_MFP_GPB_H, inpw(REG_MFP_GPB_H) | 0x000000BB);  
+		outpw(REG_MFSEL, ((inpw(REG_MFSEL) & 0xFFFC3FFF) | 0x00028000)); /* select USI function pins */
+		#endif
+
+		outpw(REG_MFP_GPB_L, inpw(REG_MFP_GPB_L) | 0xBB000000);
+		outpw(REG_MFP_GPB_H, inpw(REG_MFP_GPB_H) | 0x000000BB);
 		//SPI0: B10, B11 = D[2], D[3]
-		outpw(REG_MFP_GPB_H, inpw(REG_MFP_GPB_H) | 0x0000BB00); 
- 
+		outpw(REG_MFP_GPB_H, inpw(REG_MFP_GPB_H) | 0x0000BB00);
+
 		//SPI0 SS1: B0, H12
-		outpw(REG_MFP_GPB_L, inpw(REG_MFP_GPB_L) | 0x0000000B);  
-		outpw(REG_MFP_GPH_H, inpw(REG_MFP_GPH_H) | 0x000B0000); 
+		outpw(REG_MFP_GPB_L, inpw(REG_MFP_GPB_L) | 0x0000000B);
+		outpw(REG_MFP_GPH_H, inpw(REG_MFP_GPH_H) | 0x000B0000);
 
 		outpw(REG_USI_DIVIDER, 1);
 		outpw(REG_USI_SSR, 0x00);		// CS active low
@@ -442,7 +444,7 @@ int usiInit()
 			return Fail;
 
 		usiStatusWrite(0x00);	// clear block protect
-		
+
 		//tick = sysGetTicks(0);
 		//while((sysGetTicks(0) - tick) < 10);
 		sysDelay(50);
@@ -450,7 +452,7 @@ int usiInit()
 		_usbd_bIsSPIInit = TRUE;
 	}
 	return 0;
-	 
+
 } /* end usiInit */
 
 int DelSpiSector(UINT32 start, UINT32 len)
@@ -458,12 +460,12 @@ int DelSpiSector(UINT32 start, UINT32 len)
   int i;
   for(i=0;i<len;i++)
   {
-    usiEraseSector((start+i)*64*1024, 1); 
+    usiEraseSector((start+i)*64*1024, 1);
     SendAck(((i+1)*100)/len);
   }
   return Successful;
 }
-  
+
 int DelSpiImage(UINT32 imageNo)
 {
 	int i, count;
@@ -475,7 +477,7 @@ int DelSpiImage(UINT32 imageNo)
 	pbuf = (UINT8 *)((UINT32)_fmi_ucBuffer | 0x80000000);
 	ptr = (unsigned int *)((UINT32)_fmi_ucBuffer | 0x80000000);
 	SendAck(10);
-	usiRead( (SPI_HEAD_ADDR-1)*64*1024, 64*1024, (UINT8 *)pbuf);	
+	usiRead( (SPI_HEAD_ADDR-1)*64*1024, 64*1024, (UINT8 *)pbuf);
 	ptr = (unsigned int *)(pbuf + 63*1024);
 	SendAck(30);
 	if (((*(ptr+0)) == 0xAA554257) && ((*(ptr+3)) == 0x63594257))
@@ -503,7 +505,7 @@ int DelSpiImage(UINT32 imageNo)
 
 	/* send status */
 	SendAck(50);
-	
+
 	usiWrite((SPI_HEAD_ADDR-1)*64*1024, 64*1024, pbuf);
 	SendAck(80);
 	// erase the sector
@@ -566,7 +568,7 @@ int ChangeSpiImageType(UINT32 imageNo, UINT32 imageType)
 /******************************************/
 int wbSpiWrite(UINT32 addr, UINT32 len, UINT8 *buf)
 {
-	int volatile count=0, page, i;	
+	int volatile count=0, page, i;
 	count = len / 256;
 	if ((len % 256) != 0)
 		count++;
@@ -581,7 +583,7 @@ int wbSpiWrite(UINT32 addr, UINT32 len, UINT8 *buf)
 		}
 		else
 			page = len;
-		usiWriteEnable();		
+		usiWriteEnable();
 		outpw(REG_USI_SSR, inpw(REG_USI_SSR) | 0x01);	// CS0
 
 		// write command
@@ -594,7 +596,7 @@ int wbSpiWrite(UINT32 addr, UINT32 len, UINT8 *buf)
 		if(Enable4ByteFlag==1)
 			usiTxLen(0, 32);
 		else
-		        usiTxLen(0, 24);
+			usiTxLen(0, 24);
 		usiActive();
 
 		// write data
@@ -607,8 +609,8 @@ int wbSpiWrite(UINT32 addr, UINT32 len, UINT8 *buf)
 
 		outpw(REG_USI_SSR, inpw(REG_USI_SSR) & 0xfe);	// CS0
 
-		// check status		
-		usiCheckBusy();		
+		// check status
+		usiCheckBusy();
 	}
 
 	return Successful;
@@ -620,7 +622,7 @@ int sstSpiWrite(UINT32 addr, UINT32 len, UINT8 *buf)
 	{
 		usiWriteEnable();
 
-		outpw(REG_USI_SSR, inpw(REG_USI_SSR) | 0x01);	// CS0
+		outpw(REG_USI_SSR, inpw(REG_USI_SSR) | 0x01);// CS0
 
 		// write command
 		outpw(REG_USI_Tx0, 0x02);
@@ -637,7 +639,7 @@ int sstSpiWrite(UINT32 addr, UINT32 len, UINT8 *buf)
 		usiTxLen(0, 8);
 		usiActive();
 
-		outpw(REG_USI_SSR, inpw(REG_USI_SSR) & 0xfe);	// CS0
+		outpw(REG_USI_SSR, inpw(REG_USI_SSR) & 0xfe);// CS0
 
 		// check status
 		usiCheckBusy();
