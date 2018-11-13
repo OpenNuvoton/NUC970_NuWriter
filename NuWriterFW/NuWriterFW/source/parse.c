@@ -435,9 +435,9 @@ int Burn_SPI(UINT32 len,UINT32 imageoffset)
 	    MSG_DEBUG("Burn_SPI  offset=0x%x(%d)\n", offset, offset);
         Enable4ByteFlag = 0;
         // 4Byte Address Mode (>16MByte)
-        if((offset + SPI_BLOCK_SIZE) >= (16*1024*1024))
+        if((offset + SPI_BLOCK_SIZE) > (16*1024*1024))
             Enable4ByteFlag = 1;
-        if(len >= (16*1024*1024))
+        if(len > (16*1024*1024))
             Enable4ByteFlag = 1;
 
         if(Enable4ByteFlag)
@@ -457,9 +457,9 @@ int Burn_SPI(UINT32 len,UINT32 imageoffset)
 	    MSG_DEBUG("446 Burn_SPI  offset=0x%x(%d)\n", offset, offset);
         // 4Byte Address Mode (>16MByte)
 		Enable4ByteFlag = 0;
-        if((offset + SPI_BLOCK_SIZE) >= (16*1024*1024))
+        if((offset + SPI_BLOCK_SIZE) > (16*1024*1024))
             Enable4ByteFlag = 1;
-        if(offset >= (16*1024*1024))
+        if(offset > (16*1024*1024))
             Enable4ByteFlag = 1;
 
         if(Enable4ByteFlag)
@@ -497,12 +497,12 @@ int Burn_FastSPI(UINT32 len,UINT32 imageoffset)
         //sysprintf("Burn_FastSPI  offset=0x%x(%d)\n", offset, offset);
         Enable4ByteFlag = 0;
         // 4Byte Address Mode (>16MByte)
-        if((offset + SPI_BLOCK_SIZE) >= (16*1024*1024))
+        if((offset + SPI_BLOCK_SIZE) > (16*1024*1024))
         {
             Enable4ByteFlag = 1;
             //_spi_type = 0;
         }
-        if(len >= (16*1024*1024))
+        if(len > (16*1024*1024))
         {
             Enable4ByteFlag = 1;
             //_spi_type = 0;
@@ -524,12 +524,12 @@ int Burn_FastSPI(UINT32 len,UINT32 imageoffset)
 
         // 4Byte Address Mode (>16MByte)
 		Enable4ByteFlag = 0;
-        if((offset + SPI_BLOCK_SIZE) >= (16*1024*1024))
+        if((offset + SPI_BLOCK_SIZE) > (16*1024*1024))
         {
             Enable4ByteFlag = 1;
             //_spi_type = 0;
         }
-        if(offset >= (16*1024*1024))
+        if(offset > (16*1024*1024))
         {
             Enable4ByteFlag = 1;
             //_spi_type = 0;
@@ -684,7 +684,7 @@ void UXmodem_SPI(void)
 			Enable4ByteFlag = 0;
             // if(pSpiImage->fileLength >= (16*1024*1024))
                 // Enable4ByteFlag = 1;
-            if((pSpiImage->flashOffset + offset + TRANSFER_LEN) >= (16*1024*1024))
+            if((pSpiImage->flashOffset + offset + TRANSFER_LEN) > (16*1024*1024))
                 Enable4ByteFlag = 1;
 
             if(Enable4ByteFlag)
@@ -747,14 +747,14 @@ void UXmodem_SPI(void)
                 usb_send((unsigned char*)_ack,4);//send ack to PC
             }
 
-            //MSG_DEBUG("=======> imageNo=%d, pSpiImage->flashOffset =0x%x [%d]\n",i, pSpiImage->flashOffset, pSpiImage->flashOffset);
+            MSG_DEBUG("=======> imageNo=%d, pSpiImage->flashOffset =0x%x [%d]\n",i, pSpiImage->flashOffset, pSpiImage->flashOffset);
             do {
 
                 //4Byte Address Mode (>16MByte)
 				Enable4ByteFlag = 0;
-                if(pSpiImage->fileLength >= (16*1024*1024))
+                if(pSpiImage->fileLength > (16*1024*1024))
                     Enable4ByteFlag = 1;
-                if((pSpiImage->flashOffset + offset + TRANSFER_LEN) >= (16*1024*1024))
+                if((pSpiImage->flashOffset + offset + TRANSFER_LEN) > (16*1024*1024))
                     Enable4ByteFlag = 1;
 
                 if(Enable4ByteFlag)
@@ -812,9 +812,9 @@ void UXmodem_SPI(void)
         while(TRANSFER_LEN<remain) {
 
 			Enable4ByteFlag = 0;
-            // if(pSpiImage->fileLength >= (16*1024*1024))
+            // if(pSpiImage->fileLength > (16*1024*1024))
                 // Enable4ByteFlag = 1;
-            if((offset + TRANSFER_LEN) >= (16*1024*1024))
+            if((offset + TRANSFER_LEN) > (16*1024*1024))
                 Enable4ByteFlag = 1;
 
             if(Enable4ByteFlag)
@@ -830,9 +830,9 @@ void UXmodem_SPI(void)
         if(remain>0) {
             //4Byte Address Mode (>16MByte)
 			Enable4ByteFlag = 0;
-            // if(pSpiImage->fileLength >= (16*1024*1024))
+            // if(pSpiImage->fileLength > (16*1024*1024))
                 // Enable4ByteFlag = 1;
-            if((offset + TRANSFER_LEN) >= (16*1024*1024))
+            if((offset + TRANSFER_LEN) > (16*1024*1024))
                 Enable4ByteFlag = 1;
 
             if(Enable4ByteFlag)

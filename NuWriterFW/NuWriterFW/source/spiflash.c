@@ -126,7 +126,7 @@ int usiRead(UINT32 addr, UINT32 len, UINT8 *buf)
 
 	outpw(REG_USI_SSR, inpw(REG_USI_SSR) & 0xfe);	// CS0
 
-	if(Enable4ByteFlag==1)	usiDisable4ByteAddressMode(); 
+	if(Enable4ByteFlag==1)	usiDisable4ByteAddressMode();
 	return Successful;
 }
 
@@ -164,7 +164,7 @@ int usiReadFast(UINT32 addr, UINT32 len, UINT8 *buf)
 	}
 
 	outpw(REG_USI_SSR, inpw(REG_USI_SSR) & 0xfe);	// CS0
- 	if(Enable4ByteFlag==1)	usiDisable4ByteAddressMode(); 
+ 	if(Enable4ByteFlag==1)	usiDisable4ByteAddressMode();
 	return Successful;
 }
 
@@ -237,7 +237,7 @@ int usiWrite(UINT32 addr, UINT32 len, UINT8 *buf)
 int usiEraseSector(UINT32 addr, UINT32 secCount)
 {
 	int volatile i;
-	if(Enable4ByteFlag==1)	usiEnable4ByteAddressMode(); 
+	if(Enable4ByteFlag==1)	usiEnable4ByteAddressMode();
 	if ((addr % (64*1024)) != 0)
 		return -1;
 
@@ -359,7 +359,7 @@ INT16 usiReadID()
 	else
 		_spi_type = 0;
 
-    //sysprintf("ID=0x%08x\n",id);
+   sysprintf("ID=0x%08x  _spi_type =%d\n",id, _spi_type);
    if( (id & 0xffff) == 0xc218) Enable4ByteFlag=1;
    if( (id & 0xffff) == 0x1C18) Enable4ByteFlag=1;
    if( (id & 0xffff) == 0xEF18) Enable4ByteFlag=1; //Winbond 25q256fvfg
