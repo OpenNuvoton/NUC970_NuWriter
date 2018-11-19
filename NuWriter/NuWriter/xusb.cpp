@@ -2236,7 +2236,8 @@ BOOL CMMCDlg::XUSB_Burn(CString& portName,CString& m_pathName,int *len)
         //-------------------DDR---------------------
         //ddrbuf=DDR2Buf(mainWnd->DDRBuf,mainWnd->DDRLen,&ddrlen);
         ddrbuf=DDR2Buf(mainWnd->ShareDDRBuf,mainWnd->DDRLen,&ddrlen);
-        file_len=file_len+ddrlen;
+		TRACE(_T("ddrlen=0x%x(%d)\n"), ddrlen, ddrlen);
+        file_len=file_len+ddrlen+16;
         ((NORBOOT_MMC_HEAD *)m_fhead)->initSize=ddrlen;
         //-------------------------------------------
         *len=file_len;
@@ -4937,6 +4938,7 @@ BOOL CNANDDlg::XUSB_Read(CString& portName,CString& m_pathName,unsigned int addr
     tempfp=_wfopen(m_pathName,_T("w+b"));
     //-----------------------------------
     if(!tempfp) {
+	    delete []lpBuffer;
         AfxMessageBox(_T("File Open error\n"));
         return FALSE;
     }

@@ -643,9 +643,9 @@ void CNuWriterDlg::OnCbnSelchangeComboType()
     CString t_type, str;
 	
 	//Default
-	m_info.Nand_uIsUserConfig = 0;
-	m_info.Nand_uPagePerBlock =  Nand_uPagePerBlock;
-    m_info.Nand_uBlockPerFlash = Nand_uBlockPerFlash;
+	//m_info.Nand_uIsUserConfig = 0;
+	//m_info.Nand_uPagePerBlock =  Nand_uPagePerBlock;
+    //m_info.Nand_uBlockPerFlash = Nand_uBlockPerFlash;
     m_gtype.GetWindowText(t_type);
     if( !t_type.Compare(_T("NAND")) ) {
         CDialog * mainWnd=m_SubForms.GetSubForm(m_gtype.GetCurSel());

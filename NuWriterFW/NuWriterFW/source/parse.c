@@ -1378,7 +1378,7 @@ void UXmodem_MMC()
 #if !defined(BATCH_BRUN)
             Burn_MMC(pmmcImage->fileLength+pmmcImage->initSize+16,(pmmcImage->flashOffset/SD_SECTOR));
 #else
-            ret = BatchBurn_MMC(pmmcImage->fileLength+pmmcImage->initSize,(pmmcImage->flashOffset/SD_SECTOR),1);
+            ret = BatchBurn_MMC(pmmcImage->fileLength+pmmcImage->initSize+16,(pmmcImage->flashOffset/SD_SECTOR),1);
             if(ret == 1) {
                 //sysprintf("XXXXX BatchBurn_MMC Device UBOOT image error !!! \n");
                 return;
