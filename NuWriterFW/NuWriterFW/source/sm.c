@@ -430,9 +430,9 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
 
         pSM->uPageSize       = gu_fmiSM_PageSize;
         pSM->uSectorPerBlock = pSM->uPageSize / 512 * pSM->uPagePerBlock;
-        pSM->bIsMulticycle   = TRUE;
+        //pSM->bIsMulticycle   = TRUE;
         pSM->uSpareSize      = g_u32ExtraDataSize;
-        pSM->bIsMLCNand      = TRUE;
+        //pSM->bIsMLCNand      = TRUE;
         sysprintf("User Configure:\nBlockPerFlash= %d, PagePerBlock= %d\n", pSM->uBlockPerFlash, pSM->uPagePerBlock);
 
     } else {
@@ -596,8 +596,8 @@ INT fmiSM_BlockErase(FMI_SM_INFO_T *pSM, UINT32 uBlock)
 #ifndef ERASE_WITH_0XF0
     if (fmiCheckInvalidBlock(pSM, uBlock) != 1)
 #else
-    //if (fmiCheckInvalidBlockExcept0xF0(pSM, uBlock) != 1)
-    if (fmiCheckInvalidBlockExcept0xF0(pSM, uBlock) == 0)
+    if (fmiCheckInvalidBlockExcept0xF0(pSM, uBlock) != 1)
+    //if (fmiCheckInvalidBlockExcept0xF0(pSM, uBlock) == 0)
 #endif
     {
         page_no = uBlock * pSM->uPagePerBlock;      // get page address
@@ -959,6 +959,7 @@ INT fmiSM_Write_large_page(UINT32 uSector, UINT32 ucColAddr, UINT32 uSAddr)
 
     // set the spare area configuration
     /* write byte 2050, 2051 as used page */
+    memset((void *)REG_SMRA0, 0xFF, 64);
     outpw(REG_SMRA0, 0x0000FFFF);
 
     // clear R/B flag

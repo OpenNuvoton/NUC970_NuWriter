@@ -68,7 +68,8 @@ BOOL CNucWinUsb::NUC_ReadPipe(int id,UCHAR *buf,ULONG len)
     for(int i=0x0; i<0x4000; i++);
     bResult = WinUsb_ReadPipe(WinUsbHandle[id].hUSBHandle, WinUsbHandle[id].pipeid.PipeInId, (unsigned char*)buf, len, &nBytesRead, 0);
     if(bResult==FALSE) {
-        //TRACE(_T("XXXX IN(%d) pipeId=0x%x   len=%d    nBytesRead=%d\n"), id, WinUsbHandle[id].pipeid.PipeOutId, len, nBytesRead);
+        TRACE(_T("XXXX IN(%d) pipeId=0x%x   len=%d    nBytesRead=%d\n"), id, WinUsbHandle[id].pipeid.PipeOutId, len, nBytesRead);
+        TRACE(_T("Error WinUsb_ReadPipe: 0x%x.\n"), GetLastError());
         return FALSE;
     }
 
@@ -94,8 +95,10 @@ BOOL CNucWinUsb::NUC_SetType(int id,USHORT type,UCHAR * ack,ULONG len)
         SetupPacket.Index = 0;
         SetupPacket.Length = 0;
         bResult = WinUsb_ControlTransfer(WinUsbHandle[id].hUSBHandle, SetupPacket, 0, 0, &nBytesRead, 0);
-
-        if(bResult==FALSE) return FALSE;
+        if(bResult==FALSE) {
+            TRACE(_T("Error WinUsb_ControlTransfer: %d.\n"), GetLastError());
+            return FALSE;
+        }
 
         ZeroMemory(&SetupPacket, sizeof(WINUSB_SETUP_PACKET));
         //Create the setup packet
@@ -119,7 +122,7 @@ BOOL CNucWinUsb::NUC_WriteAck(int id,ULONG len)
     unsigned int ack;
     if(id >= WinUsbNumber || id < 0) return FALSE;
     WinUsb_ReadPipe(WinUsbHandle[id].hUSBHandle,WinUsbHandle[id].pipeid.PipeInId, (unsigned char*)&ack, 4, &nBytesRead, 0);
-    //printf("Read from pipe 0x%x: Actual data read: %d.\n", PipeID.PipeInId, nBytesRead);
+    //TRACE(_T("Read from pipe 0x%x: Actual data read: %d.\n"), PipeID.PipeInId, nBytesRead);
     if(nBytesRead!=4)
         return FALSE;
     else
@@ -156,8 +159,7 @@ BOOL CNucWinUsb::NUC_WritePipe(int id,UCHAR *buf,ULONG len)
     SetupPacket.Value = 0x12;
     SetupPacket.Index = (USHORT)len;
     SetupPacket.Length = 0;
-    bResult = WinUsb_ControlTransfer(WinUsbHandle[id].hUSBHandle, SetupPacket, 0,0 , &nBytesSent, 0);
-
+    bResult = WinUsb_ControlTransfer(WinUsbHandle[id].hUSBHandle, SetupPacket, 0, 0, &nBytesSent, 0);
 
     if(bResult==FALSE) {
         //TRACE(_T("XXXX CTRL(%d) hUSBHandle=0x%x,  nBytesSent=%d\n"), id, WinUsbHandle[id].pipeid.PipeOutId, nBytesSent);
@@ -175,6 +177,7 @@ BOOL CNucWinUsb::NUC_WritePipe(int id,UCHAR *buf,ULONG len)
 
     bResult=WinUsb_WritePipe(WinUsbHandle[id].hUSBHandle, WinUsbHandle[id].pipeid.PipeOutId, buf, len, &nBytesSent, 0);
     if(bResult==FALSE) {
+        TRACE(_T("XXXXX Error WinUsb_WritePipe: 0x%x.\n"), GetLastError());
         //TRACE(_T("XXXX #189  OUT(%d) pipeId=0x%x   len=%d    nBytesSent=%d\n"), id, WinUsbHandle[id].pipeid.PipeOutId, len, nBytesSent);
         //TRACE(_T("           0x%x  0x%x  0x%x  0x%x  0x%x  0x%x  0x%x  0x%x\n"), buf[0],buf[1],buf[2],buf[3], buf[len-1],buf[len-2],buf[len-3],buf[len-4]);
         return FALSE;
@@ -203,7 +206,7 @@ BOOL CNucWinUsb::EnableWinUsbDevice(void)
     BOOL bResult;
     bResult = GetDeviceHandle();
     if(!bResult) {
-        printf("GetDeviceHandle error\n");
+        TRACE(_T("XXX GetDeviceHandle error\n"));
         return bResult;
     }
 
@@ -212,13 +215,13 @@ BOOL CNucWinUsb::EnableWinUsbDevice(void)
         for(int i=0; i<WinUsbNumber; i++)
             CloseHandle(WinUsbHandle[i].hDeviceHandle);
         WinUsbNumber=0;
-        printf("GetWinUSBHandle error\n");
+        TRACE(_T("XXX GetWinUSBHandle error\n"));
         return bResult;
     }
 
     bResult = GetUSBDeviceSpeed();
     if(!bResult) {
-        printf("GetUSBDeviceSpeed error\n");
+        TRACE(_T("XXX GetUSBDeviceSpeed error\n"));
         return bResult;
     }
 
@@ -229,7 +232,7 @@ BOOL CNucWinUsb::EnableWinUsbDevice(void)
             WinUsb_Free(WinUsbHandle[i].hUSBHandle);
         }
         WinUsbNumber=0;
-        printf("QueryDeviceEndpoints error\n");
+        TRACE(_T("XXX QueryDeviceEndpoints error\n"));
         return bResult;
     }
     Sleep(100);
@@ -290,7 +293,7 @@ BOOL CNucWinUsb::GetDeviceHandle(void)
 
         //Check for some other error
         if (!bResult) {
-            //printf("Error SetupDiEnumDeviceInterfaces: %d.\n", GetLastError());
+            //TRACE(_T("Error SetupDiEnumDeviceInterfaces:0x%x.\n"), GetLastError());
             goto done;
         }
 
@@ -323,11 +326,11 @@ BOOL CNucWinUsb::GetDeviceHandle(void)
 
                 if (!pInterfaceDetailData) {
                     // ERROR
-                    //printf("Error allocating memory for the device detail buffer.\n");
+                    //TRACE(_T("Error allocating memory for the device detail buffer.\n"));
                     goto done;
                 }
             } else {
-                //printf("Error SetupDiEnumDeviceInterfaces: %d.\n", GetLastError());
+                //TRACE(_T("Error SetupDiEnumDeviceInterfaces: 0x%x.\n"), GetLastError());
                 goto done;
             }
         }
@@ -346,7 +349,7 @@ BOOL CNucWinUsb::GetDeviceHandle(void)
 
         //Check for some other error
         if (!bResult) {
-            //printf("Error SetupDiGetDeviceInterfaceDetail: %d.\n", GetLastError());
+            //TRACE(_T("Error SetupDiGetDeviceInterfaceDetail: 0x%x.\n"), GetLastError());
             goto done;
         }
 
@@ -357,9 +360,9 @@ BOOL CNucWinUsb::GetDeviceHandle(void)
         StringCchCopy(lpDevicePath, nLength, pInterfaceDetailData->DevicePath);
         lpDevicePath[nLength-1] = 0;
 
-        //printf("Device path:  %s\n", lpDevicePath);
+        //TRACE(_T("Device path:  %s\n"), lpDevicePath);
         if (!lpDevicePath) {
-            //printf("Error %d.", GetLastError());
+            //TRACE(_T("Error 0x%x."), GetLastError());
             goto done;
         }
 
@@ -374,7 +377,7 @@ BOOL CNucWinUsb::GetDeviceHandle(void)
                                                 NULL);
 
         if (WinUsbHandle[index].hDeviceHandle == INVALID_HANDLE_VALUE) {
-            //printf("Error %d.", GetLastError());
+            //TRACE(_T("Error 0x%x."), GetLastError());
             goto done;
         }
         WinUsbHandle[index].DevicePath.Format(_T("%s"),lpDevicePath);
@@ -416,7 +419,7 @@ BOOL CNucWinUsb::GetUSBDeviceSpeed()
 
         bResult = WinUsb_QueryDeviceInformation(WinUsbHandle[i].hUSBHandle, DEVICE_SPEED, &length, &DeviceSpeed);
         if(!bResult) {
-            //printf("Error getting device speed: %d.\n", GetLastError());
+            //TRACE(_T("Error getting device speed: 0x%x.\n"), GetLastError());
             return bResult;
         }
     }
@@ -433,6 +436,8 @@ BOOL CNucWinUsb::QueryDeviceEndpoints(void)
     PIPE_ID* pipeid;
     BOOL bResult = TRUE;
     WINUSB_INTERFACE_HANDLE hUSBHandle;
+    //ULONG timeout = 20000;
+    ULONG timeout = 10000;
     for(i=0; i<WinUsbNumber ; i++) {
         hUSBHandle=WinUsbHandle[i].hUSBHandle;
         pipeid=&(WinUsbHandle[i].pipeid);
@@ -453,24 +458,26 @@ BOOL CNucWinUsb::QueryDeviceEndpoints(void)
 
                 if (bResult) {
                     if (Pipe.PipeType == UsbdPipeTypeControl) {
-                        //printf("Endpoint index: %d Pipe type: Control<0x%x> Pipe ID: 0x%x.\n", index, Pipe.PipeType, Pipe.PipeId);
+                        //TRACE(_T("Endpoint index: %d Pipe type: Control<0x%x> Pipe ID: 0x%x.\n"), index, Pipe.PipeType, Pipe.PipeId);
                     }
                     if (Pipe.PipeType == UsbdPipeTypeIsochronous) {
-                        //printf("Endpoint index: %d Pipe type: Isochronous<0x%x> Pipe ID: 0x%x.\n", index, Pipe.PipeType, Pipe.PipeId);
+                        //TRACE(_T("Endpoint index: %d Pipe type: Isochronous<0x%x> Pipe ID: 0x%x.\n"), index, Pipe.PipeType, Pipe.PipeId);
                     }
                     if (Pipe.PipeType == UsbdPipeTypeBulk) {
                         if (USB_ENDPOINT_DIRECTION_IN(Pipe.PipeId)) {
-                            //printf("Endpoint index: %d Pipe type: Bulk<0x%x> Pipe ID: 0x%x.\n", index, Pipe.PipeType, Pipe.PipeId);
+                            //TRACE(_T("Endpoint index: %d Pipe type: Bulk<0x%x> Pipe ID: 0x%x.\n"), index, Pipe.PipeType, Pipe.PipeId);
                             pipeid->PipeInId = Pipe.PipeId;
+                            WinUsb_SetPipePolicy(hUSBHandle, Pipe.PipeId, PIPE_TRANSFER_TIMEOUT, sizeof(timeout), &timeout);
                         }
                         if (USB_ENDPOINT_DIRECTION_OUT(Pipe.PipeId)) {
-                            //printf("Endpoint index: %d Pipe type: Bulk<0x%x> Pipe ID: 0x%x.\n", index, Pipe.PipeType, Pipe.PipeId);
+                            //TRACE(_T("Endpoint index: %d Pipe type: Bulk<0x%x> Pipe ID: 0x%x.\n"), index, Pipe.PipeType, Pipe.PipeId);
                             pipeid->PipeOutId = Pipe.PipeId;
+                            WinUsb_SetPipePolicy(hUSBHandle, Pipe.PipeId, PIPE_TRANSFER_TIMEOUT, sizeof(timeout), &timeout);							
                         }
 
                     }
                     if (Pipe.PipeType == UsbdPipeTypeInterrupt) {
-                        //printf("Endpoint index: %d Pipe type: Interrupt<0x%x> Pipe ID: 0x%x.\n", index, Pipe.PipeType, Pipe.PipeId);
+                        //TRACE(_T("Endpoint index: %d Pipe type: Interrupt<0x%x> Pipe ID: 0x%x.\n"), index, Pipe.PipeType, Pipe.PipeId);
                     }
                 } else {
                     continue;
@@ -489,7 +496,7 @@ BOOL CNucWinUsb::CloseWinUsbDevice( int id )
     //TRACE("CloseWinUsbDevice id=%d\n",id);
     if (FALSE == WinUsbHandle[id].HandlesOpen ) {
         // Called on an uninitialized DeviceData
-        //TRACE("WinUsbHandle[%d] is not Open.\n",id);
+        //TRACE(_T("WinUsbHandle[%d] is not Open.\n"),id);
         return FALSE;
     }
     CloseHandle(WinUsbHandle[id].hDeviceHandle);
@@ -498,7 +505,7 @@ BOOL CNucWinUsb::CloseWinUsbDevice( int id )
     WinUsbHandle[id].hUSBHandle=INVALID_HANDLE_VALUE;
     WinUsbHandle[id].HandlesOpen = FALSE;
 
-//	Sleep(150);
+//Sleep(150);
     return TRUE;
 }
 
@@ -507,9 +514,9 @@ BOOL CNucWinUsb::EnableOneWinUsbDevice(int id)
     BOOL bResult = TRUE;
     CString str;
 
-    //TRACE("EnableOneWinUsbDevice id=%d\n",id);
+    //TRACE("#### EnableOneWinUsbDevice id=%d\n",id);
     if(WinUsbHandle[id].HandlesOpen == TRUE) {
-        TRACE("XXX Device %d has been enabled by other thread\n",id);
+        TRACE(_T("#### Device %d has been enabled by other thread\n"),id);
         //CloseHandle(WinUsbHandle[id].hDeviceHandle);
         //WinUsb_Free(WinUsbHandle[id].hUSBHandle);
 #if(0)
@@ -524,33 +531,33 @@ BOOL CNucWinUsb::EnableOneWinUsbDevice(int id)
 
     bResult = OpenDevice(id);
     if(!bResult) {
-        TRACE(_T("(%d)  OpenDevice: Try again\n"),id);
-        //str.Format(_T("Device %d NucWinUsb.cpp  OpenDevice: Try again\n"),id);
-        //AfxMessageBox(str);
+        TRACE(_T("#### (%d)  OpenDevice: Try again\n"),id);
         Sleep(500);
         bResult = OpenDevice(id);
         if(!bResult) {
-            TRACE(_T("(%d) XXX NucWinUsb.cpp  OpenDevice Error\n"),id);
+            TRACE(_T("#### (%d) XXX NucWinUsb.cpp  OpenDevice Error\n"),id);
             return bResult;
         }
     }
 
+    //TRACE(_T(" WinUsbNumber WinUsbNumber WinUsbNumber %d\n"),WinUsbNumber);
     Sleep(200);//for Mass production
     bResult = GetOneUSBDeviceSpeed(id);
     if(!bResult) {
-        TRACE(_T("(%d) XXX GetOneUSBDeviceSpeed\n"),id);
+        TRACE(_T("#### (%d) XXX GetOneUSBDeviceSpeed\n"),id);
         CloseWinUsbDevice(id);
         return bResult;
     }
     Sleep(200);//for Mass production
     bResult = QueryOneDeviceEndpoints( id );
     if(!bResult) {
-        TRACE(_T("(%d) XXX QueryOneDeviceEndpoints\n"),id);
+        TRACE(_T("#### (%d) XXX QueryOneDeviceEndpoints\n"),id);
         CloseWinUsbDevice(id);
         return bResult;
     }
     Sleep(200);
 
+    //TRACE(_T("#### (%d) EnableOneWinUsbDevice  bResult=%d\n"),id, bResult);
     return bResult;
 }
 
@@ -565,7 +572,7 @@ BOOL CNucWinUsb::GetOneUSBDeviceSpeed( int id )
 
     bResult = WinUsb_QueryDeviceInformation(WinUsbHandle[id].hUSBHandle, DEVICE_SPEED, &length, &DeviceSpeed);
     if(!bResult) {
-        TRACE("Error getting device speed: %d.\n", GetLastError());
+        TRACE("XXX Error getting device speed: 0x%x.\n", GetLastError());
         return bResult;
     }
     if(DeviceSpeed == LowSpeed) {
@@ -654,7 +661,8 @@ BOOL CNucWinUsb::QueryOneDeviceEndpoints( int id )
 
 BOOL CNucWinUsb::OpenDevice( int id )
 {
-    BOOL bResult = TRUE;
+    //BOOL bResult = TRUE;
+	BOOL bResult = FALSE;
     HDEVINFO hDeviceInfo;
     SP_DEVINFO_DATA DeviceInfoData;
 
@@ -678,7 +686,7 @@ BOOL CNucWinUsb::OpenDevice( int id )
 
     if (hDeviceInfo == INVALID_HANDLE_VALUE) {
         // ERROR
-        //printf("Error SetupDiGetClassDevs: %d.\n", GetLastError());
+        //TRACE(_T("Error SetupDiGetClassDevs: 0x%x.\n"), GetLastError());
         goto done;
     }
     //Enumerate all the device interfaces in the device information set.
@@ -686,7 +694,7 @@ BOOL CNucWinUsb::OpenDevice( int id )
 
     bResult = SetupDiEnumDeviceInfo(hDeviceInfo, id, &DeviceInfoData);
     if(!bResult) {
-        //TRACE("Error OpenDevice SetupDiEnumDeviceInfo: %d.\n", GetLastError());
+        //TRACE(_T("Error OpenDevice SetupDiEnumDeviceInfo: 0x%x.\n"), GetLastError());
         goto done;
     }
     deviceInterfaceData.cbSize = sizeof(SP_INTERFACE_DEVICE_DATA);
@@ -703,7 +711,7 @@ BOOL CNucWinUsb::OpenDevice( int id )
     }
     //Check for some other error
     if (!bResult) {
-        //TRACE("Error SetupDiEnumDeviceInterfaces: %d.\n", GetLastError());
+        //TRACE(_T("Error SetupDiEnumDeviceInterfaces: 0x%x.\n"), GetLastError());
         goto done;
     }
 
@@ -736,11 +744,11 @@ BOOL CNucWinUsb::OpenDevice( int id )
 
             if (!pInterfaceDetailData) {
                 // ERROR
-                //printf("Error allocating memory for the device detail buffer.\n");
+                //TRACE(_T("Error allocating memory for the device detail buffer.\n"));
                 goto done;
             }
         } else {
-            //printf("Error SetupDiEnumDeviceInterfaces: %d.\n", GetLastError());
+            //TRACE(_T("Error SetupDiEnumDeviceInterfaces: 0x%x.\n"), GetLastError());
             goto done;
         }
     }
@@ -759,7 +767,7 @@ BOOL CNucWinUsb::OpenDevice( int id )
 
     //Check for some other error
     if (!bResult) {
-        //printf("Error SetupDiGetDeviceInterfaceDetail: %d.\n", GetLastError());
+        //TRACE(_T("Error SetupDiGetDeviceInterfaceDetail:0x%x.\n"), GetLastError());
         goto done;
     }
 
@@ -770,9 +778,9 @@ BOOL CNucWinUsb::OpenDevice( int id )
     StringCchCopy(lpDevicePath, nLength, pInterfaceDetailData->DevicePath);
     lpDevicePath[nLength-1] = 0;
 
-    //printf("Device path:  %s\n", lpDevicePath);
+    //TRACE(_T("Device path:  %s\n"), lpDevicePath);
     if (!lpDevicePath) {
-        //printf("Error %d.", GetLastError());
+        //TRACE(_T("Error 0x%x."), GetLastError());
         goto done;
     }
 
@@ -787,7 +795,7 @@ BOOL CNucWinUsb::OpenDevice( int id )
                                          NULL);
 
     if (WinUsbHandle[id].hDeviceHandle == INVALID_HANDLE_VALUE) {
-        //printf("Error %d.", GetLastError());
+        //TRACE(_T("Error 0x%x."), GetLastError());
         goto done;
     }
     WinUsbHandle[id].DevicePath.Format(_T("%s"),lpDevicePath);
@@ -796,7 +804,8 @@ BOOL CNucWinUsb::OpenDevice( int id )
                                 &WinUsbHandle[id].hUSBHandle);
     if (FALSE == bResult) {
         CloseHandle(WinUsbHandle[id].hDeviceHandle);
-        //TRACE("WinUsb_Initialize Error\n");
+        goto done;
+        //TRACE(_T("WinUsb_Initialize Error\n"));
     }
     WinUsbHandle[id].HandlesOpen = TRUE;
 
@@ -812,7 +821,6 @@ done:
 int CNucWinUsb::UsbDevice_Detect( void )
 {
     BOOL bResult = TRUE;
-    BOOL bDev = FALSE;
     int id = 0;
 
     while( id < 8 ) {
@@ -823,13 +831,10 @@ int CNucWinUsb::UsbDevice_Detect( void )
         NucUsb.CloseWinUsbDevice(id);
         id++;
     }
+    WinUsbNumber = id;
+    //TRACE(_T("CNucWinUsb::UsbDevice_Detect  WinUsbNumber %d\n"),WinUsbNumber);
 
-    WinUsbNumber = id ;
-    //Sleep(100);
-    ////TRACE("WinUsbDevice Detect: %d device connected\n",id);
-    //return (NucUsb.WinUsbNumber);
     return (WinUsbNumber);
-
 }
 
 BOOL CNucWinUsb::NUC_SetDeviceLEDOn(int id)
@@ -920,7 +925,7 @@ BOOL CNucWinUsb::NUC_BulkOutTest(int id,UCHAR *buf,ULONG len)
     if(id >= WinUsbNumber || id < 0) return FALSE;
 
     if (FALSE == WinUsbHandle[id].HandlesOpen ) {
-        TRACE("WinUsb_ControlTransfer WinUsbHandle[%d] is not Open.\n",id);
+        TRACE(_T("WinUsb_ControlTransfer WinUsbHandle[%d] is not Open.\n"),id);
         return FALSE;
     }
 

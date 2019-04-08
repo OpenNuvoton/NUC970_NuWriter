@@ -100,23 +100,25 @@ BOOL CRAMDlg::InitFile(int flag)
 	CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
 	if(!mainWnd->m_inifile.ReadFile()) return false;
 
-	if(mainWnd->DtbEn==1)
-	{
-		GetDlgItem(IDC_DTB_EN)->ShowWindow(SW_SHOW);
-		GetDlgItem(IDC_STATIC_DTB)->ShowWindow(SW_SHOW);
-		GetDlgItem(IDC_DTB_FILENAME)->ShowWindow(SW_SHOW);
-		GetDlgItem(IDC_DTB_BROWSE)->ShowWindow(SW_SHOW);
-		GetDlgItem(IDC_DTB_BUFFER_ADDRESS)->ShowWindow(SW_SHOW);
-		GetDlgItem(IDC_STATIC_DTB2)->ShowWindow(SW_SHOW);
-		
-	}else{
-		GetDlgItem(IDC_DTB_EN)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_STATIC_DTB)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_DTB_FILENAME)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_DTB_BROWSE)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_DTB_BUFFER_ADDRESS)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_STATIC_DTB2)->ShowWindow(SW_HIDE);
-	}
+
+
+    //if(mainWnd->DtbEn==1)
+    //{
+        GetDlgItem(IDC_DTB_EN)->ShowWindow(SW_SHOW);
+        GetDlgItem(IDC_STATIC_DTB)->ShowWindow(SW_SHOW);
+        GetDlgItem(IDC_DTB_FILENAME)->ShowWindow(SW_SHOW);
+        GetDlgItem(IDC_DTB_BROWSE)->ShowWindow(SW_SHOW);
+        GetDlgItem(IDC_DTB_BUFFER_ADDRESS)->ShowWindow(SW_SHOW);
+        GetDlgItem(IDC_STATIC_DTB2)->ShowWindow(SW_SHOW);
+
+    //}else{
+    //    GetDlgItem(IDC_DTB_EN)->ShowWindow(SW_HIDE);
+    //    GetDlgItem(IDC_STATIC_DTB)->ShowWindow(SW_HIDE);
+    //    GetDlgItem(IDC_DTB_FILENAME)->ShowWindow(SW_HIDE);
+    //    GetDlgItem(IDC_DTB_BROWSE)->ShowWindow(SW_HIDE);
+    //    GetDlgItem(IDC_DTB_BUFFER_ADDRESS)->ShowWindow(SW_HIDE);
+    //    GetDlgItem(IDC_STATIC_DTB2)->ShowWindow(SW_HIDE);
+    //}
 
 	switch(flag)
 	{
@@ -138,57 +140,60 @@ BOOL CRAMDlg::InitFile(int flag)
 			GetDlgItem(IDC_DTB_BUFFER_ADDRESS)->SetWindowText(tmp);
 			m_dtbaddress=tmp;
 
+            tmp=mainWnd->m_inifile.GetValue(_T("SDRAM"),_T("DTBEN"));
 			tmp=mainWnd->m_inifile.GetValue(_T("SDRAM"),_T("DTB_UIEN"));
-			m_dtb_en.SetCheck(_wtoi(tmp));
-			if(_wtoi(tmp)==1)
-			{				
-				GetDlgItem(IDC_DTB_BROWSE)->EnableWindow(TRUE);
-				GetDlgItem(IDC_DTB_BUFFER_ADDRESS)->EnableWindow(TRUE);
-			}else{
-				GetDlgItem(IDC_DTB_BROWSE)->EnableWindow(FALSE);
-				GetDlgItem(IDC_DTB_BUFFER_ADDRESS)->EnableWindow(FALSE);
-			}
-			
-			
+            m_dtb_en.SetCheck(_wtoi(tmp));
+            if(_wtoi(tmp)==1)
+            {
+                GetDlgItem(IDC_DTB_BROWSE)->EnableWindow(TRUE);
+                GetDlgItem(IDC_DTB_BUFFER_ADDRESS)->EnableWindow(TRUE);
+            }else{
+                GetDlgItem(IDC_DTB_BROWSE)->EnableWindow(FALSE);
+                GetDlgItem(IDC_DTB_BUFFER_ADDRESS)->EnableWindow(FALSE);
+            }
 
-			tmp=mainWnd->m_inifile.GetValue(_T("SDRAM"),_T("TYPE"));			
-			((CButton *)GetDlgItem(IDC_SDRAM_AUTORUN))->SetCheck(FALSE);
-			switch(_wtoi(tmp))
-			{
-				case 0: ((CButton *)GetDlgItem(IDC_SDRAM_AUTORUN))->SetCheck(TRUE); break;
-				case 1: ((CButton *)GetDlgItem(IDC_SDRAM_NOAUTORUN))->SetCheck(TRUE); break;				
-			}
 
-			break;
-		case 1:
-			tmp.Format(_T("%d"),m_autorun);
-			mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("TYPE"),tmp);	
-			mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("PATH"),m_filename);
-			mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("DTBPATH"),m_dtbname);
-			mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("EXEADDR"),m_address);
-			mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("DTBADDR"),m_dtbaddress);
 
+            tmp=mainWnd->m_inifile.GetValue(_T("SDRAM"),_T("TYPE"));
+            ((CButton *)GetDlgItem(IDC_SDRAM_AUTORUN))->SetCheck(FALSE);
+            switch(_wtoi(tmp))
+            {
+                case 0: ((CButton *)GetDlgItem(IDC_SDRAM_AUTORUN))->SetCheck(TRUE); break;
+                case 1: ((CButton *)GetDlgItem(IDC_SDRAM_NOAUTORUN))->SetCheck(TRUE); break;
+            }
+
+            break;
+        case 1:
+            tmp.Format(_T("%d"),m_autorun);
+            mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("TYPE"),tmp);
+            mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("PATH"),m_filename);
+            mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("DTBPATH"),m_dtbname);
+            mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("EXEADDR"),m_address);
+            mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("DTBADDR"),m_dtbaddress);
+
+            tmp.Format(_T("%d"),m_dtb_en.GetCheck());
+            mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("DTBEN"),tmp);
 			tmp.Format(_T("%d"),m_dtb_en.GetCheck());
-			mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("DTB_UIEN"),tmp);
-			
-			mainWnd->m_inifile.WriteFile();
-			break;
-	}
+            mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("DTB_UIEN"),tmp);
+
+            mainWnd->m_inifile.WriteFile();
+            break;
+    }
 return true;
 }
 
 void CRAMDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 {
-	CDialog::OnShowWindow(bShow, nStatus);
+    CDialog::OnShowWindow(bShow, nStatus);
 
-	
-	// TODO: Add your message handler code here		
-	if(InitFlag==0)
-	{
-		InitFlag=1;
-		InitFile(0);
-	}
-	//UpdateData (TRUE);
+
+    // TODO: Add your message handler code here
+    if(InitFlag==0)
+    {
+        InitFlag=1;
+        InitFile(0);
+    }
+    //UpdateData (TRUE);
 }
 
 unsigned WINAPI CRAMDlg:: Download_proc(void* args)
@@ -283,8 +288,8 @@ void CRAMDlg::OnBnClickedSdramBrowse()
 
 LRESULT CRAMDlg::ShowStatus( WPARAM  pos, LPARAM message)
 {
-	m_progress.SetPos((int)pos);
-	return true;
+    m_progress.SetPos((int)pos);
+    return true;
 }
 
 void CRAMDlg:: Download()
@@ -336,77 +341,77 @@ void CRAMDlg:: Download()
 
 }
 
-BOOL CRAMDlg::PreTranslateMessage(MSG* pMsg) 
+BOOL CRAMDlg::PreTranslateMessage(MSG* pMsg)
 {
-	if((pMsg->message==WM_KEYDOWN)&&(pMsg->wParam==0x0d))
-	{
-		return TRUE;
-	}
-	
-	return CDialog::PreTranslateMessage(pMsg);
+    if((pMsg->message==WM_KEYDOWN)&&(pMsg->wParam==0x0d))
+    {
+        return TRUE;
+    }
+
+    return CDialog::PreTranslateMessage(pMsg);
 }
 
 HBRUSH CRAMDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
-	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
-	 if (pWnd->GetDlgCtrlID() == IDC_SDRAMSTATUS)
+    HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+     if (pWnd->GetDlgCtrlID() == IDC_SDRAMSTATUS)
      {
-		 CString word;
-		 GetDlgItem(IDC_SDRAMSTATUS)->GetWindowText(word);
-		 if(!word.Compare(_T("Download")))
-			pDC->SetTextColor(RGB(255,0,0));		 
-		 else
-			pDC->SetTextColor(RGB(0,0,0));
+         CString word;
+         GetDlgItem(IDC_SDRAMSTATUS)->GetWindowText(word);
+         if(!word.Compare(_T("Download")))
+            pDC->SetTextColor(RGB(255,0,0));
+         else
+            pDC->SetTextColor(RGB(0,0,0));
 
-		 if(!word.Compare(_T("Download failed!! Please check device")))
-			pDC->SetTextColor(RGB(255,0,0));
-		 else
-			pDC->SetTextColor(RGB(0,0,0));
-     } 
-	 
-	return hbr;
+         if(!word.Compare(_T("Download failed!! Please check device")))
+            pDC->SetTextColor(RGB(255,0,0));
+         else
+            pDC->SetTextColor(RGB(0,0,0));
+     }
+
+    return hbr;
 }
 void CRAMDlg::OnBnClickedDtbBrowse()
 {
-	//CAddFileDialog dlg(TRUE,NULL,NULL,OFN_FILEMUSTEXIST | OFN_HIDEREADONLY ,_T("Bin,Img Files  (*.bin;*.img;*.gz)|*.bin;*.img;*.gz|All Files (*.*)|*.*||"));
-	CAddFileDialog dlg(TRUE,NULL,NULL,OFN_FILEMUSTEXIST | OFN_HIDEREADONLY ,_T("All Files (*.*)|*.*||"));
-	dlg.m_ofn.lpstrTitle=_T("Choose burning file...");
+    //CAddFileDialog dlg(TRUE,NULL,NULL,OFN_FILEMUSTEXIST | OFN_HIDEREADONLY ,_T("Bin,Img Files  (*.bin;*.img;*.gz)|*.bin;*.img;*.gz|All Files (*.*)|*.*||"));
+    CAddFileDialog dlg(TRUE,NULL,NULL,OFN_FILEMUSTEXIST | OFN_HIDEREADONLY ,_T("All Files (*.*)|*.*||"));
+    dlg.m_ofn.lpstrTitle=_T("Choose burning file...");
 
-	CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
+    CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
 
-	if(!mainWnd->m_inifile.ReadFile())
-		dlg.m_ofn.lpstrInitialDir=_T("c:");
-	else
-	{
-		CString _path;
-		_path=mainWnd->m_inifile.GetValue(_T("SDRAM"),_T("DTBPATH"));
-		int len=_path.GetLength();		
-		int i;
-		for(i=len;i>0;i--)
-		{
-			if(_path.GetAt(i)=='\\')
-			{			
-				len=i;
-				break;
-			}
-		}
-		CString filepath=_path.Left(len);
-		if(filepath.IsEmpty())
-			dlg.m_ofn.lpstrInitialDir=_T("c:");
-		else
-			dlg.m_ofn.lpstrInitialDir=_path;
-	}
-		
-	BOOLEAN ret=dlg.DoModal();
+    if(!mainWnd->m_inifile.ReadFile())
+        dlg.m_ofn.lpstrInitialDir=_T("c:");
+    else
+    {
+        CString _path;
+        _path=mainWnd->m_inifile.GetValue(_T("SDRAM"),_T("DTBPATH"));
+        int len=_path.GetLength();
+        int i;
+        for(i=len;i>0;i--)
+        {
+            if(_path.GetAt(i)=='\\')
+            {
+                len=i;
+                break;
+            }
+        }
+        CString filepath=_path.Left(len);
+        if(filepath.IsEmpty())
+            dlg.m_ofn.lpstrInitialDir=_T("c:");
+        else
+            dlg.m_ofn.lpstrInitialDir=_path;
+    }
 
-	if(ret==IDCANCEL)
-	{
-		return;
-	}
+    BOOLEAN ret=dlg.DoModal();
 
-	m_dtbname=dlg.GetPathName();
-	m_dtbinfo=_T(" ")+m_dtbname;
-	UpdateData(FALSE);	
+    if(ret==IDCANCEL)
+    {
+        return;
+    }
+
+    m_dtbname=dlg.GetPathName();
+    m_dtbinfo=_T(" ")+m_dtbname;
+    UpdateData(FALSE);
 
 	mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("DTBPATH"),m_dtbname);
 	mainWnd->m_inifile.WriteFile();
@@ -414,12 +419,22 @@ void CRAMDlg::OnBnClickedDtbBrowse()
 
 void CRAMDlg::OnBnClickedDtbEn()
 {
-	if(m_dtb_en.GetCheck())
-	{				
-		GetDlgItem(IDC_DTB_BROWSE)->EnableWindow(TRUE);
-		GetDlgItem(IDC_DTB_BUFFER_ADDRESS)->EnableWindow(TRUE);
-	}else{
-		GetDlgItem(IDC_DTB_BROWSE)->EnableWindow(FALSE);
-		GetDlgItem(IDC_DTB_BUFFER_ADDRESS)->EnableWindow(FALSE);
-	}
+	CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
+
+    if(m_dtb_en.GetCheck())
+    {
+        GetDlgItem(IDC_DTB_BROWSE)->EnableWindow(TRUE);
+        GetDlgItem(IDC_DTB_BUFFER_ADDRESS)->EnableWindow(TRUE);
+		
+		mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("DTBEN"),_T("1"));
+		mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("DTB_UIEN"),_T("1"));
+		
+        mainWnd->m_inifile.WriteFile();
+    }else{
+        GetDlgItem(IDC_DTB_BROWSE)->EnableWindow(FALSE);
+        GetDlgItem(IDC_DTB_BUFFER_ADDRESS)->EnableWindow(FALSE);
+		mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("DTBEN"),_T("0"));
+		mainWnd->m_inifile.SetValue(_T("SDRAM"),_T("DTB_UIEN"),_T("0"));
+        mainWnd->m_inifile.WriteFile();
+    }
 }

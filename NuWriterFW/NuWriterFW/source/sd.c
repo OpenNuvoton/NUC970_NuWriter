@@ -152,13 +152,11 @@ int SD_SDCmdAndRspDataIn(FMI_SD_INFO_T *pSD, UINT8 ucCmd, UINT32 uArg)
 
     while (inpw(REG_NAND_SDCSR) & SD_CSR_DI_EN);
 
-    if (!(inpw(REG_NAND_SDISR) & SD_ISR_CRC7_OK))       // check CRC7
-    {
+    if (!(inpw(REG_NAND_SDISR) & SD_ISR_CRC7_OK)) {     // check CRC7
         return SD_CRC7_ERROR;
     }
 
-    if (!(inpw(REG_NAND_SDISR) & SD_ISR_CRC16_OK))      // check CRC16
-    {
+    if (!(inpw(REG_NAND_SDISR) & SD_ISR_CRC16_OK)) {    // check CRC16
         return SD_CRC16_ERROR;
     }
     return Successful;
@@ -181,23 +179,20 @@ void SD_Set_clock(UINT32 sd_clock_khz)
     UINT32 rate, div0, div1, i;
 
     rate = _sd_ReferenceClock / sd_clock_khz;
-        
+
     // choose slower clock if system clock cannot divisible by wanted clock
     if (_sd_ReferenceClock % sd_clock_khz != 0)
         rate++;
 
-    if (rate >= (SD_CLK_DIV0_MAX * SD_CLK_DIV1_MAX)) // the maximum divider for SD_CLK is (SD_CLK_DIV0_MAX * SD_CLK_DIV1_MAX)
-        {
-                rate = SD_CLK_DIV0_MAX * SD_CLK_DIV1_MAX;
-        }
+    if (rate >= (SD_CLK_DIV0_MAX * SD_CLK_DIV1_MAX)) { // the maximum divider for SD_CLK is (SD_CLK_DIV0_MAX * SD_CLK_DIV1_MAX)
+        rate = SD_CLK_DIV0_MAX * SD_CLK_DIV1_MAX;
+    }
 
-    for (div0 = SD_CLK_DIV0_MAX; div0 > 0; div0--)    // choose the maximum value if can exact division
-    {
+    for (div0 = SD_CLK_DIV0_MAX; div0 > 0; div0--) {  // choose the maximum value if can exact division
         if (rate % div0 == 0)
             break;
     }
-    if (div0 == 0) // cannot exact division
-    {
+    if (div0 == 0) { // cannot exact division
         // if rate <= SD_CLK_DIV1_MAX, set div0 to 1 since div1 can exactly divide input clock
         div0 = (rate <= SD_CLK_DIV1_MAX) ? 1 : SD_CLK_DIV0_MAX;
     }
@@ -209,13 +204,13 @@ void SD_Set_clock(UINT32 sd_clock_khz)
     MSG_DEBUG("fmiSD_Set_clock(): wanted clock=%d, rate=%d, div0=%d, div1=%d\n", sd_clock_khz, rate, div0, div1);
 
     //--- setup register
-		    outpw(REG_CLKDIV3, (inpw(REG_CLKDIV3) & ~0x18) | (0x0 << 3));       // SD clock from XIN [4:3]
-        //outpw(REG_CLKDIV3, (inpw(REG_CLKDIV3) & ~0x18) | (0x3 << 3));       // SD clock from UPLL [4:3]
-        outpw(REG_CLKDIV3, (inpw(REG_CLKDIV3) & ~0x7) | (div0-1));                 // SD clock divided by CLKDIV3[SD_N] [2:0]
-        outpw(REG_CLKDIV3, (inpw(REG_CLKDIV3) & ~0xff00) | ((div1-1) << 8)); // SD clock divided by CLKDIV3[SD_N] [15:8]
-        for(i=0; i<1000; i++);  // waiting for clock become stable
-				MSG_DEBUG("clock: 0x%x\n", inpw(REG_CLKDIV3));
-        return;
+    outpw(REG_CLKDIV3, (inpw(REG_CLKDIV3) & ~0x18) | (0x0 << 3));       // SD clock from XIN [4:3]
+    //outpw(REG_CLKDIV3, (inpw(REG_CLKDIV3) & ~0x18) | (0x3 << 3));       // SD clock from UPLL [4:3]
+    outpw(REG_CLKDIV3, (inpw(REG_CLKDIV3) & ~0x7) | (div0-1));                 // SD clock divided by CLKDIV3[SD_N] [2:0]
+    outpw(REG_CLKDIV3, (inpw(REG_CLKDIV3) & ~0xff00) | ((div1-1) << 8)); // SD clock divided by CLKDIV3[SD_N] [15:8]
+    for(i=0; i<1000; i++);  // waiting for clock become stable
+    MSG_DEBUG("clock: 0x%x\n", inpw(REG_CLKDIV3));
+    return;
 }
 
 // Initial
@@ -249,8 +244,7 @@ int SD_Init(FMI_SD_INFO_T *pSD)
         _sd_uR3_CMD = 1;
         SD_SDCmdAndRsp(pSD, 41, 0x40ff8000, u32CmdTimeOut); // 2.7v-3.6v
         resp = inpw(REG_NAND_SDRSP0);
-        while (!(resp & 0x00800000))        // check if card is ready
-        {
+        while (!(resp & 0x00800000)) {      // check if card is ready
             SD_SDCmdAndRsp(pSD, 55, 0x00, u32CmdTimeOut);
             _sd_uR3_CMD = 1;
             SD_SDCmdAndRsp(pSD, 41, 0x40ff8000, u32CmdTimeOut); // 3.0v-3.4v
@@ -267,9 +261,8 @@ int SD_Init(FMI_SD_INFO_T *pSD)
         SD_SDCommand(pSD, 0, 0);        // reset all cards
         for (i=0x100; i>0; i--);
 
-        i = SD_SDCmdAndRsp(pSD, 55, 0x00, u32CmdTimeOut);						
-        if (i == 2)     // MMC memory
-        {										  
+        i = SD_SDCmdAndRsp(pSD, 55, 0x00, u32CmdTimeOut);
+        if (i == 2) {   // MMC memory
             SD_SDCommand(pSD, 0, 0);        // reset
             for (i=0x100; i>0; i--);
 
@@ -287,15 +280,14 @@ int SD_Init(FMI_SD_INFO_T *pSD)
             }
             else
             {							  
-                SD_SDCommand(pSD, 0, 0);        // reset							  
+                SD_SDCommand(pSD, 0, 0);        // reset
                 for (i=0x100; i>0; i--){;}
                 i=SD_SDCmdAndRsp(pSD, 1, 0x80ff8000, u32CmdTimeOut);
                 MSG_DEBUG("i=SD_SDCmdAndRs i=%d\n",i);
                 if ( i!= 2) // MMC memory
                 {
                     resp = inpw(REG_NAND_SDRSP0);
-                    while (!(resp & 0x00800000))        // check if card is ready
-                    {
+                    while (!(resp & 0x00800000)) {      // check if card is ready
                         _sd_uR3_CMD = 1;
                         SD_SDCmdAndRsp(pSD, 1, 0x80ff8000, u32CmdTimeOut);      // high voltage
                         resp = inpw(REG_NAND_SDRSP0);
@@ -311,25 +303,21 @@ int SD_Init(FMI_SD_INFO_T *pSD)
         {
 					  int count=10;
             _sd_uR3_CMD = 1;
-            SD_SDCmdAndRsp(pSD, 41, 0x00ff8000, u32CmdTimeOut); // 3.0v-3.4v					
-            resp = inpw(REG_NAND_SDRSP0);					  					
-            while (!(resp & 0x00800000) && count>0)        // check if card is ready
-            {
+            SD_SDCmdAndRsp(pSD, 41, 0x00ff8000, u32CmdTimeOut); // 3.0v-3.4v
+            resp = inpw(REG_NAND_SDRSP0);
+            while (!(resp & 0x00800000) && count>0) {      // check if card is ready
                 SD_SDCmdAndRsp(pSD, 55, 0x00,u32CmdTimeOut);
                 _sd_uR3_CMD = 1;
                 SD_SDCmdAndRsp(pSD, 41, 0x00ff8000, u32CmdTimeOut); // 3.0v-3.4v
                 resp = inpw(REG_NAND_SDRSP0);
-							  count--;							 
+                count--;
             }
-						if(count<=0)
-						{
-							pSD->uCardType = SD_TYPE_UNKNOWN;
-							return SD_INIT_ERROR;
-						}
-            pSD->uCardType = SD_TYPE_SD_LOW;						
-        }
-        else
-        {
+            if(count<=0) {
+                pSD->uCardType = SD_TYPE_UNKNOWN;
+                return SD_INIT_ERROR;
+            }
+            pSD->uCardType = SD_TYPE_SD_LOW;
+        } else {
             pSD->uCardType = SD_TYPE_UNKNOWN;
             return SD_INIT_ERROR;
         }
@@ -385,8 +373,7 @@ int SD_SwitchToHighSpeed(FMI_SD_INFO_T *pSD)
 
     busy_status0 = _sd_pSDHCBuffer[28]<<8 | _sd_pSDHCBuffer[29];
 
-    if (!busy_status0)  // function ready
-    {
+    if (!busy_status0) { // function ready
         outpw(REG_NAND_DMACSAR, (UINT32)_sd_pSDHCBuffer);   // set DMA transfer starting address
         outpw(REG_NAND_SDBLEN, 63); // 512 bit
 
@@ -526,14 +513,12 @@ int SD_Read_in_blksize(FMI_SD_INFO_T *pSD, UINT32 uSector, UINT32 uBufcnt, UINT3
             }
         }
 
-        if (!(inpw(REG_NAND_SDISR) & SD_ISR_CRC7_OK))       // check CRC7
-        {
+        if (!(inpw(REG_NAND_SDISR) & SD_ISR_CRC7_OK)) {     // check CRC7
             //printf("sdioSD_Read_in_blksize(): response error!\n");
             return SD_CRC7_ERROR;
         }
 
-        if (!(inpw(REG_NAND_SDISR) & SD_ISR_CRC16_OK))      // check CRC16
-        {
+        if (!(inpw(REG_NAND_SDISR) & SD_ISR_CRC16_OK)) {    // check CRC16
             //printf("sdioSD_Read_in_blksize() :read data error!\n");
             return SD_CRC16_ERROR;
         }
@@ -563,21 +548,18 @@ int SD_Read_in_blksize(FMI_SD_INFO_T *pSD, UINT32 uSector, UINT32 uBufcnt, UINT3
             }
         }
 
-        if (!(inpw(REG_NAND_SDISR) & SD_ISR_CRC7_OK))       // check CRC7
-        {
+        if (!(inpw(REG_NAND_SDISR) & SD_ISR_CRC7_OK)) {     // check CRC7
             //printf("sdioSD_Read_in_blksize(): response error!\n");
             return SD_CRC7_ERROR;
         }
 
-        if (!(inpw(REG_NAND_SDISR) & SD_ISR_CRC16_OK))      // check CRC16
-        {
+        if (!(inpw(REG_NAND_SDISR) & SD_ISR_CRC16_OK)) {    // check CRC16
             //printf("sdioSD_Read_in_blksize(): read data error!\n");
             return SD_CRC16_ERROR;
         }
     }
 
-    if (SD_SDCmdAndRsp(pSD, 12, 0, 0))      // stop command
-    {
+    if (SD_SDCmdAndRsp(pSD, 12, 0, 0)) {    // stop command
         //printf("stop command fail !!\n");
         return SD_CRC7_ERROR;
     }
@@ -641,8 +623,7 @@ int SD_Write_in(FMI_SD_INFO_T *pSD, UINT32 uSector, UINT32 uBufcnt, UINT32 uSAdd
             }
         }
 
-        if ((inpw(REG_NAND_SDISR) & SD_ISR_CRC_IF) != 0)        // check CRC
-        {
+        if ((inpw(REG_NAND_SDISR) & SD_ISR_CRC_IF) != 0) {      // check CRC
             outpw(REG_NAND_SDISR, SD_ISR_CRC_IF);
             return SD_CRC_ERROR;
         }
@@ -669,8 +650,7 @@ int SD_Write_in(FMI_SD_INFO_T *pSD, UINT32 uSector, UINT32 uBufcnt, UINT32 uSAdd
             }
         }
 
-        if ((inpw(REG_NAND_SDISR) & SD_ISR_CRC_IF) != 0)        // check CRC
-        {
+        if ((inpw(REG_NAND_SDISR) & SD_ISR_CRC_IF) != 0) {      // check CRC
             outpw(REG_NAND_SDISR, SD_ISR_CRC_IF);
             return SD_CRC_ERROR;
         }

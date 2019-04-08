@@ -942,6 +942,10 @@ int Run_SDRAM(UINT32 address,UINT32 offset,UINT32 tmpAddr,UINT32 dtbEn,UINT32 dt
     sysFlushCache(I_D_CACHE);
 //  outpw(REG_USBD_PHY_CTL, inpw(REG_USBD_PHY_CTL) & ~0x200);    // offset 0x704
 
+    outpw(REG_AHBIPRST,1<<19);  //USBD reset
+    outpw(REG_AHBIPRST,0<<19);
+    outpw(REG_USBD_PHY_CTL, inpw(REG_USBD_PHY_CTL) & ~0x100);
+    outpw(REG_HCLKEN, inpw(REG_HCLKEN) & ~0x80000);
     MSG_DEBUG("run ... %x\n", address);
 
     UNLOCKREG();
