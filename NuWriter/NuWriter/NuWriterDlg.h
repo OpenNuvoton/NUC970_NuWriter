@@ -34,7 +34,7 @@ extern "C" {
 #include "NucWinUsb.h"
 #include "afxwin.h"
 
-#define PROJECT_NAME _T("Nuvoton NuWriter v2.03")
+#define PROJECT_NAME _T("Nuvoton NuWriter v2.04")
 //for AES ------------------
 #define LINE_BUFF_LEN            4096
 

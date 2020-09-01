@@ -13,7 +13,7 @@
 #define TYPE_SPI     1
 #define TYPE_EMMC    2
 
-#define MMC_TIMEOUT_SEC 200
+#define MMC_TIMEOUT_SEC 3600//200
 #define SPI_TIMEOUT_SEC 360
 #define NAND_TIMEOUT_SEC 120
 
@@ -735,7 +735,7 @@ void FastDlg::OnTimer(UINT_PTR nIDEvent)
         timercnt = 0;
         KillTimer(0);//停止編號0計時器
         GetDlgItem(IDC_BTN_FAST_START)->EnableWindow(TRUE);
-        //AfxMessageBox(_T("Please reset device and Re-connect now !!!\n"));
+        AfxMessageBox(_T("Time-out. Please reset device and Re-connect now !!!\n"));
     }
     CDialog::OnTimer(nIDEvent);
 }

@@ -103,7 +103,7 @@ int main()
     sysDelay(10);//For connection stability
 
 #if 1 /* SD Init */
-    _sd_ReferenceClock = 12000;    // kHz
+    _sd_ReferenceClock = 300000;//12000;    // kHz upll or hxt
     eMMCBlockSize=fmiInitSDDevice();
     sysDelay(10); //For connection stability
     MSG_DEBUG("eMMCBlockSize=%08x\n",eMMCBlockSize);

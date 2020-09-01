@@ -7145,7 +7145,7 @@ BOOL FastDlg::XUSB_FasteMMCBurn(int id, CString& portName,CString& m_pathName,in
         }
 
         if(rcnt>0) {
-            Sleep(20);
+            //Sleep(20);
             //TRACE(_T("#7587 (%d) eMMC Burn 66666666  rcnt = %d\n"), id, rcnt);
             bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)pbuf,rcnt);
             if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT) {

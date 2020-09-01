@@ -204,8 +204,8 @@ void SD_Set_clock(UINT32 sd_clock_khz)
     MSG_DEBUG("fmiSD_Set_clock(): wanted clock=%d, rate=%d, div0=%d, div1=%d\n", sd_clock_khz, rate, div0, div1);
 
     //--- setup register
-    outpw(REG_CLKDIV3, (inpw(REG_CLKDIV3) & ~0x18) | (0x0 << 3));       // SD clock from XIN [4:3]
-    //outpw(REG_CLKDIV3, (inpw(REG_CLKDIV3) & ~0x18) | (0x3 << 3));       // SD clock from UPLL [4:3]
+    //outpw(REG_CLKDIV3, (inpw(REG_CLKDIV3) & ~0x18) | (0x0 << 3));       // SD clock from XIN [4:3]
+    outpw(REG_CLKDIV3, (inpw(REG_CLKDIV3) & ~0x18) | (0x3 << 3));       // SD clock from UPLL [4:3]
     outpw(REG_CLKDIV3, (inpw(REG_CLKDIV3) & ~0x7) | (div0-1));                 // SD clock divided by CLKDIV3[SD_N] [2:0]
     outpw(REG_CLKDIV3, (inpw(REG_CLKDIV3) & ~0xff00) | ((div1-1) << 8)); // SD clock divided by CLKDIV3[SD_N] [15:8]
     for(i=0; i<1000; i++);  // waiting for clock become stable
@@ -222,7 +222,7 @@ int SD_Init(FMI_SD_INFO_T *pSD)
     unsigned int volatile u32CmdTimeOut;
 
     // set the clock to 200KHz
-    SD_Set_clock(200);
+    SD_Set_clock(300);
     //SD_Set_clock(50);
     // power ON 74 clock
     outpw(REG_NAND_SDCSR, inpw(REG_NAND_SDCSR) | SD_CSR_CLK74_OE);
@@ -351,7 +351,7 @@ int SD_Init(FMI_SD_INFO_T *pSD)
     if (pSD->uCardType == SD_TYPE_EMMC)
         MSG_DEBUG("This is eMMC memory card\n");
 
-    SD_Set_clock(1000);
+    SD_Set_clock(50000);
     return Successful;
 }
 
