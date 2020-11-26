@@ -185,16 +185,18 @@ INT fmiSM_ReadID(FMI_SM_INFO_T *pSM)
         break;
 
     case 0xda:  // 256M v
-        pSM->uBlockPerFlash = 1023;
-        pSM->uPagePerBlock = 64;
         if ((tempID[3] & 0x33) == 0x11) {
-            pSM->uBlockPerFlash = 1023;
+            pSM->uBlockPerFlash = 2047;
             pSM->uPagePerBlock = 64;
             pSM->uSectorPerBlock = 256;
         } else if ((tempID[3] & 0x33) == 0x21) {
             pSM->uBlockPerFlash = 1023;
             pSM->uPagePerBlock = 128;
             pSM->uSectorPerBlock = 512;
+        } else { // Unrecognized ID[3]
+            pSM->uBlockPerFlash = 2047;
+            pSM->uPagePerBlock = 64;
+            pSM->uSectorPerBlock = 256;
         }
         pSM->uPageSize = 2048;
         pSM->uNandECC = BCH_T4;
