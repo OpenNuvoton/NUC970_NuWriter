@@ -36,6 +36,7 @@ extern int usiEraseAll(void);
 extern int usiWrite(UINT32 addr, UINT32 len, UINT16 *buf);
 extern int usiRead(UINT32 addr, UINT32 len, UINT8 *buf);
 extern int usiEraseSector(UINT32 addr, UINT32 secCount);
+extern int spiNorReset(void);
 
 extern int ChangeSpiImageType(UINT32 imageNo, UINT32 imageType);
 extern int DelSpiImage(UINT32 imageNo);
@@ -580,6 +581,7 @@ void UXmodem_SPI(void)
     MSG_DEBUG("action flag %d, image %d, len=%d exec=0x%08x type=%d\n",
               pSpiImage->actionFlag, pSpiImage->imageNo,pSpiImage->fileLength,pSpiImage->executeAddr,pSpiImage->imageType);
     usiInit();
+    spiNorReset();
     switch(pSpiImage->actionFlag) {
     case WRITER_MODE: { // normal write
         MSG_DEBUG("SPI normal write !!!\n");

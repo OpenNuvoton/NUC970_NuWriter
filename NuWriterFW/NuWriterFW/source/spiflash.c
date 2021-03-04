@@ -30,6 +30,7 @@ spiflash_t spiflash[]={
 
 INT32 volatile _spi_type = -1;
 
+
 int usiActive()
 {
 	unsigned int volatile tick;
@@ -651,4 +652,44 @@ int sstSpiWrite(UINT32 addr, UINT32 len, UINT8 *buf)
 }
 
 
+int spiNorReset(void)
+{
+	/* reset SPI flash */
+	// /CS: active
+	outpw(REG_USI_SSR, inpw(REG_USI_SSR) | 0x01);	// CS0
+	outpw(REG_USI_Tx0, 0x66);
+	usiTxLen(0, 8);
 
+	usiActive();
+
+	// /CS: de-active
+	outpw(REG_USI_SSR, inpw(REG_USI_SSR) & 0xfe);// CS0
+
+	sysDelay(5);
+
+	// /CS: active
+	outpw(REG_USI_SSR, inpw(REG_USI_SSR) | 0x01);	// CS0
+	outpw(REG_USI_Tx0, 0x99);
+	usiTxLen(0, 8);
+
+	usiActive();
+
+	// /CS: de-active
+	outpw(REG_USI_SSR, inpw(REG_USI_SSR) & 0xfe);// CS0
+
+	sysDelay(5);
+
+	// /CS: active
+	outpw(REG_USI_SSR, inpw(REG_USI_SSR) | 0x01);	// CS0
+	outpw(REG_USI_Tx0, 0xF0);
+	usiTxLen(0, 8);
+
+	usiActive();
+
+	// /CS: de-active
+	outpw(REG_USI_SSR, inpw(REG_USI_SSR) & 0xfe);// CS0
+	sysDelay(5);
+
+	return 0;
+
+}
