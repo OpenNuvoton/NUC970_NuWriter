@@ -1025,7 +1025,8 @@ void UXmodem_SDRAM(void)
         ptr=_ch+offset;
     } else {
         Otag=0;
-        ptr=_ch;
+        //ptr=_ch;
+        ptr=_ch+offset;
     }
 
     do {
