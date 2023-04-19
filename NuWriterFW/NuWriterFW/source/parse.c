@@ -1020,9 +1020,12 @@ void UXmodem_SDRAM(void)
     }
 
     _ch=((unsigned char*)(((unsigned int)fileAddr | NON_CACHE)));
-    if(fileAddr<offset && exeFlag == 1) {
+    if(fileAddr<offset && fileAddr == 0 && exeFlag == 1) { //non os bsp
         Otag=1;
         ptr=_ch+offset;
+    } else if(fileAddr == 0x8000 && exeFlag == 1) { // kernel image
+        Otag=0;
+        ptr=_ch;
     } else {
         Otag=0;
         //ptr=_ch;
