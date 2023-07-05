@@ -1026,10 +1026,10 @@ void UXmodem_SDRAM(void)
     } else if(fileAddr == 0x8000 && exeFlag == 1) { // kernel image
         Otag=0;
         ptr=_ch;
-    } else {
+    } else { // dtb 
         Otag=0;
-        //ptr=_ch;
-        ptr=_ch+offset;
+        ptr=_ch;
+        //ptr=_ch+offset;
     }
 
     do {
