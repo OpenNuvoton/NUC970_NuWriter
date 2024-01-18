@@ -256,6 +256,37 @@
 #define IDC_RSTBTN                      1194
 #define IDC_ALLRSTBTN                   1195
 #define IDC_STATIC_NAND                 1196
+#define IDC_FORMAT_P1Size               1278
+#define IDC_FORMAT_P2Size               1279
+#define IDC_FORMAT_P3Size               1280
+#define IDC_FORMAT_P4Size               1281
+#define IDC_STATIC_FORMAT_P1Size        1282
+#define IDC_STATIC_FORMAT_P2Size        1283
+#define IDC_STATIC_FORMAT_P3Size        1284
+#define IDC_STATIC_FORMAT_P4Size        1285
+#define IDC_FORMAT_STATIC_ParNum        1286
+#define IDC_RADIO_FORMAT_P1             1287
+#define IDC_RADIO_FORMAT_P2             1288
+#define IDC_RADIO_FORMAT_P3             1289
+#define IDC_RADIO_FORMAT_P4             1290
+#define IDC_STATIC_FORMAT_TotalSize     1291
+#define IDC_FORMAT_P1Size2              1292
+#define IDC_FORMAT_TOTALSIZE            1293
+#define IDC_FORMAT_STATIC1              1294
+#define IDC_FORMAT_STATIC2              1295
+#define IDC_FORMAT_STATIC3              1296
+#define IDC_FORMAT_STATIC4              1297
+#define IDC_FORMAT_SLIDER1              1298
+#define IDC_FORMAT_SLIDER2              1299
+#define IDC_FORMAT_SLIDER3              1300
+#define IDC_FORMAT_SLIDER4              1301
+#define IDC_FORMAT_BTNADD               1302
+#define IDC_FORMAT_BTNRST               1303
+#define IDC_FORMAT_BTNSET               1304
+#define IDC_STATIC_FORMAT_ReserveSize   1305
+#define IDC_FORMAT_STATIC0              1306
+#define IDC_FORMAT_SLIDER0              1307
+#define IDC_FORMAT_ReserveSize          1308
 #define IDC_DOWNLOADSTATUS              4000
 #define IDC_DOWNLOADSTATUS2             4001
 #define IDC_DOWNLOADSTATUS3             4002
@@ -292,7 +323,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        166
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1196
+#define _APS_NEXT_CONTROL_VALUE         1309
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -68,6 +68,8 @@ extern volatile unsigned char Enable4ByteFlag;
 #define PACK      3
 #define IMAGE     4
 #define DATA_OOB  5
+#define PARTITION 6
+
 #define YAFFS2  41
 #define UBIFS   42
 #define PMTP    15
@@ -1629,10 +1631,42 @@ void UXmodem_MMC()
             MSG_DEBUG("#1512 \n");
         }
 
-        MSG_DEBUG("pmmcImage->ReserveSize = %d !!!\n",pmmcImage->ReserveSize);
-        if(eMMCBlockSize>0) {
-            pmbr=create_mbr(eMMCBlockSize,pmmcImage->ReserveSize);
-            FormatFat32(pmbr,0);
+        MSG_DEBUG("pmmcImage->ReserveSize = %d ! eMMCBlockSize = %d\n",pmmcImage->ReserveSize, eMMCBlockSize);
+        MSG_DEBUG("PartitionNum =%d, P1=%d(0x%x)MB P2=%d(0x%x)MB P3=%d(0x%x)MB P4=%d(0x%x)MB\n", pmmcImage->PartitionNum, pmmcImage->PartitionS1Size, pmmcImage->PartitionS1Size, pmmcImage->PartitionS2Size, pmmcImage->PartitionS2Size,
+                  pmmcImage->PartitionS3Size, pmmcImage->PartitionS3Size, pmmcImage->PartitionS4Size, pmmcImage->PartitionS4Size);
+        if(eMMCBlockSize>0)
+        {
+            //pmbr=create_mbr(eMMCBlockSize,pmmcImage->ReserveSize);
+            //FormatFat32(pmbr,0);
+            pmbr=create_mbr(eMMCBlockSize, pmmcImage);
+            switch(pmmcImage->PartitionNum)
+            {
+            case 1:
+                FormatFat32(pmbr,0);
+                break;
+            case 2:
+            {
+                FormatFat32(pmbr,0);
+                FormatFat32(pmbr,1);
+            }
+            break;
+            case 3:
+            {
+                FormatFat32(pmbr,0);
+                FormatFat32(pmbr,1);
+                FormatFat32(pmbr,2);
+            }
+            break;
+            case 4:
+            {
+                FormatFat32(pmbr,0);
+                FormatFat32(pmbr,1);
+                FormatFat32(pmbr,2);
+                FormatFat32(pmbr,3);
+            }
+            break;
+            }
+
             fmiSD_Read(MMC_INFO_SECTOR,1,(UINT32)ptr);
             *(ptr+125)=0x11223344;
             *(ptr+126)=pmmcImage->ReserveSize;

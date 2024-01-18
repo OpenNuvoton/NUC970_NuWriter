@@ -70,7 +70,7 @@ END_MESSAGE_MAP()
 BOOL CMMCDlg::OnInitDialog()
 {
     CDialog::OnInitDialog();
-    m_imagelist.SetHeadings(_T("Name, 70; Type, 50;Start offset, 80;End offset, 80"));
+    m_imagelist.SetHeadings(_T("Name, 90; Type, 80;Start offset, 80;End offset, 80"));
     m_imagelist.SetGridLines(TRUE);
 
 
@@ -248,6 +248,9 @@ void CMMCDlg:: Format()
     ret=XUSB_Format(mainWnd->m_portName);
     if(ret)
         AfxMessageBox(_T("Format successfully"));
+    else
+        m_progress.SetRange(0,0);
+
     GetDlgItem(IDC_MMC_FORMAT)->EnableWindow(TRUE);
     //UpdateData(FALSE); //shanchun moedified 20121003
     mainWnd->m_gtype.EnableWindow(TRUE);
@@ -272,12 +275,17 @@ unsigned WINAPI CMMCDlg:: Format_proc(void* args)
 void CMMCDlg::OnBnClickedMmcFormat()
 {
     // TODO: Add your control notification handler code here
+    CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
     CFormatDlg format_dlg;
-    if(format_dlg.DoModal()==IDCANCEL) return;
-    m_space=format_dlg.space;
-
     CString dlgText;
 
+    if(format_dlg.DoModal()==IDCANCEL) return;
+    m_space=format_dlg.strResSize;
+    strPartitionNum = format_dlg.strPartitionNum;
+    strPartition1Size=format_dlg.strPartition1Size;
+    strPartition2Size=format_dlg.strPartition2Size;
+    strPartition3Size=format_dlg.strPartition3Size;
+    strPartition4Size=format_dlg.strPartition4Size;
     UpdateData(TRUE);
 
     GetDlgItem(IDC_MMC_FORMAT)->GetWindowText(dlgText);
@@ -340,8 +348,8 @@ void CMMCDlg::OnBnClickedMmcBrowse()
     else
         m_imagename=temp;
 
-    if(m_imagename.GetLength()>16)
-        m_imagename = m_imagename.Mid(0,15);
+    //if(m_imagename.GetLength()>16)
+    //    m_imagename = m_imagename.Mid(0,15);
     this->GetDlgItem(IDC_MMC_IMAGENAME_A)->SetWindowText(m_imagename);
     //UpdateData(FALSE); //shanchun modified 20121203
     //PostMessage(WM_UPDATE_MESSAGE,0,0);

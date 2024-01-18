@@ -600,7 +600,14 @@ int SD_Write_in(FMI_SD_INFO_T *pSD, UINT32 uSector, UINT32 uBufcnt, UINT32 uSAdd
 
     // According to SD Spec v2.0, the write CMD block size MUST be 512, and the start address MUST be 512*n.
     outpw(REG_NAND_SDBLEN, SD_BLOCK_SIZE - 1);           // set the block size
-    outpw(REG_NAND_SDARG, uSector);
+
+    //outpw(REG_NAND_SDARG, uSector);
+    if ((pSD->uCardType == SD_TYPE_SD_HIGH) || (pSD->uCardType == SD_TYPE_EMMC))
+        outpw(REG_NAND_SDARG, uSector);
+    else
+        outpw(REG_NAND_SDARG, uSector * SD_BLOCK_SIZE);  // set start address for SD CMD
+    //MSG_DEBUG("SD_Write_in %x(%d), %x(%d)", uSector, uSector, SD_BLOCK_SIZE, SD_BLOCK_SIZE);
+    for(i=0; i<2000; i++);
     outpw(REG_NAND_DMACSAR, uSAddr);
     loop = uBufcnt / 255;
     for (i=0; i<loop; i++)
@@ -628,7 +635,7 @@ int SD_Write_in(FMI_SD_INFO_T *pSD, UINT32 uSector, UINT32 uBufcnt, UINT32 uSAdd
             return SD_CRC_ERROR;
         }
     }
-
+    for(i=0; i<2000; i++);
     loop = uBufcnt % 255;
     if (loop != 0)
     {
@@ -656,13 +663,14 @@ int SD_Write_in(FMI_SD_INFO_T *pSD, UINT32 uSector, UINT32 uBufcnt, UINT32 uSAdd
         }
     }
     outpw(REG_NAND_SDISR, SD_ISR_CRC_IF);
-
+    for(i=0; i<2000; i++);
     if (SD_SDCmdAndRsp(pSD, 12, 0, 0))      // stop command
     {
         return SD_CRC7_ERROR;
     }
     SD_CheckRB();
 
+    for(i=0; i<2000; i++);
     SD_SDCommand(pSD, 7, 0);
 
     return Successful;
@@ -681,7 +689,7 @@ void SD_Get_SD_info(FMI_SD_INFO_T *pSD, DISK_DATA_T *_info)
     if ((Buffer[0] & 0xc0000000) && (pSD->uCardType != SD_TYPE_MMC) && (pSD->uCardType != SD_TYPE_EMMC))
     {
         C_Size = ((Buffer[1] & 0x0000003f) << 16) | ((Buffer[2] & 0xffff0000) >> 16);
-        size = (C_Size+1) * 512;    // Kbytes
+        size = (C_Size+1) * 512;// Kbytes
 
         _info->diskSize = size;
         _info->totalSectorN = size << 1;
@@ -691,7 +699,7 @@ void SD_Get_SD_info(FMI_SD_INFO_T *pSD, DISK_DATA_T *_info)
         R_LEN = (Buffer[1] & 0x000f0000) >> 16;
         C_Size = ((Buffer[1] & 0x000003ff) << 2) | ((Buffer[2] & 0xc0000000) >> 30);
         MULT = (Buffer[2] & 0x00038000) >> 15;
-        size = (C_Size+1) * (1<<(MULT+2)) * (1<<R_LEN);
+        size = (C_Size + 1) * (1 << (MULT + 2)) * (1 << R_LEN);
 
         _info->diskSize = size / 1024;
         _info->totalSectorN = size / 512;

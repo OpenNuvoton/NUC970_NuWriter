@@ -118,8 +118,8 @@ typedef struct fw_nand_image_t
     UINT32  executeAddr;    // endblock
     UINT32  blockNo;        // startblock
     UINT32  dummy;
-		UCHAR macaddr[8];
-		UINT32 initSize;
+    UCHAR macaddr[8];
+    UINT32 initSize;
 } FW_NAND_IMAGE_T;
 
 typedef struct fw_nor_image_t
@@ -135,8 +135,8 @@ typedef struct fw_nor_image_t
     UINT32  executeAddr;
     UINT32  flashOffset;
     UINT32  endAddr;
-		UCHAR   macaddr[8];	
-		UINT32  initSize;
+    UCHAR   macaddr[8];
+    UINT32  initSize;
 } FW_NOR_IMAGE_T;
 
 //MMC---------------------------------
@@ -153,6 +153,16 @@ typedef struct fw_mmc_image_t
     UINT32  ReserveSize;  //unit of sector
     UCHAR   macaddr[8];
     UINT32  initSize;
+    UCHAR   FSType;
+    UINT32  PartitionNum;
+    UINT32  Partition1Size;  //unit of MB
+    UINT32  Partition2Size;  //unit of MB
+    UINT32  Partition3Size;  //unit of MB
+    UINT32  Partition4Size;  //unit of MB
+    UINT32  PartitionS1Size; //Sector size unit 512Byte
+    UINT32  PartitionS2Size; //Sector size unit 512Byte
+    UINT32  PartitionS3Size; //Sector size unit 512Byte
+    UINT32  PartitionS4Size; //Sector size unit 512Byte
 } FW_MMC_IMAGE_T;
 //------------------------------------
 
@@ -180,7 +190,7 @@ typedef struct _PACK_CHILD_HEAD
 typedef struct _PACK_HEAD
 {
 	UINT32 actionFlag;
-	UINT32 fileLength;		 
+	UINT32 fileLength;
 	UINT32 num;
 	UINT32 reserve[1];
 }PACK_HEAD,*PPACK_HEAD;

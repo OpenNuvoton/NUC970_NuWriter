@@ -3015,6 +3015,9 @@ BOOL CMMCDlg::XUSB_Format(CString& portName)
     unsigned int ack,format_pos=0;
     NORBOOT_MMC_HEAD *fhead;
     char* lpBuffer;
+    CFormatDlg format_dlg;
+
+    m_progress.SetRange(0,100);
     fhead=(NORBOOT_MMC_HEAD *)malloc(sizeof(NORBOOT_MMC_HEAD));
 
     /***********************************************/
@@ -3043,6 +3046,11 @@ BOOL CMMCDlg::XUSB_Format(CString& portName)
     memset((unsigned char*)fhead,0,sizeof(NORBOOT_MMC_HEAD));
     fhead->flag=FORMAT_ACTION;
     swscanf_s(m_space,_T("%d"),&fhead->ReserveSize);
+    swscanf_s(strPartitionNum,_T("%d"),&fhead->PartitionNum);
+    swscanf_s(strPartition1Size,_T("%d"),&fhead->Partition1Size);
+    swscanf_s(strPartition2Size,_T("%d"),&fhead->Partition2Size);
+    swscanf_s(strPartition3Size,_T("%d"),&fhead->Partition3Size);
+    swscanf_s(strPartition4Size,_T("%d"),&fhead->Partition4Size);
 
     memcpy(lpBuffer,(unsigned char*)fhead,sizeof(NORBOOT_MMC_HEAD));
     free(fhead);
@@ -3071,7 +3079,7 @@ BOOL CMMCDlg::XUSB_Format(CString& portName)
             return FALSE;
         }
 
-        DbgOut("eMMC wait erase ack");
+        //DbgOut("eMMC wait erase ack");
         bResult=NucUsb.NUC_ReadPipe(0,(UCHAR *)&ack,4);
         if(bResult=FALSE) {
             delete []lpBuffer;
@@ -3079,7 +3087,7 @@ BOOL CMMCDlg::XUSB_Format(CString& portName)
             AfxMessageBox(_T("ACK error !"));
             return FALSE;
         }
-        DbgOut("eMMC wait erase ack end");
+        //DbgOut("eMMC wait erase ack end");
         if(!((ack>>16)&0xffff)) {
             format_pos=ack&0xffff;
             PostMessage(WM_MMC_PROGRESS,(LPARAM)format_pos,0);

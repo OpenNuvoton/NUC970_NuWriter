@@ -79,7 +79,7 @@ public:
 	BOOL InitFile(int flag);
 	int InitFlag;
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);	
-	CString m_space;
+	CString m_space, strPartition1Size, strPartition2Size, strPartition3Size, strPartition4Size, strPartitionNum;
 	CStatic m_status;
 
 	char *encbuf;
