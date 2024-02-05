@@ -39,7 +39,7 @@ public:
 	int m_PartitionNum;
     int TotalSize, TotalMB, resSizeMB, ParTotalMB;
 	int m_CtrlCnt;
-	int Partition1Size, Partition2Size, Partition3Size, Partition4Size, PartitionNum;
+	int Partition1Size, Partition2Size, Partition3Size, Partition4Size, PartitionNum, tmpPartition2Size;
 	virtual BOOL OnInitDialog();
 	void InitDialogWnd(bool);
 	void ButtonCTRL(bool bShow);
@@ -51,4 +51,5 @@ public:
 	CButton m_BtnSet;
 	CButton m_BtnRst;
 
+	afx_msg void OnBnClickedButton1();
 };

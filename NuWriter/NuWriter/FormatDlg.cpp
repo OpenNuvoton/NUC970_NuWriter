@@ -48,6 +48,7 @@ BEGIN_MESSAGE_MAP(CFormatDlg, CDialog)
     ON_BN_CLICKED(IDC_FORMAT_BTNADD, &CFormatDlg::OnBnClickedFormatBtnadd)
     ON_BN_CLICKED(IDC_FORMAT_BTNSET, &CFormatDlg::OnBnClickedFormatBtnset)
     ON_BN_CLICKED(IDC_FORMAT_BTNRST, &CFormatDlg::OnBnClickedFormatBtnrst)
+    ON_BN_CLICKED(IDC_BUTTON1, &CFormatDlg::OnBnClickedButton1)
 END_MESSAGE_MAP()
 
 
@@ -81,10 +82,10 @@ void CFormatDlg::InitDialogWnd(bool bShow)
         resSizeMB = 0;
         ParTotalMB = 0;
         m_bInit = TRUE;
-		strPartition1Size = _T("0");
-		strPartition2Size = _T("0");
-		strPartition3Size = _T("0");
-		strPartition4Size = _T("0");
+        strPartition1Size = _T("0");
+        strPartition2Size = _T("0");
+        strPartition3Size = _T("0");
+        strPartition4Size = _T("0");
     }
 }
 
@@ -229,8 +230,9 @@ BOOL CFormatDlg::OnInitDialog()
     ParTotalMB = TotalMB - resSizeMB;
     TRACE(_T("strResSize = %s , resSizeMB = %d\n"), strResSize, resSizeMB);
 
-	GetDlgItem(IDOK)->EnableWindow(FALSE);
-	m_BtnRst.EnableWindow(FALSE);
+    GetDlgItem(IDOK)->EnableWindow(FALSE);
+    GetDlgItem(IDC_BUTTON1)->EnableWindow(FALSE);
+    m_BtnRst.EnableWindow(FALSE);
 
     return TRUE;  // return TRUE unless you set the focus to a control
 }
@@ -276,6 +278,8 @@ void CFormatDlg::OnBnClickedFormatBtnadd()
         Partition2Size = _wtoi(strPartition2Size);
         m_Slider2.EnableWindow(FALSE);
 
+		tmpPartition2Size= _wtoi(strPartition2Size);
+
 		if((Partition1Size+Partition2Size) >= ParTotalMB) {
             m_BtnSet.EnableWindow(FALSE);
             AfxMessageBox(_T("Error! Partition Size = Total size, Can't add partition.  Please press Reset"));
@@ -319,7 +323,8 @@ void CFormatDlg::OnBnClickedFormatBtnadd()
         m_BtnAdd.EnableWindow(FALSE);
         m_BtnSet.EnableWindow(FALSE);
         m_BtnRst.EnableWindow(TRUE);
-		GetDlgItem(IDOK)->EnableWindow(FALSE);
+        GetDlgItem(IDOK)->EnableWindow(FALSE);
+        GetDlgItem(IDC_BUTTON1)->EnableWindow(FALSE);
         AfxMessageBox(_T("Error! Partition number > 4, please press Reset"));
     }
 
@@ -330,15 +335,19 @@ void CFormatDlg::OnBnClickedFormatBtnadd()
 void CFormatDlg::OnBnClickedFormatBtnset()
 {
     CString str;
+    CString msg;
 
     //InitDialogWnd(FALSE);
+    //msg.Format(_T("m_bInit:%d, m_CtrlCnt:%d"), m_bInit, m_CtrlCnt);
+    //AfxMessageBox(msg);
+
     if(m_bInit) {
-	
-		m_reserve.GetWindowText(strResSize);
+
+        m_reserve.GetWindowText(strResSize);
         resSizeMB = (_wtoi(strResSize)/2/1024);
         ParTotalMB = TotalMB - resSizeMB;
         TRACE(_T("Btnset strResSize = %s , resSizeMB = %d\n"), strResSize, resSizeMB);
-		
+
         if(strResSize.IsEmpty()) {
             AfxMessageBox(_T("Error! Please input reserve space"));
             return ;
@@ -347,9 +356,9 @@ void CFormatDlg::OnBnClickedFormatBtnset()
         if(resSizeMB > ParTotalMB) {
             AfxMessageBox(_T("Error! Reserve space is bigger than Total size."));
             return ;
-        }		
+        }
 
-		m_BtnRst.EnableWindow(TRUE);
+        m_BtnRst.EnableWindow(TRUE);
         m_BtnAdd.EnableWindow(FALSE);
         m_BtnSet.EnableWindow(TRUE);
 
@@ -359,10 +368,12 @@ void CFormatDlg::OnBnClickedFormatBtnset()
         m_Edit1.SetParams( 0, ParTotalMB, 1);
         m_Edit1.SetValue(0);
         m_bInit = FALSE;
-		m_CtrlCnt = 0;
+        m_CtrlCnt = 0;
     } else {
-		GetDlgItem(IDOK)->EnableWindow(TRUE);
-        m_BtnRst.EnableWindow(TRUE);		
+
+        GetDlgItem(IDOK)->EnableWindow(TRUE);
+
+        m_BtnRst.EnableWindow(TRUE);
         m_BtnAdd.EnableWindow(TRUE);
         m_BtnSet.EnableWindow(FALSE);
 
@@ -395,17 +406,30 @@ void CFormatDlg::OnBnClickedFormatBtnset()
 
             strPartitionNum.Format(_T("%d"), 3);
             m_CtrlCnt = 3;
+
         } else {
             strPartitionNum.Format(_T("%d"), 4);
             m_CtrlCnt = 4;
-			m_BtnAdd.EnableWindow(FALSE);
+            m_BtnAdd.EnableWindow(FALSE);
         }
 
-        if((Partition1Size+Partition2Size+Partition3Size+Partition4Size) > ParTotalMB) {
-            AfxMessageBox(_T("Error! Partition size > Total size !"));
-            str.Format(_T("%d"), (ParTotalMB-Partition1Size-Partition2Size-Partition3Size));
-            m_Edit4.SetWindowTextW(str);
-            m_Slider4.SetSlidePos(Partition4Size);
+        if(((Partition1Size != ParTotalMB)) && (Partition2Size == 0)) {
+            strPartitionNum.Format(_T("%d"), 2);
+            //m_CtrlCnt = 2;
+            msg.Format(_T("m_CtrlCnt: %d, Partition1Size:%d, Partition2Size:%d"), m_CtrlCnt, Partition1Size, Partition2Size);
+            //AfxMessageBox(msg);
+			GetDlgItem(IDOK)->EnableWindow(FALSE);
+            GetDlgItem(IDC_BUTTON1)->EnableWindow(TRUE);
+        }
+        else
+        {
+            GetDlgItem(IDC_BUTTON1)->EnableWindow(FALSE);
+            if((Partition1Size+Partition2Size+Partition3Size+Partition4Size) > ParTotalMB) {
+                AfxMessageBox(_T("Error! Partition size > Total size !"));
+                str.Format(_T("%d"), (ParTotalMB-Partition1Size-Partition2Size-Partition3Size));
+                m_Edit4.SetWindowTextW(str);
+                m_Slider4.SetSlidePos(Partition4Size);
+            }
         }
     }
 
@@ -416,12 +440,14 @@ void CFormatDlg::OnBnClickedFormatBtnrst()
     m_CtrlCnt = 0;
     SliderCTRL(TRUE);
 
-	GetDlgItem(IDOK)->EnableWindow(FALSE);
+    GetDlgItem(IDOK)->EnableWindow(FALSE);
+    GetDlgItem(IDC_BUTTON1)->EnableWindow(FALSE);
+
     m_BtnAdd.EnableWindow(FALSE);
     m_BtnSet.EnableWindow(TRUE);
-	m_BtnRst.EnableWindow(FALSE);
+    m_BtnRst.EnableWindow(FALSE);
 
-	m_bInit = TRUE;
+    m_bInit = TRUE;
     m_reserve.SetWindowTextW(_T("0"));
     m_reserve.GetWindowText(strResSize);
     resSizeMB = (_wtoi(strResSize)/2/1024);
@@ -459,4 +485,51 @@ void CFormatDlg::OnBnClickedFormatBtnrst()
     m_Edit4.SetWindowText(_T("0"));
     Partition4Size = 0;
     strPartition4Size = _T("0");
+}
+
+
+void CFormatDlg::OnBnClickedButton1()
+{
+    // TODO: Add your control notification handler code here
+    CString str;
+    CNuWriterDlg* mainWnd = (CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
+    int ParNum;
+
+    m_reserve.GetWindowText(strResSize);
+    resSizeMB = (_wtoi(strResSize) / 2 / 1024);
+
+    if (strResSize.IsEmpty()) {
+        AfxMessageBox(_T("Error! Please input reserve space"));
+        return;
+    }
+
+    strPartitionNum.Format(_T("%d"), 2);
+    ParTotalMB = TotalMB - resSizeMB;
+    ParNum = 2;
+    {
+        m_Edit1.GetWindowText(strPartition1Size);
+        Partition1Size = _wtoi(strPartition1Size);
+    }
+    m_Edit2.GetWindowText(strPartition2Size);
+    Partition2Size = _wtoi(strPartition2Size);
+
+    Partition2Size = ParTotalMB - Partition1Size;
+    Partition3Size = 0;
+    Partition4Size = 0;
+#if 1
+    if (Partition2Size == 0 || Partition3Size == 0 || Partition4Size == 0)
+    {
+        GetDlgItem(IDC_BUTTON1)->EnableWindow(TRUE);
+        GetDlgItem(IDOK)->EnableWindow(FALSE);
+    }
+    else
+    {
+        GetDlgItem(IDC_BUTTON1)->EnableWindow(FALSE);
+        GetDlgItem(IDOK)->EnableWindow(TRUE);
+    }
+#endif
+    CString msg;
+    msg.Format(_T("ParTotalMB: %d, resSizeMB:%d, Partition1Size:%d, Partition1Size:%d"), ParTotalMB, resSizeMB, Partition1Size, Partition2Size);
+    //AfxMessageBox(msg);
+    OnOK();
 }

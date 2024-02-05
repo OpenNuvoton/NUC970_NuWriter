@@ -148,6 +148,20 @@ void CMMCDlg::Download()
             //else
             //	AfxMessageBox("Burn unsuccessfully!! Please check device");
         } else {
+            ret = XUSB_PackErase(0, mainWnd->m_portName,m_filename);
+            if(ret) {
+                //AfxMessageBox(_T("Burn successfully"));
+                TRACE(_T("Format Done.\n"));
+            }
+            else
+            {
+                m_progress.SetPos(0);
+                GetDlgItem(IDC_MMC_DOWNLOAD)->EnableWindow(TRUE);
+                GetDlgItem(IDC_MMC_DOWNLOAD)->SetWindowText(_T("Program"));
+                mainWnd->m_gtype.EnableWindow(TRUE);
+                AfxMessageBox(_T("Burn Error! Please check device\n"));
+                return;
+            }
             ret=XUSB_Pack(mainWnd->m_portName,m_filename,&len);
             if(ret) {
                 GetDlgItem(IDC_MMC_VERIFY)->EnableWindow(TRUE);
@@ -159,14 +173,6 @@ void CMMCDlg::Download()
         GetDlgItem(IDC_MMC_DOWNLOAD)->SetWindowText(_T("Burn"));
         //UpdateData(FALSE);
         mainWnd->m_gtype.EnableWindow(TRUE);
-
-        //if(ret)
-        //{
-        //	CSPIComDlg* parent=(CSPIComDlg*)GetParent();
-
-        //	if(parent)
-        //		parent->PostMessage(WM_SPI_UPDATE_LIST,0,0);
-        //}
 
     } else
         AfxMessageBox(_T("Please choose image file !"));
@@ -286,6 +292,16 @@ void CMMCDlg::OnBnClickedMmcFormat()
     strPartition2Size=format_dlg.strPartition2Size;
     strPartition3Size=format_dlg.strPartition3Size;
     strPartition4Size=format_dlg.strPartition4Size;
+
+    mainWnd->m_inifile.SetValue(_T("PACK"),_T("MMCFTFS"),_T("0"));
+    mainWnd->m_inifile.SetValue(_T("PACK"),_T("MMCFTPNUM"),strPartitionNum);
+    mainWnd->m_inifile.SetValue(_T("PACK"),_T("MMCFTPREV"),m_space);
+    mainWnd->m_inifile.SetValue(_T("PACK"),_T("MMCFTP1"),strPartition1Size);
+    mainWnd->m_inifile.SetValue(_T("PACK"),_T("MMCFTP2"),strPartition2Size);
+    mainWnd->m_inifile.SetValue(_T("PACK"),_T("MMCFTP3"),strPartition3Size);
+    mainWnd->m_inifile.SetValue(_T("PACK"),_T("MMCFTP4"),strPartition4Size);
+    mainWnd->m_inifile.WriteFile();
+
     UpdateData(TRUE);
 
     GetDlgItem(IDC_MMC_FORMAT)->GetWindowText(dlgText);
@@ -382,7 +398,10 @@ void CMMCDlg:: Read()
         if(XUSB_Read(mainWnd->m_portName,m_filename2,sblocks,blocks*(0x200)))
             AfxMessageBox(_T("Read OK !"));
         else
-            AfxMessageBox(_T("Read Error !"));
+        {
+            AfxMessageBox(_T("Read Error! "));
+            m_progress.SetPos(0);
+        }
         GetDlgItem(IDC_MMC_READ)->EnableWindow(TRUE);
 
         //UpdateData(FALSE);
@@ -448,9 +467,12 @@ void CMMCDlg::Verify()
         GetDlgItem(IDC_MMC_VERIFY)->SetWindowText(_T("Abort"));
         ret=XUSB_Verify(mainWnd->m_portName,m_filename);
         if(ret)
-            AfxMessageBox(_T("Verify OK !"));
+            AfxMessageBox(_T("Verify OK."));
         else
-            AfxMessageBox(_T("Verify Error !"));
+        {
+            AfxMessageBox(_T("Verify Error!"));
+            m_progress.SetPos(0);
+        }
         GetDlgItem(IDC_MMC_VERIFY)->EnableWindow(TRUE);
         GetDlgItem(IDC_MMC_VERIFY)->SetWindowText(_T("Verify"));
         //UpdateData(FALSE);
@@ -478,7 +500,7 @@ void CMMCDlg::OnBnClickedMmcVerify()
 
     if(m_type==PACK) {
 
-        AfxMessageBox(_T("Pack image can't verify"));
+        AfxMessageBox(_T("Error! Pack image can't verify"));
         return;
     }
 

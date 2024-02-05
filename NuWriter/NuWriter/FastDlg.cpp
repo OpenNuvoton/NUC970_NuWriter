@@ -218,7 +218,7 @@ LRESULT FastDlg::ThreadClose( WPARAM  id, LPARAM message)
         GetDlgItem(IDC_BTN_FAST_START)->SetWindowText(_T("Start"));
         GetDlgItem(IDC_BTN_FAST_START)->EnableWindow(FALSE);
         mainWnd->m_gtype.EnableWindow(TRUE);
-        KillTimer(0);//停止編號0計時器
+        KillTimer(0);//stop timer
     }
 
     return true;
@@ -345,7 +345,7 @@ BOOL FastDlg:: FastErase(int id, int storagetype)
         break;
 
     case TYPE_EMMC:
-        ret=XUSB_FasteMMCErase(id, mainWnd->m_portName);
+        ret = XUSB_FasteMMCErase(id, mainWnd->m_portName, m_filename);
         break;
 
     case TYPE_NAND:
@@ -687,7 +687,6 @@ void FastDlg::OnBnClickedButton1()
 
 void FastDlg::OnBnClickedButton2()
 {
-    // TODO: 在此加入控制項告知處理常式程式碼
     int Num;
     //Num = GetDlgItemInt(IDC_USBEDIT1);
     Num = m_FastDeviceID.GetCurSel();
@@ -697,7 +696,6 @@ void FastDlg::OnBnClickedButton2()
 
 void FastDlg::OnCbnSelchangeComboFastId()
 {
-    // TODO: 在此加入控制項告知處理常式程式碼
     int IdNum = 0;
     CString str;
 
@@ -713,7 +711,6 @@ void FastDlg::OnCbnSelchangeComboFastId()
 
 void FastDlg::OnTimer(UINT_PTR nIDEvent)
 {
-    // TODO: 在此加入您的訊息處理常式程式碼和 (或) 呼叫預設值
     CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
     int i;
 
@@ -733,7 +730,7 @@ void FastDlg::OnTimer(UINT_PTR nIDEvent)
             }
         }
         timercnt = 0;
-        KillTimer(0);//停止編號0計時器
+        KillTimer(0);//stop timer
         GetDlgItem(IDC_BTN_FAST_START)->EnableWindow(TRUE);
         AfxMessageBox(_T("Time-out. Please reset device and Re-connect now !!!\n"));
     }
@@ -743,7 +740,6 @@ void FastDlg::OnTimer(UINT_PTR nIDEvent)
 
 void FastDlg::OnBnClickedRstbtn()
 {
-    // TODO: 在此加入控制項告知處理常式程式碼
     int Num;
     BOOL bResult;
 
@@ -772,7 +768,6 @@ void FastDlg::OnBnClickedRstbtn()
 
 void FastDlg::OnBnClickedAllrstbtn()
 {
-    // TODO: 在此加入控制項告知處理常式程式碼
     int i;
     BOOL bResult;
     CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
@@ -1071,7 +1066,6 @@ BOOL FastDlg::XUSB(int id, CString& m_BinName)
 
 void FastDlg::OnBnClickedRadioFastNand()
 {
-    // TODO: 在此加入控制項告知處理常式程式碼
     m_type = TYPE_NAND;
     timeoutsec = NAND_TIMEOUT_SEC;
 	GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(TRUE);
@@ -1081,7 +1075,6 @@ void FastDlg::OnBnClickedRadioFastNand()
 
 void FastDlg::OnBnClickedRadioFastSpi()
 {
-    // TODO: 在此加入控制項告知處理常式程式碼
     m_type = TYPE_SPI;
     timeoutsec = SPI_TIMEOUT_SEC;
 	GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(FALSE);
@@ -1091,7 +1084,6 @@ void FastDlg::OnBnClickedRadioFastSpi()
 
 void FastDlg::OnBnClickedRadioFastemmc()
 {
-    // TODO: 在此加入控制項告知處理常式程式碼
     m_type = TYPE_EMMC;
     timeoutsec = MMC_TIMEOUT_SEC;
 	GetDlgItem(IDC_FAST_NAND_USRCONFIG)->EnableWindow(FALSE);
@@ -1101,9 +1093,8 @@ void FastDlg::OnBnClickedRadioFastemmc()
 
 void FastDlg::OnBnClickedFastNandUsrconfig()
 {
-	// TODO: 在此加入控制項告知處理常式程式碼
 	CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
-	CNandInfoDlg nandinfo_dlg;   
+	CNandInfoDlg nandinfo_dlg;
     int i;
 
     TRACE(_T("FastDlg::OnBnClickedFastNandUsrconfig  mainWnd->g_iDeviceNum =%d\n"), mainWnd->g_iDeviceNum);    
@@ -1111,8 +1102,8 @@ void FastDlg::OnBnClickedFastNandUsrconfig()
 	{
 	    nandinfo_dlg.DoModal();
 	}
-    
+
     for(i = 0; i<mainWnd->g_iDeviceNum; i++) {
-	    mainWnd->OneDeviceInfo(i);// Update nand parameters	
+	    mainWnd->OneDeviceInfo(i);// Update nand parameters
 	}
 }

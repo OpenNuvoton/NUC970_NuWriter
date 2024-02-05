@@ -31,7 +31,7 @@ public:
 	CString m_imagename;
 	HANDLE m_ExitEvent;
 	CProgressCtrl	m_progress;
-
+    BOOL XUSB_PackErase(int id, CString& portName, CString& m_pathName);
 	BOOL XUSB_Pack(CString& portName,CString& m_pathName,int *len);
 	BOOL XUSB_Burn(CString& portName,CString& m_pathName,int *len);
 	static unsigned WINAPI Download_proc(void* args);

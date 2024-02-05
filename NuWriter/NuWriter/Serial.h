@@ -3,6 +3,9 @@
 
 #include "devioctl.h"
 
+#define IBR_HEADER_LEN          (16)
+#define PACK_FOMRAT_HEADER_LEN  (48) // 12*4
+
 #define READ_TIMEOUT 10000
 #define MAX_FILESIZE 50*1024*1024 //50M
 
@@ -38,6 +41,8 @@
 #define	IMAGE		4
 #define DATA_OOB	5
 
+#define PARTITION	6
+
 #define	PMTP 	15
 #endif
 
@@ -72,6 +77,18 @@ typedef struct _INFO_T
 	DWORD	MTP_uNumber;
 }INFO_T,*PINFO_T;
 
+typedef struct _MMC_FORMAT_INFO
+{
+	DWORD   EMMC_FormatFSType;
+	DWORD   EMMC_PartitionNum;
+	DWORD   EMMC_Reserved;
+    DWORD   EMMC_Partition1Size;
+	DWORD   EMMC_Partition2Size;
+	DWORD   EMMC_Partition3Size;
+	DWORD   EMMC_Partition4Size;
+	DWORD   reserve;
+}MMC_FORMAT_INFO, *PMMC_FORMAT_INFO;
+
 typedef struct _PACK_CHILD_HEAD
 {
 	DWORD filelen;
@@ -88,6 +105,21 @@ typedef struct _PACK_HEAD
 	DWORD reserve[1];
 }PACK_HEAD,*PPACK_HEAD;
 
+typedef struct _PACK_MMC_FORMAT_INFO
+{
+	DWORD   MMCFTFS;
+	DWORD   MMCFTPNUM;
+	DWORD   MMCFTPREV;
+    DWORD   reserve1;
+	DWORD   MMCFTP1;
+	DWORD   MMCFTP1S;
+	DWORD   MMCFTP2;
+	DWORD   MMCFTP2S;
+	DWORD   MMCFTP3;
+	DWORD   MMCFTP3S;
+	DWORD   MMCFTP4;
+	DWORD   MMCFTP4S;
+}PACK_MMC_FORMAT_INFO, *PPACK_MMC_FORMAT_INFO;
 
 typedef struct _MaxOffset
 {
@@ -213,11 +245,11 @@ typedef struct _NORBOOT_MMC_HEAD //MMC(bootloader)
 	DWORD Partition2Size;  //unit of sector
 	DWORD Partition3Size;  //unit of sector
 	DWORD Partition4Size;  //unit of sector
-	DWORD PartitionS1Size; //Sector size unit 512Byte
-	DWORD PartitionS2Size; //Sector size unit 512Byte
-	DWORD PartitionS3Size; //Sector size unit 512Byte
-	DWORD PartitionS4Size; //Sector size unit 512Byte
-}NORBOOT_MMC_HEAD, * PNORBOOT_MMC_HEAD;
+    DWORD PartitionS1Size; //Sector size unit 512Byte
+    DWORD PartitionS2Size; //Sector size unit 512Byte
+    DWORD PartitionS3Size; //Sector size unit 512Byte
+    DWORD PartitionS4Size; //Sector size unit 512Byte
+}NORBOOT_MMC_HEAD,*PNORBOOT_MMC_HEAD;
 
 typedef struct _NORBOOT_MTP_HEAD //MMC(bootloader)
 {

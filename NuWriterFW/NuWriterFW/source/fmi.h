@@ -124,7 +124,7 @@ typedef struct fw_nand_image_t
 
 typedef struct fw_nor_image_t
 {
-    UINT32  actionFlag;		
+    UINT32  actionFlag;
     UINT32  fileLength;
 	union{
     UINT32  imageNo;

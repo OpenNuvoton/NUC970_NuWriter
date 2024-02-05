@@ -1200,7 +1200,7 @@ int BatchBurn_MMC(UINT32 len,UINT32 offset,UINT32 HeaderFlag)
     }
 
     /* check image 0 / offset 0 and back up */
-    //if (pmmcImage->imageType == UBOOT)  // system image, burn nomal image
+    //if (pmmcImage->imageType == UBOOT)  // system image, burn normal image
     //    fmiSD_Read(MMC_INFO_SECTOR,1,(UINT32)pInfo);
 
     mmcSourceAddr = (DOWNLOAD_BASE | NON_CACHE);
@@ -1246,12 +1246,13 @@ int BatchBurn_MMC(UINT32 len,UINT32 offset,UINT32 HeaderFlag)
         fmiSD_Write(offset,(tmplen+SD_SECTOR-1)/SD_SECTOR,(UINT32)ptr);
     }
     /* restore image 0 and offset 0 */
-    if (pmmcImage->imageType == 3) { // system image, burn nomal image
+    if (pmmcImage->imageType == 3/*PACK*/)   // system image, burn normal image
+    {
         if((pmmcImage)->macaddr[7]==1)
             memcpy(infoBuf+0x190,(UCHAR *)((pmmcImage)->macaddr),6);  // MAC Address
     }
 
-    if ((pmmcImage->flashOffset != 2) || (pmmcImage->imageType == 3)) {
+    if ((pmmcImage->flashOffset != 2) || (pmmcImage->imageType == 3/*PACK*/)) {
         /* set MMC information */
         MSG_DEBUG("SetMMCImageInfo\n");
         SetMMCImageInfo(pmmcImage);
@@ -1304,7 +1305,7 @@ int Burn_MMC(UINT32 len,UINT32 offset)
             memcpy(infoBuf+0x190,(UCHAR *)((pmmcImage)->macaddr),6);  // MAC Address
     }
 
-    if ((pmmcImage->flashOffset != 2) || (pmmcImage->imageType == 3)) {
+    if ((pmmcImage->flashOffset != 2) || (pmmcImage->imageType == 3/*PARTITION*/)) {
         /* set MMC information */
         MSG_DEBUG("SetMMCImageInfo\n");
         SetMMCImageInfo(pmmcImage);
@@ -1493,6 +1494,7 @@ void UXmodem_MMC()
                     fmiSD_Read(offset,8,(UINT32)ptr);
                     ptr=_ch;
                     usb_send(ptr,TRANSFER_LEN); //send data to PC
+					while(Bulk_Out_Transfer_Size==0) {}
                     usb_recv((unsigned char*)_ack,4);   //recv data from PC
                     tranferlen-=TRANSFER_LEN;
                     //memcpy(ptr,_ch+(8*SD_SECTOR),(16+pmmcImage->initSize));
@@ -1501,6 +1503,7 @@ void UXmodem_MMC()
                 }
                 if(tranferlen>0) {
                     usb_send(ptr,TRANSFER_LEN); //send data to PC
+					while(Bulk_Out_Transfer_Size==0) {}
                     usb_recv((unsigned char*)_ack,4);   //recv data from PC
                 }
             }
@@ -1508,8 +1511,11 @@ void UXmodem_MMC()
             for(i=0; i<blockCount; i++) {
                 fmiSD_Read(offset,8,(UINT32)ptr);
                 usb_send(ptr,TRANSFER_LEN); //send data to PC
+				while(Bulk_Out_Transfer_Size==0) {}
                 usb_recv((unsigned char*)_ack,4);   //recv data from PC
                 offset+=8;
+                usleep(5000);
+                MSG_DEBUG("blockCount:0x%08x\n",blockCount);
             }
         }
 #endif
@@ -1577,6 +1583,7 @@ void UXmodem_MMC()
                 if(blockCount==1) {
                     ptr=_ch+(16+pmmcImage->initSize);
                     usb_send(ptr,TRANSFER_LEN); //send data to PC
+                    while(Bulk_Out_Transfer_Size==0) {}
                     usb_recv((unsigned char*)_ack,4);   //recv data from PC
                 } else {
                     INT32 mvlen,tranferlen;
@@ -1594,6 +1601,7 @@ void UXmodem_MMC()
                                   blockCount, mvlen, ptr[0], ptr[1], ptr[2], ptr[3], offset);
                         ptr=_ch;
                         usb_send(ptr,TRANSFER_LEN); //send data to PC
+                        while(Bulk_Out_Transfer_Size==0) {}
                         usb_recv((unsigned char*)_ack,4);   //recv data from PC
                         tranferlen-=TRANSFER_LEN;
                         //memcpy(ptr,_ch+(8*SD_SECTOR),(16+pmmcImage->initSize));
@@ -1602,6 +1610,7 @@ void UXmodem_MMC()
                     }
                     if(tranferlen>0) {
                         usb_send(ptr,TRANSFER_LEN); //send data to PC
+                        while(Bulk_Out_Transfer_Size==0) {}                       
                         usb_recv((unsigned char*)_ack,4);   //recv data from PC
                     }
                 }
@@ -1609,6 +1618,7 @@ void UXmodem_MMC()
                 for(i=0; i<blockCount; i++) {
                     fmiSD_Read(offset,8,(UINT32)ptr);
                     usb_send(ptr,TRANSFER_LEN); //send data to PC
+                    while(Bulk_Out_Transfer_Size==0) {}
                     usb_recv((unsigned char*)_ack,4);   //recv data from PC
                     offset+=8;
                 }
@@ -1632,39 +1642,52 @@ void UXmodem_MMC()
         }
 
         MSG_DEBUG("pmmcImage->ReserveSize = %d ! eMMCBlockSize = %d\n",pmmcImage->ReserveSize, eMMCBlockSize);
-        MSG_DEBUG("PartitionNum =%d, P1=%d(0x%x)MB P2=%d(0x%x)MB P3=%d(0x%x)MB P4=%d(0x%x)MB\n", pmmcImage->PartitionNum, pmmcImage->PartitionS1Size, pmmcImage->PartitionS1Size, pmmcImage->PartitionS2Size, pmmcImage->PartitionS2Size,
-                  pmmcImage->PartitionS3Size, pmmcImage->PartitionS3Size, pmmcImage->PartitionS4Size, pmmcImage->PartitionS4Size);
+        MSG_DEBUG("PartitionNum =%d, P1=%d MB(0x%x) P2=%d MB(0x%x) P3=%d MB(0x%x) P4=%d MB(0x%x)\n", pmmcImage->PartitionNum, pmmcImage->Partition1Size, pmmcImage->PartitionS1Size, pmmcImage->Partition2Size, pmmcImage->PartitionS2Size,
+                  pmmcImage->Partition3Size, pmmcImage->PartitionS3Size, pmmcImage->Partition4Size, pmmcImage->PartitionS4Size);
         if(eMMCBlockSize>0)
         {
             //pmbr=create_mbr(eMMCBlockSize,pmmcImage->ReserveSize);
             //FormatFat32(pmbr,0);
-            pmbr=create_mbr(eMMCBlockSize, pmmcImage);
-            switch(pmmcImage->PartitionNum)
+            //pmbr=create_mbr(eMMCBlockSize, pmmcImage);
+ 
+            if(pmmcImage->Partition2Size == 0 && pmmcImage->Partition3Size == 0 && pmmcImage->Partition4Size == 0)
             {
-            case 1:
+                sysprintf("FORMAT_MODE PartitionNum =%d, P1=%d MB(0x%x) P2=%d MB(0x%x) P3=%d MB(0x%x) P4=%d MB(0x%x)\n", pmmcImage->PartitionNum, pmmcImage->Partition1Size, pmmcImage->PartitionS1Size, pmmcImage->Partition2Size, pmmcImage->PartitionS2Size,
+                      pmmcImage->Partition3Size, pmmcImage->PartitionS3Size, pmmcImage->Partition4Size, pmmcImage->PartitionS4Size);
+                pmmcImage->PartitionNum = 2;
+                pmbr=create_mbr(eMMCBlockSize, pmmcImage);
                 FormatFat32(pmbr,0);
-                break;
-            case 2:
-            {
-                FormatFat32(pmbr,0);
-                FormatFat32(pmbr,1);
             }
-            break;
-            case 3:
+            else
             {
-                FormatFat32(pmbr,0);
-                FormatFat32(pmbr,1);
-                FormatFat32(pmbr,2);
-            }
-            break;
-            case 4:
-            {
-                FormatFat32(pmbr,0);
-                FormatFat32(pmbr,1);
-                FormatFat32(pmbr,2);
-                FormatFat32(pmbr,3);
-            }
-            break;
+                pmbr=create_mbr(eMMCBlockSize, pmmcImage);
+                switch(pmmcImage->PartitionNum)
+                {
+                    case 1:
+                        FormatFat32(pmbr,0);
+                        break;
+                    case 2:
+                    {
+                        FormatFat32(pmbr,0);
+                        FormatFat32(pmbr,1);
+                        break;
+                    }
+                    case 3:
+                    {
+                        FormatFat32(pmbr,0);
+                        FormatFat32(pmbr,1);
+                        FormatFat32(pmbr,2);
+                        break;
+                    }
+                    case 4:
+                    {
+                        FormatFat32(pmbr,0);
+                        FormatFat32(pmbr,1);
+                        FormatFat32(pmbr,2);
+                        FormatFat32(pmbr,3);
+                        break;
+                    }
+                }
             }
 
             fmiSD_Read(MMC_INFO_SECTOR,1,(UINT32)ptr);
@@ -1697,6 +1720,7 @@ void UXmodem_MMC()
         offset = pmmcImage->flashOffset;
         blockCount = (pmmcImage->fileLength+((SD_SECTOR)-1))/(SD_SECTOR);
         blockCount = (blockCount+8-1)/8;
+        MSG_DEBUG("Read Total blockCount:%d\n",blockCount);
         while(blockCount) {
 
             fmiSD_Read(offset,8,(UINT32)ptr);
@@ -1704,7 +1728,10 @@ void UXmodem_MMC()
             offset+=8;
             blockCount--;
             usb_send(ptr,4096); //send data to PC
+            MSG_DEBUG("blockCount:%d\n", blockCount);
+            while(Bulk_Out_Transfer_Size==0) {}
             usb_recv((unsigned char*)_ack,4);   //recv data from PC
+            //usleep(10000);
         }
     }
     break;
@@ -1760,10 +1787,16 @@ void UXmodem_MMC()
 #if !defined(BATCH_BRUN)
                 Burn_MMC(ppack.filelen,ppack.startaddr/SD_SECTOR);
 #else
+                MSG_DEBUG("ppack.imagetype:%d\n", ppack.imagetype);
                 if(ppack.imagetype!=PMTP) {
-                    if(ppack.imagetype==UBOOT)
-                        ppack.startaddr=0x400;
-                    BatchBurn_MMC(ppack.filelen,ppack.startaddr/SD_SECTOR,0);
+                    if(ppack.imagetype!=PARTITION)
+                    {
+                        if(ppack.imagetype==UBOOT)
+                            ppack.startaddr=0x400;
+                        BatchBurn_MMC(ppack.filelen,ppack.startaddr/SD_SECTOR,0);
+                    }
+                    else
+                        continue;
                 } else { /* if(ppack.imagetype==PMTP) */
                     UINT32 m_mtp_mode,m_mtp_option,m_mtp_encrypt,m_mtp_enable,j;
                     FW_OTP_IMAGE_T MTPImage;

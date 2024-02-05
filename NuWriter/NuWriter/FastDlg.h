@@ -67,7 +67,8 @@ public:
     BOOL XUSB_FastSPIBurn(int id, CString& portName,CString& m_pathName,int *len);
     BOOL XUSB_FastSPIVerify(int id, CString& portName, CString& m_pathName);
 
-    BOOL XUSB_FasteMMCErase(int id, CString& portName);
+    //BOOL XUSB_FasteMMCErase(int id, CString& portName);
+    BOOL FastDlg::XUSB_FasteMMCErase(int id, CString& portName, CString& m_pathName);
     BOOL XUSB_FasteMMCBurn(int id, CString& portName,CString& m_pathName,int *len);
     BOOL XUSB_FasteMMCVerify(int id, CString& portName, CString& m_pathName);
 

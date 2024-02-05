@@ -25,7 +25,7 @@ CRAMDlg::~CRAMDlg()
 
 void CRAMDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);	
+	CDialog::DoDataExchange(pDX);
 
 	DDX_Control(pDX, IDC_SDRAM_DOWNPROGRESS, m_progress);
 	DDX_Text(pDX, IDC_SDRAM_FILENAME, m_fileinfo);

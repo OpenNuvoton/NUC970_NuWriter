@@ -37,12 +37,13 @@ public:
 	CString	m_execaddr;
 	int		m_type;
 	CButton m_pack_enc_check;
-	CComboBox m_combo_encrypt;	
+	CComboBox m_combo_encrypt;
 	CString m_encryptName;
 
 	CString TmpOffset;
-	int TmpOffsetFlag;	
+	int TmpOffsetFlag;
 	int modifyflag;
+	MMC_FORMAT_INFO mmcfomat_info;
 };
 
 #endif //__PACTAB1_H__
