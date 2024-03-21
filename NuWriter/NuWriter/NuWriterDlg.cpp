@@ -604,26 +604,24 @@ void CNuWriterDlg::LoadDirINI(CString szDir,wchar_t * pext, vector<CString> &sLi
     CString szFileName,szFileFullPath;
     wchar_t filename[_MAX_FNAME];
     wchar_t ext[_MAX_EXT];
-    //szDir = IncludeTrailingPathDelimiter(Dir); // 確保最後有反斜線
+    //szDir = IncludeTrailingPathDelimiter(Dir);
 
-    filehandle = FindFirstFile((szDir + _T("*.*")).GetBuffer(0), &filedata); // 因為我們要包含子目錄，所以要用 *.*，不然直接用 *.ini 就行了
+    filehandle = FindFirstFile((szDir + _T("*.*")).GetBuffer(0), &filedata);
     if (filehandle != INVALID_HANDLE_VALUE) {
         do {
-            /* 不處理隱藏檔及 . 跟 .. */
             if ((filedata.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0 ||
                     lstrcmp(filedata.cFileName, _T(".")) == 0 ||
                     lstrcmp(filedata.cFileName, _T("..")) == 0)
                 continue;
-            /* 若是資料夾 */
             if ((filedata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) {
-                szFileFullPath = szDir + filedata.cFileName;// 資料夾完整路徑
-                LoadDirINI(szFileFullPath,pext,sList); // 遞迴找下一層目錄
+                szFileFullPath = szDir + filedata.cFileName;
+                LoadDirINI(szFileFullPath,pext,sList);
             } else {
                 szFileFullPath = szDir + filedata.cFileName;
                 _wsplitpath(szFileFullPath, NULL, NULL, filename,ext);
-                if(lstrcmp(ext,pext)==0) { // 若找到的檔案的副檔名是 .ini
+                if(lstrcmp(ext,pext)==0) {
                     szFileName.Format(_T("%s%s"),filename,ext);
-                    sList.push_back(szFileName); // 將完整路徑加到 sList 裡頭
+                    sList.push_back(szFileName);
                 }
 
             }
@@ -669,7 +667,7 @@ void CNuWriterDlg::OnCbnSelchangeComboType()
 			m_info.Nand_uBlockPerFlash = 4096;
 		else if(m_info.Nand_uBlockPerFlash == 8191)
 			m_info.Nand_uBlockPerFlash = 8192;
-			
+
         if(((CNANDDlg *)mainWnd)->m_nandflash_check.GetCheck()!=TRUE) // Auto Detect
         {
             m_info.Nand_uIsUserConfig = 0;

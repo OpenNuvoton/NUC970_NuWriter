@@ -110,8 +110,8 @@ UINT32 fmiGetSPIImageInfo(unsigned int *image)
             *(image+9) = *(ptr+1);
             *(image+10) = *(ptr+3);
 
-//MSG_DEBUG("\nNo[%d], Flag[%d], name[%s]\n\n",
-//  *(image+2), *(image+7), (char *)(image+3));
+            //MSG_DEBUG("\nNo[%d], Flag[%d], name[%s]\n\n",
+            //  *(image+2), *(image+7), (char *)(image+3));
             /* pointer to next image */
             image += 11;
             ptr = ptr+8;
@@ -135,7 +135,7 @@ void addMagicHeader(unsigned int address, unsigned int length)
         *magic++ = MagicWord[i];
 
     *(ptr+1) = address;          /* 2nd word - Target Address */
-    *(ptr+2) = length;           /* 3rd word - Total length     */
+    *(ptr+2) = length;           /* 3rd word - Total length   */
     *(ptr+3) = 0xFFFFFFFF;
 }
 
@@ -1028,7 +1028,7 @@ void UXmodem_SDRAM(void)
     } else if(fileAddr == 0x8000 && exeFlag == 1) { // kernel image
         Otag=0;
         ptr=_ch;
-    } else { // dtb 
+    } else { // dtb
         Otag=0;
         ptr=_ch;
         //ptr=_ch+offset;
@@ -1324,7 +1324,7 @@ void UXmodem_MMC()
     unsigned char buf[80];
     unsigned char *_ch;
     unsigned int *_ack;
-    unsigned int blockCount,offset=0;
+    unsigned int volatile blockCount,offset=0;
     PACK_HEAD pack;
     PACK_CHILD_HEAD ppack;
     unsigned int ddrlen;
@@ -1534,8 +1534,9 @@ void UXmodem_MMC()
         _ch=((unsigned char*)(((unsigned int)DOWNLOAD_BASE)|NON_CACHE));
         ptr=_ch;
 
+        MSG_DEBUG("Total_Image: %d,  initSize=0x%08x\n", pmmcImage->imageNo, pmmcImage->initSize);
         for(j=0; j<pmmcImage->imageNo; j++) {
-            MSG_DEBUG("loop %d:  pmmcImage->imageNo = %d,  initSize=0x%08x\n", j, pmmcImage->imageNo, pmmcImage->initSize);
+
             while(1) {
                 if(Bulk_Out_Transfer_Size>=sizeof(PACK_CHILD_HEAD)) {
                     usb_recv(ptr,sizeof(PACK_CHILD_HEAD));
@@ -1550,6 +1551,7 @@ void UXmodem_MMC()
             pmmcImage->imageType = ppack.imagetype;
             pmmcImage->fileLength = ppack.filelen;
             pmmcImage->flashOffset = ppack.startaddr;
+            MSG_DEBUG("imageNo:%d  imageType: %d\n", j, pmmcImage->imageType);
             MSG_DEBUG("pmmcImage->fileLength = %d(0x%x)\n", pmmcImage->fileLength, pmmcImage->fileLength);
             MSG_DEBUG("pmmcImage->flashOffset = %d(0x%x)\n", pmmcImage->flashOffset, pmmcImage->flashOffset);
             MSG_DEBUG("pmmcImage->imageType = %d(0x%x)\n", pmmcImage->imageType, pmmcImage->imageType);
@@ -1557,8 +1559,8 @@ void UXmodem_MMC()
             if(pmmcImage->imageType == UBOOT) {
                 blockCount = (pmmcImage->fileLength+16+pmmcImage->initSize+((SD_SECTOR)-1))/(SD_SECTOR);
                 pmmcImage->flashOffset = 0x400;
-                MSG_DEBUG("blockCount = %d\n", blockCount);
-                MSG_DEBUG("pmmcImage->flashOffset = %d(0x%x)\n", pmmcImage->flashOffset, pmmcImage->flashOffset);
+                MSG_DEBUG("UBOOT blockCount = %d, uboot_len: [ %d ]\n", blockCount, pmmcImage->fileLength+16+pmmcImage->initSize);
+                MSG_DEBUG("UBOOT pmmcImage->flashOffset = %d(0x%x)\n", pmmcImage->flashOffset, pmmcImage->flashOffset);
 
                 // Get DDR parameter length
                 usb_recv(ptr,4);
@@ -1641,8 +1643,9 @@ void UXmodem_MMC()
             MSG_DEBUG("#1512 \n");
         }
 
+        sysprintf("Partition ReserveSize: %d\n",pmmcImage->ReserveSize, eMMCBlockSize);
         MSG_DEBUG("pmmcImage->ReserveSize = %d ! eMMCBlockSize = %d\n",pmmcImage->ReserveSize, eMMCBlockSize);
-        MSG_DEBUG("PartitionNum =%d, P1=%d MB(0x%x) P2=%d MB(0x%x) P3=%d MB(0x%x) P4=%d MB(0x%x)\n", pmmcImage->PartitionNum, pmmcImage->Partition1Size, pmmcImage->PartitionS1Size, pmmcImage->Partition2Size, pmmcImage->PartitionS2Size,
+        sysprintf("PartitionNum =%d, P1=%d MB(0x%x) P2=%d MB(0x%x) P3=%d MB(0x%x) P4=%d MB(0x%x)\n", pmmcImage->PartitionNum, pmmcImage->Partition1Size, pmmcImage->PartitionS1Size, pmmcImage->Partition2Size, pmmcImage->PartitionS2Size,
                   pmmcImage->Partition3Size, pmmcImage->PartitionS3Size, pmmcImage->Partition4Size, pmmcImage->PartitionS4Size);
         if(eMMCBlockSize>0)
         {
@@ -1652,7 +1655,7 @@ void UXmodem_MMC()
  
             if(pmmcImage->Partition2Size == 0 && pmmcImage->Partition3Size == 0 && pmmcImage->Partition4Size == 0)
             {
-                sysprintf("FORMAT_MODE PartitionNum =%d, P1=%d MB(0x%x) P2=%d MB(0x%x) P3=%d MB(0x%x) P4=%d MB(0x%x)\n", pmmcImage->PartitionNum, pmmcImage->Partition1Size, pmmcImage->PartitionS1Size, pmmcImage->Partition2Size, pmmcImage->PartitionS2Size,
+                MSG_DEBUG("PartitionNum =%d, P1=%d MB(0x%x) P2=%d MB(0x%x) P3=%d MB(0x%x) P4=%d MB(0x%x)\n", pmmcImage->PartitionNum, pmmcImage->Partition1Size, pmmcImage->PartitionS1Size, pmmcImage->Partition2Size, pmmcImage->PartitionS2Size,
                       pmmcImage->Partition3Size, pmmcImage->PartitionS3Size, pmmcImage->Partition4Size, pmmcImage->PartitionS4Size);
                 pmmcImage->PartitionNum = 2;
                 pmbr=create_mbr(eMMCBlockSize, pmmcImage);
@@ -1719,8 +1722,9 @@ void UXmodem_MMC()
         ptr=_ch;
         offset = pmmcImage->flashOffset;
         blockCount = (pmmcImage->fileLength+((SD_SECTOR)-1))/(SD_SECTOR);
+        sysprintf("blockCount:%d, filelen: 0x%x(%d), offset: 0x%x\n",blockCount, pmmcImage->fileLength, pmmcImage->fileLength, offset);
         blockCount = (blockCount+8-1)/8;
-        MSG_DEBUG("Read Total blockCount:%d\n",blockCount);
+        sysprintf("Read Total blockCount:%d, filelen: 0x%x(%d), offset: 0x%x\n",blockCount, pmmcImage->fileLength, pmmcImage->fileLength, offset);
         while(blockCount) {
 
             fmiSD_Read(offset,8,(UINT32)ptr);
@@ -1729,7 +1733,7 @@ void UXmodem_MMC()
             blockCount--;
             usb_send(ptr,4096); //send data to PC
             MSG_DEBUG("blockCount:%d\n", blockCount);
-            while(Bulk_Out_Transfer_Size==0) {}
+            //while(Bulk_Out_Transfer_Size==0) {}
             usb_recv((unsigned char*)_ack,4);   //recv data from PC
             //usleep(10000);
         }

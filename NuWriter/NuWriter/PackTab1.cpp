@@ -39,12 +39,12 @@ void CPackTab1::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_PACK_BROWSE, m_browse);
-	DDX_Text(pDX, IDC_PACK_IMAGENAME_A, m_imagename);	
+	DDX_Text(pDX, IDC_PACK_IMAGENAME_A, m_imagename);
 	DDX_Text(pDX, IDC_PACK_FLASHOFFSET_A, m_startblock);
 	DDV_MaxChars(pDX, m_startblock, 8);
 	DDX_Text(pDX, IDC_PACK_EXECADDR_A, m_execaddr);
 	DDV_MaxChars(pDX, m_execaddr, 8);
-	DDX_Radio(pDX, IDC_PACK_TYPE_A, m_type);	
+	DDX_Radio(pDX, IDC_PACK_TYPE_A, m_type);
 	DDX_Control(pDX, IDC_PACK_ENC_E, m_pack_enc_check);
 	DDX_Control(pDX, IDC_PACK_COMBO_ENCRYPT, m_combo_encrypt);
 }
@@ -54,10 +54,13 @@ BEGIN_MESSAGE_MAP(CPackTab1, CDialog)
 	ON_BN_CLICKED(IDC_PACK_BROWSE, &CPackTab1::OnBnClickedPackBrowse)
 	ON_BN_CLICKED(IDC_PACK_ENC_E, &CPackTab1::OnBnClickedPackEncE)
 	ON_WM_SHOWWINDOW()
+	ON_BN_CLICKED(IDC_PACK_TYPE_A3, &CPackTab1::OnBnClickedPackTypeA3)// for mmcFormat();
 END_MESSAGE_MAP()
 
 
 // CPackTab1 message handlers
+
+
 
 void CPackTab1::OnBnClickedPackBrowse()
 {
@@ -137,12 +140,53 @@ void CPackTab1::OnBnClickedPackEncE()
 			m_combo_encrypt.EnableWindow(FALSE);
 }
 
+
+void CPackTab1::mmcFormat()
+{
+    CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
+    CFormatDlg format_dlg;
+    CString tmp;
+
+    if(format_dlg.DoModal()==IDCANCEL) return;
+	mmcfomat_info.EMMC_FormatFSType = 0;// fat32
+
+    swscanf_s(format_dlg.strResSize,_T("%d"),&mmcfomat_info.EMMC_Reserved);
+	swscanf_s(format_dlg.strPartitionNum,_T("%d"),&mmcfomat_info.EMMC_PartitionNum);
+	swscanf_s(format_dlg.strPartition1Size,_T("%d"),&mmcfomat_info.EMMC_Partition1Size);
+	swscanf_s(format_dlg.strPartition2Size,_T("%d"),&mmcfomat_info.EMMC_Partition2Size);
+	swscanf_s(format_dlg.strPartition3Size,_T("%d"),&mmcfomat_info.EMMC_Partition3Size);
+	swscanf_s(format_dlg.strPartition4Size,_T("%d"),&mmcfomat_info.EMMC_Partition4Size);
+
+	// eMMC/SD & uBoot :  Partition information
+	mainWnd->m_inifile.SetValue(_T("PACK"),_T("MMCFTFS"),_T("0"));
+	tmp.Format(_T("%d"),mmcfomat_info.EMMC_PartitionNum);
+	mainWnd->m_inifile.SetValue(_T("PACK"),_T("MMCFTPNUM"),tmp);
+	tmp.Format(_T("%d"),mmcfomat_info.EMMC_Reserved);
+	mainWnd->m_inifile.SetValue(_T("PACK"),_T("MMCFTPREV"),tmp);
+	tmp.Format(_T("%d"),mmcfomat_info.EMMC_Partition1Size);
+	mainWnd->m_inifile.SetValue(_T("PACK"),_T("MMCFTP1"),tmp);
+	tmp.Format(_T("%d"),mmcfomat_info.EMMC_Partition2Size);
+	mainWnd->m_inifile.SetValue(_T("PACK"),_T("MMCFTP2"),tmp);
+	tmp.Format(_T("%d"),mmcfomat_info.EMMC_Partition3Size);
+	mainWnd->m_inifile.SetValue(_T("PACK"),_T("MMCFTP3"),tmp);
+	tmp.Format(_T("%d"),mmcfomat_info.EMMC_Partition4Size);
+	mainWnd->m_inifile.SetValue(_T("PACK"),_T("MMCFTP4"),tmp);
+	mainWnd->m_inifile.WriteFile();
+
+	TRACE("%d  %d  %d  %d  %d  %d\n",  mmcfomat_info.EMMC_PartitionNum, mmcfomat_info.EMMC_Reserved, mmcfomat_info.EMMC_Partition1Size, mmcfomat_info.EMMC_Partition2Size, mmcfomat_info.EMMC_Partition3Size, mmcfomat_info.EMMC_Partition4Size);
+}
+
+void CPackTab1::OnBnClickedPackTypeA3()
+{
+	mmcFormat();
+}
+
 BOOL CPackTab1::OnCommand(WPARAM wParam, LPARAM lParam)
 {
 	//TmpOffset
 	UpdateData(TRUE);
 	if(m_type==UBOOT)
-	{								
+	{
 		if(TmpOffsetFlag==0)
 		{
 			TmpOffsetFlag=1;
@@ -162,7 +206,6 @@ BOOL CPackTab1::OnCommand(WPARAM wParam, LPARAM lParam)
 			GetDlgItem(IDC_PACK_FLASHOFFSET_A)->SetWindowText(TmpOffset);
 			GetDlgItem(IDC_PACK_FLASHOFFSET_A)->EnableWindow(TRUE);
 		}
-				
 
 		if(m_type==PACK)
 		{

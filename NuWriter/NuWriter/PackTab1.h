@@ -44,6 +44,8 @@ public:
 	int TmpOffsetFlag;
 	int modifyflag;
 	MMC_FORMAT_INFO mmcfomat_info;
+	void mmcFormat();
+	afx_msg void OnBnClickedPackTypeA3();
 };
 
 #endif //__PACTAB1_H__

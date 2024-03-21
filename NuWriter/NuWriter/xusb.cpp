@@ -129,10 +129,15 @@ BOOL Device_Detect(CString& portName,CString& tempName)
 
 BOOLEAN DataCompare(char* base,char* src,int len)
 {
+    CString debugstr;
     int i=0;
     for(i=0; i<len; i++) {
         if(base[i]!=src[i])
+        {
+            debugstr.Format(_T("DataCompare error 0x%x(%d): %x, %x"), i, i, base[i], src[i]);
+            AfxMessageBox(debugstr);
             return FALSE;
+        }
     }
 
     return TRUE;
@@ -173,41 +178,41 @@ unsigned char * DDR2Buf(char *buf,int buflen,int *ddrlen)
 
 BOOL CheckDDRiniData(char *buf, int filelen)
 {
-	CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
-	INT i, j, ini_idx, ddr_cnt, start_idx = 0, ddr_len = 0;
+    CNuWriterDlg* mainWnd=(CNuWriterDlg*)(AfxGetApp()->m_pMainWnd);
+    INT i, j, ini_idx, ddr_cnt, start_idx = 0, ddr_len = 0;
 
-	// Check DDR *ini
-	i = PACK_FORMAT_HEADER; // PACK Header 16
-	ini_idx = 0;
-	ddr_cnt = 0;
-	// Find DDR Initial Marker
-	while(i < filelen) 
-	{
-		if((buf[i] == 0x20) && (buf[i+1] == 'T') && (buf[i+2] == 'V') && (buf[i+3] == 'N'))
-		{			
-			if((buf[i+BOOT_HEADER] == 0x55) && (buf[i+BOOT_HEADER+1] == 0xffffffaa) && (buf[i+BOOT_HEADER+2] == 0x55) && (buf[i+BOOT_HEADER+3] == 0xffffffaa))
-			{
-				ini_idx = (i+BOOT_HEADER); // Found DDR
-				ddr_cnt = ((buf[ini_idx+7]&0xff) << 24 | (buf[ini_idx+6]&0xff) << 16 | (buf[ini_idx+5]&0xff) << 8 | (buf[ini_idx+4]&0xff));
-				TRACE(_T("ini_idx:0x%x(%d)  ddr_cnt =0x%x(%d)\n"), ini_idx, ini_idx, ddr_cnt, ddr_cnt);
-				break;
-			}
-		}
-	    i++;
-	}
+    // Check DDR *ini
+    i = PACK_FORMAT_HEADER; // PACK Header 16
+    ini_idx = 0;
+    ddr_cnt = 0;
+    // Find DDR Initial Marker
+    while(i < filelen) 
+    {
+        if((buf[i] == 0x20) && (buf[i+1] == 'T') && (buf[i+2] == 'V') && (buf[i+3] == 'N'))
+        {           
+            if((buf[i+BOOT_HEADER] == 0x55) && (buf[i+BOOT_HEADER+1] == 0xffffffaa) && (buf[i+BOOT_HEADER+2] == 0x55) && (buf[i+BOOT_HEADER+3] == 0xffffffaa))
+            {
+                ini_idx = (i+BOOT_HEADER); // Found DDR
+                ddr_cnt = ((buf[ini_idx+7]&0xff) << 24 | (buf[ini_idx+6]&0xff) << 16 | (buf[ini_idx+5]&0xff) << 8 | (buf[ini_idx+4]&0xff));
+                TRACE(_T("ini_idx:0x%x(%d)  ddr_cnt =0x%x(%d)\n"), ini_idx, ini_idx, ddr_cnt, ddr_cnt);
+                break;
+            }
+        }
+        i++;
+    }
 
-	j = 0;
-	// Compare DDR *ini content
-	start_idx = ini_idx+DDR_INITIAL_MARKER+DDR_COUNTER;//ini_idx+8
-	ddr_len = ddr_cnt*8;
-	for(i = start_idx; i < (start_idx + ddr_len); i++)
-	{
-		if(buf[i] != mainWnd->ShareDDRBuf[j++])
-		{
+    j = 0;
+    // Compare DDR *ini content
+    start_idx = ini_idx+DDR_INITIAL_MARKER+DDR_COUNTER;//ini_idx+8
+    ddr_len = ddr_cnt*8;
+    for(i = start_idx; i < (start_idx + ddr_len); i++)
+    {
+        if(buf[i] != mainWnd->ShareDDRBuf[j++])
+        {
             TRACE(_T("DDR parameter error! buf[%d]= 0x%x, mainWnd->ShareDDRBuf[%d]=0x%x\n"), i, buf[i], j, mainWnd->ShareDDRBuf[j]);
-			return FALSE;
-		}
-	}
+            return FALSE;
+        }
+    }
 
     return TRUE;
 }
@@ -492,31 +497,31 @@ BOOL CSPIDlg::XUSB_Pack(CString& portName,CString& m_pathName,int *len)
     fread(lpBuffer,m_fhead->filelen,1,fp);
     if(lpBuffer[0]!=0x5) {
         AfxMessageBox(_T("This file is not pack image"));
-		delete []lpBuffer;
+        delete []lpBuffer;
         //NucUsb.NUC_CloseHandle();
         fclose(fp);
         return FALSE;
     }
     fclose(fp);
 
-	// Check DDR *ini
-	bResult=CheckDDRiniData(lpBuffer, m_fhead->filelen);
-	if(bResult==FALSE) {
-		AfxMessageBox(_T("DDR Init select error\n"));
-		delete []lpBuffer;
-		//NucUsb.NUC_CloseHandle();
-		return FALSE;
+    // Check DDR *ini
+    bResult=CheckDDRiniData(lpBuffer, m_fhead->filelen);
+    if(bResult==FALSE) {
+        AfxMessageBox(_T("DDR Init select error\n"));
+        delete []lpBuffer;
+        //NucUsb.NUC_CloseHandle();
+        return FALSE;
     }
 
     char *pbuf = lpBuffer;
     PACK_HEAD *ppackhead=(PACK_HEAD *)lpBuffer;
     bResult=NucUsb.NUC_WritePipe(0,(UCHAR *)pbuf, sizeof(PACK_HEAD));
     Sleep(5);
-    if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT)	return FALSE;
+    if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT) return FALSE;
     if(bResult!=TRUE) return FALSE;
     bResult=NucUsb.NUC_ReadPipe(0,(UCHAR *)&ack,4);
     if(bResult==FALSE) {
-	    delete []lpBuffer;
+        delete []lpBuffer;
         NucUsb.NUC_CloseHandle();
         return FALSE;
     }
@@ -530,14 +535,14 @@ BOOL CSPIDlg::XUSB_Pack(CString& portName,CString& m_pathName,int *len)
         memcpy(&child,(char *)pbuf,sizeof(PACK_CHILD_HEAD));
         //Sleep(20);
         bResult=NucUsb.NUC_WritePipe(0,(UCHAR *)pbuf, sizeof(PACK_CHILD_HEAD));
-		if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT) {
-			delete []lpBuffer;
-			return FALSE;
-		}
+        if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT) {
+            delete []lpBuffer;
+            return FALSE;
+        }
         if(bResult!=TRUE) {
-			delete []lpBuffer;
-			return FALSE;
-		}
+            delete []lpBuffer;
+            return FALSE;
+        }
         total+= sizeof(PACK_CHILD_HEAD);
         pbuf+= sizeof(PACK_CHILD_HEAD);
 
@@ -549,7 +554,7 @@ BOOL CSPIDlg::XUSB_Pack(CString& portName,CString& m_pathName,int *len)
             bResult=NucUsb.NUC_WritePipe(0,(UCHAR *)pbuf, BUF_SIZE);
             if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT) {
                 //fclose(fp);
-				delete []lpBuffer;
+                delete []lpBuffer;
                 return FALSE;
             }
 
@@ -575,7 +580,7 @@ BOOL CSPIDlg::XUSB_Pack(CString& portName,CString& m_pathName,int *len)
             }
 
             if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT) {
-			    delete []lpBuffer;
+                delete []lpBuffer;
                 return FALSE;
             }
 
@@ -617,7 +622,7 @@ BOOL CSPIDlg::XUSB_Pack(CString& portName,CString& m_pathName,int *len)
 
             if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT) {
                 //fclose(fp);
-				delete []lpBuffer;
+                delete []lpBuffer;
                 return FALSE;
             }
 
@@ -835,8 +840,8 @@ BOOL CSPIDlg::XUSB_Burn(CString& portName,CString& m_pathName,int *len)
     ((NORBOOT_NAND_HEAD *)m_fhead)->macaddr[7]=0;
 
 
-    //	for(int i=0;i<6;i++)
-    //	  ((NORBOOT_NAND_HEAD2 *)m_fhead)->macaddr[i]=i*10;
+    //  for(int i=0;i<6;i++)
+    //    ((NORBOOT_NAND_HEAD2 *)m_fhead)->macaddr[i]=i*10;
 
 
     wcstombs( m_fhead->name, (wchar_t *)m_imagename.GetBuffer(), 16);
@@ -1187,7 +1192,7 @@ BOOL CSPIDlg::XUSB_Verify(CString& portName,CString& m_pathName)
         return FALSE;
     }
 
-	m_progress.SetRange(0,100);
+    m_progress.SetRange(0,100);
     scnt=file_len/BUF_SIZE;
     rcnt=file_len%BUF_SIZE;
 
@@ -1382,7 +1387,7 @@ BOOL CSPIDlg::XUSB_Read(CString& portName,CString& m_pathName,unsigned int addr,
         return FALSE;
     }
 
-	m_progress.SetRange(0,100);
+    m_progress.SetRange(0,100);
     scnt=len/BUF_SIZE;
     rcnt=len%BUF_SIZE;
     total=0;
@@ -2052,15 +2057,15 @@ BOOL CMMCDlg::XUSB_Pack(CString& portName,CString& m_pathName,int *len)
 
     char *pbuf = lpBuffer;
     PACK_HEAD *ppackhead=(PACK_HEAD *)lpBuffer;
-	totalsize = 0;
+    totalsize = 0;
     bResult=NucUsb.NUC_WritePipe(0,(UCHAR *)pbuf, sizeof(PACK_HEAD));
     Sleep(5);
-    if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT)	return FALSE;
+    if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT) return FALSE;
     if(bResult!=TRUE) return FALSE;
     bResult=NucUsb.NUC_ReadPipe(0,(UCHAR *)&ack,4);
     if(bResult==FALSE)
     {
-		delete []lpBuffer;
+        delete []lpBuffer;
         NucUsb.NUC_CloseHandle();
         return FALSE;
     }
@@ -2078,7 +2083,7 @@ BOOL CMMCDlg::XUSB_Pack(CString& portName,CString& m_pathName,int *len)
         memcpy(&child,(char *)pbuf,sizeof(PACK_CHILD_HEAD));
         //Sleep(20);
         bResult=NucUsb.NUC_WritePipe(0,(UCHAR *)pbuf, sizeof(PACK_CHILD_HEAD));
-        if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT)	return FALSE;
+        if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT) return FALSE;
         if(bResult!=TRUE) return FALSE;
         total+= sizeof(PACK_CHILD_HEAD);
         pbuf+= sizeof(PACK_CHILD_HEAD);
@@ -2218,7 +2223,7 @@ BOOL CMMCDlg::XUSB_Pack(CString& portName,CString& m_pathName,int *len)
         u32imagetype = child.imagetype;
         TRACE(_T("      child.image(%d): child.filelen=%d,  PACK_CHILD_HEAD size=%d\n"),i, child.filelen, sizeof(PACK_CHILD_HEAD));
         bResult=NucUsb.NUC_WritePipe(0,(UCHAR *)pbuf, sizeof(PACK_CHILD_HEAD));
-        if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT)	return FALSE;
+        if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT) return FALSE;
         if(bResult==FALSE) {
             delete []lpBuffer;
             NucUsb.NUC_CloseHandle();
@@ -2255,7 +2260,7 @@ BOOL CMMCDlg::XUSB_Pack(CString& portName,CString& m_pathName,int *len)
 
         //total+= sizeof(PACK_CHILD_HEAD);
         pbuf+= sizeof(PACK_CHILD_HEAD);
-		totalsize += sizeof(PACK_CHILD_HEAD);
+        totalsize += sizeof(PACK_CHILD_HEAD);
         //Sleep(1);
         scnt=child.filelen/BUF_SIZE;
         rcnt=child.filelen%BUF_SIZE;
@@ -2272,7 +2277,7 @@ BOOL CMMCDlg::XUSB_Pack(CString& portName,CString& m_pathName,int *len)
             }
             if(bResult==FALSE)
             {
-				delete []lpBuffer;
+                delete []lpBuffer;
                 NucUsb.NUC_CloseHandle();
                 TRACE(_T("Error! Pack eMMC WritePipe error. scnt= %d ,0x%x\n"), scnt, GetLastError());
                 return FALSE;
@@ -2296,7 +2301,7 @@ BOOL CMMCDlg::XUSB_Pack(CString& portName,CString& m_pathName,int *len)
                     NucUsb.NUC_CloseHandle();
                     //fclose(fp);
                     CString tmp;
-                    tmp.Format(_T("Pack ACK error %d!"),i);
+                    tmp.Format(_T("Pack eMMC ACK error! imagenum:%d"),i);
                     AfxMessageBox(tmp);
                     return FALSE;
                 }
@@ -2329,8 +2334,8 @@ BOOL CMMCDlg::XUSB_Pack(CString& portName,CString& m_pathName,int *len)
             }
             if(bResult==FALSE)
             {
-				delete []lpBuffer;
-				NucUsb.NUC_CloseHandle();
+                delete []lpBuffer;
+                NucUsb.NUC_CloseHandle();
                 TRACE(_T("Error! Pack eMMC WritePipe error! rcnt = %d  0x%x\n"), rcnt, GetLastError());
                 return FALSE;
             }
@@ -2359,8 +2364,8 @@ BOOL CMMCDlg::XUSB_Pack(CString& portName,CString& m_pathName,int *len)
 
             if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT) {
                 //fclose(fp);
-				delete []lpBuffer;
-				NucUsb.NUC_CloseHandle();
+                delete []lpBuffer;
+                NucUsb.NUC_CloseHandle();
                 return FALSE;
             }
 
@@ -2381,10 +2386,10 @@ BOOL CMMCDlg::XUSB_Pack(CString& portName,CString& m_pathName,int *len)
 
         }
         //posnum+=100;
-
+//#endif
         bResult=NucUsb.NUC_ReadPipe(0,(UCHAR *)&blockNum,4);
         if(bResult==FALSE) {
-			delete []lpBuffer;
+            delete []lpBuffer;
             NucUsb.NUC_CloseHandle();
             AfxMessageBox(_T("Pack eMMC read block error !"));
             return FALSE;
@@ -2512,7 +2517,7 @@ BOOL CMMCDlg::XUSB_Burn(CString& portName,CString& m_pathName,int *len)
         swscanf_s(m_startblock,_T("%x"),&m_fhead->flashoffset);
         //-------------------DDR---------------------
         ddrbuf=DDR2Buf(mainWnd->ShareDDRBuf,mainWnd->DDRLen,&ddrlen);
-		TRACE(_T("ddrlen=0x%x(%d)\n"), ddrlen, ddrlen);
+        TRACE(_T("ddrlen=0x%x(%d)\n"), ddrlen, ddrlen);
         file_len=file_len+ddrlen+16;
         ((NORBOOT_MMC_HEAD *)m_fhead)->initSize=ddrlen;
         //-------------------------------------------
@@ -2552,8 +2557,8 @@ BOOL CMMCDlg::XUSB_Burn(CString& portName,CString& m_pathName,int *len)
     ((NORBOOT_MMC_HEAD *)m_fhead)->macaddr[7]=0;
 
 
-    //	for(int i=0;i<6;i++)
-    //	  ((NORBOOT_NAND_HEAD2 *)m_fhead)->macaddr[i]=i*10;
+    //  for(int i=0;i<6;i++)
+    //    ((NORBOOT_NAND_HEAD2 *)m_fhead)->macaddr[i]=i*10;
 
 
     wcstombs( m_fhead->name, (wchar_t *)m_imagename.GetBuffer(), 16);
@@ -3429,26 +3434,26 @@ BOOL CNANDDlg::XUSB_Pack(CString& portName,CString& m_pathName,int *len)
 
     fread(lpBuffer,m_fhead->filelen,1,fp);
     if(lpBuffer[0]!=0x5) {
-	    delete []lpBuffer;
-		fclose(fp);
+        delete []lpBuffer;
+        fclose(fp);
         AfxMessageBox(_T("This file is not pack image"));
     }
     fclose(fp);
 
-	// Check DDR *ini
-	bResult=CheckDDRiniData(lpBuffer, m_fhead->filelen);
-	if(bResult==FALSE) {
-		AfxMessageBox(_T("DDR Init select error\n"));
-		delete []lpBuffer;
-		//NucUsb.NUC_CloseHandle();
-		return FALSE;
-    }	
+    // Check DDR *ini
+    bResult=CheckDDRiniData(lpBuffer, m_fhead->filelen);
+    if(bResult==FALSE) {
+        AfxMessageBox(_T("DDR Init select error\n"));
+        delete []lpBuffer;
+        //NucUsb.NUC_CloseHandle();
+        return FALSE;
+    }   
 
     char *pbuf = lpBuffer;
     PACK_HEAD *ppackhead=(PACK_HEAD *)lpBuffer;
     bResult=NucUsb.NUC_WritePipe(0,(UCHAR *)pbuf, sizeof(PACK_HEAD));
     Sleep(5);
-    if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT)	return FALSE;
+    if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT) return FALSE;
     if(bResult!=TRUE) return FALSE;
     bResult=NucUsb.NUC_ReadPipe(0,(UCHAR *)&ack,4);
     if(bResult==FALSE) {
@@ -3468,7 +3473,7 @@ BOOL CNANDDlg::XUSB_Pack(CString& portName,CString& m_pathName,int *len)
         memcpy(&child,(char *)pbuf,sizeof(PACK_CHILD_HEAD));
         bResult=NucUsb.NUC_WritePipe(0,(UCHAR *)pbuf, sizeof(PACK_CHILD_HEAD));
 
-        if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT)	return FALSE;
+        if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT) return FALSE;
         if(bResult!=TRUE) return FALSE;
         total+= sizeof(PACK_CHILD_HEAD);
         pbuf+= sizeof(PACK_CHILD_HEAD);
@@ -3610,7 +3615,7 @@ BOOL CNANDDlg::XUSB_Pack(CString& portName,CString& m_pathName,int *len)
         total=0;
         memcpy(&child,(char *)pbuf,sizeof(PACK_CHILD_HEAD));
         bResult=NucUsb.NUC_WritePipe(0,(UCHAR *)pbuf, sizeof(PACK_CHILD_HEAD));
-        if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT)	return FALSE;
+        if(WaitForSingleObject(m_ExitEvent, 0) != WAIT_TIMEOUT) return FALSE;
         if(bResult!=TRUE) return FALSE;
 
         bResult=NucUsb.NUC_ReadPipe(0,(UCHAR *)&ack,4);
@@ -5159,7 +5164,7 @@ BOOL CNANDDlg::XUSB_Read(CString& portName,CString& m_pathName,unsigned int addr
     tempfp=_wfopen(m_pathName,_T("w+b"));
     //-----------------------------------
     if(!tempfp) {
-	    delete []lpBuffer;
+        delete []lpBuffer;
         AfxMessageBox(_T("File Open error\n"));
         return FALSE;
     }
@@ -5398,12 +5403,12 @@ BOOL CNANDDlg::XUSB_Erase(CString& portName)
 /************** NAND End ************/
 
 /************** MTP Begin ************/
-#define MTP_KEY_SUCCESS			0x80
-#define MTP_NO_KEY 				0x81
-#define MTP_LOCK_FAILED 		0x82
-#define MTP_LOCK_KEY    		0x83
+#define MTP_KEY_SUCCESS         0x80
+#define MTP_NO_KEY              0x81
+#define MTP_LOCK_FAILED         0x82
+#define MTP_LOCK_KEY            0x83
 #define MTP_LOCK_SUCCESS        0x84
-#define MTP_ENABLE_SUCCESS 	    0x85
+#define MTP_ENABLE_SUCCESS      0x85
 
 //#define TEST
 BOOL CMTPDlg::XUSB_Burn(CString& portName,CString& m_pathName)
@@ -5493,18 +5498,18 @@ BOOL CMTPDlg::XUSB_Burn(CString& portName,CString& m_pathName)
     else
         fhead.Lock = 0;
 
-	TRACE(_T("m_mtp_option= %d, m_mtp_mode=%d,m_mtp_encrypt=%d, fhead.Mode = %d, fhead.Option = %d,  fhead.Lock = %d\n"), m_mtp_option, m_mtp_mode, m_mtp_encrypt, fhead.Mode, fhead.Option, fhead.Lock);
+    TRACE(_T("m_mtp_option= %d, m_mtp_mode=%d,m_mtp_encrypt=%d, fhead.Mode = %d, fhead.Option = %d,  fhead.Lock = %d\n"), m_mtp_option, m_mtp_mode, m_mtp_encrypt, fhead.Mode, fhead.Option, fhead.Lock);
 
-	lpBuffer = new char[BUF_SIZE];
-	memcpy(lpBuffer,(unsigned char*)&fhead,sizeof(NORBOOT_MTP_HEAD));
-	bResult=NucUsb.NUC_WritePipe(0,(UCHAR *)lpBuffer, sizeof(NORBOOT_MTP_HEAD));
-	if(bResult==FALSE)
-	{
-		delete []lpBuffer;
-		NucUsb.NUC_CloseHandle();
-		AfxMessageBox(_T("Write MTP head error\n"));
-		return FALSE;
-	}
+    lpBuffer = new char[BUF_SIZE];
+    memcpy(lpBuffer,(unsigned char*)&fhead,sizeof(NORBOOT_MTP_HEAD));
+    bResult=NucUsb.NUC_WritePipe(0,(UCHAR *)lpBuffer, sizeof(NORBOOT_MTP_HEAD));
+    if(bResult==FALSE)
+    {
+        delete []lpBuffer;
+        NucUsb.NUC_CloseHandle();
+        AfxMessageBox(_T("Write MTP head error\n"));
+        return FALSE;
+    }
 
     Sleep(50);
     bResult=NucUsb.NUC_ReadPipe(0,(UCHAR *)&ack,4);
@@ -5779,13 +5784,13 @@ BOOL FastDlg::XUSB_FastNANDBurn(int id, CString& portName,CString& m_pathName,in
     }
     fclose(fp);
 
-	// Check DDR *ini
-	bResult=CheckDDRiniData(lpBuffer, m_fhead_nand->filelen);
-	if(bResult==FALSE) {
-		delete []lpBuffer;
+    // Check DDR *ini
+    bResult=CheckDDRiniData(lpBuffer, m_fhead_nand->filelen);
+    if(bResult==FALSE) {
+        delete []lpBuffer;
         NucUsb.CloseWinUsbDevice(id);
-		//AfxMessageBox(_T("DDR Init select error\n"));
-		return ERR_DDRINI_DATACOM;
+        //AfxMessageBox(_T("DDR Init select error\n"));
+        return ERR_DDRINI_DATACOM;
     }
 
     char *pbuf = lpBuffer;
@@ -6485,13 +6490,13 @@ BOOL FastDlg::XUSB_FastSPIBurn(int id, CString& portName,CString& m_pathName,int
     }
     fclose(fp);
 
-	// Check DDR *ini
-	bResult=CheckDDRiniData(lpBuffer, m_fhead_spi->filelen);
-	if(bResult==FALSE) {
-		delete []lpBuffer;
+    // Check DDR *ini
+    bResult=CheckDDRiniData(lpBuffer, m_fhead_spi->filelen);
+    if(bResult==FALSE) {
+        delete []lpBuffer;
         NucUsb.CloseWinUsbDevice(id);
-		//AfxMessageBox(_T("DDR Init select error\n"));
-		return ERR_DDRINI_DATACOM;
+        //AfxMessageBox(_T("DDR Init select error\n"));
+        return ERR_DDRINI_DATACOM;
     }
 
     char *pbuf = lpBuffer;
@@ -6656,7 +6661,7 @@ BOOL FastDlg::XUSB_FastSPIBurn(int id, CString& portName,CString& m_pathName,int
 
             if(pos%5==0) {
                PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)(posnum+pos),0);
-            	//PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)pos,0);
+                //PostMessage((WM_FAST_PROGRESS1+id),(LPARAM)pos,0);
             }
             // if((pos!=prepos) || (pos==100)) {
                 // prepos=pos;
@@ -6675,7 +6680,7 @@ BOOL FastDlg::XUSB_FastSPIBurn(int id, CString& portName,CString& m_pathName,int
             if(pos%5==0) {
 
                 PostMessage(WM_SPI_PROGRESS,(LPARAM)(posnum+pos),0);
-            }			
+            }
 #endif
         }
 
@@ -6925,7 +6930,7 @@ int FastDlg::XUSB_FastSPIVerify(int id, CString& portName, CString& m_pathName)
                 NucUsb.CloseWinUsbDevice(id);
                 fclose(fp);
                 //return FALSE;
-				return ERR_VERIFY_DATACOM;
+                return ERR_VERIFY_DATACOM;
             }
     
         } else {
@@ -6988,7 +6993,7 @@ int FastDlg::XUSB_FastSPIVerify(int id, CString& portName, CString& m_pathName)
                     delete []lpBuffer;
                     NucUsb.CloseWinUsbDevice(id);
                     //return FALSE;
-					return ERR_VERIFY_DATACOM;
+                    return ERR_VERIFY_DATACOM;
 
                 }
 
@@ -7029,9 +7034,7 @@ int FastDlg::XUSB_FastSPIVerify(int id, CString& portName, CString& m_pathName)
 
 }
 
-
 BOOL FastDlg::XUSB_FasteMMCErase(int id, CString& portName, CString& m_pathName)
-//BOOL FastDlg::XUSB_FasteMMCErase(int id, CString& portName)
 {
     BOOL bResult;
     CString tempstr;
@@ -7284,7 +7287,7 @@ BOOL FastDlg::XUSB_FasteMMCBurn(int id, CString& portName,CString& m_pathName,in
     {
         NucUsb.CloseWinUsbDevice(id);
         fclose(fp);
-        AfxMessageBox(_T("File Open error\n"));
+        AfxMessageBox(_T("Error! File Open error\n"));
         return FALSE;
     }
 
@@ -7295,7 +7298,7 @@ BOOL FastDlg::XUSB_FasteMMCBurn(int id, CString& portName,CString& m_pathName,in
     {
         NucUsb.CloseWinUsbDevice(id);
         fclose(fp);
-        AfxMessageBox(_T("File length is zero\n"));
+        AfxMessageBox(_T("Error! File length is zero\n"));
         return FALSE;
     }
 
@@ -7305,7 +7308,7 @@ BOOL FastDlg::XUSB_FasteMMCBurn(int id, CString& portName,CString& m_pathName,in
     {
         NucUsb.CloseWinUsbDevice(id);
         fclose(fp);
-        AfxMessageBox(_T("Fast eMMC Burn: Pack Image Format Error\n"));
+        AfxMessageBox(_T("Error! Pack Image Format Error\n"));
         return ERR_PACK_FORMAT;
     }
 
@@ -7343,7 +7346,7 @@ BOOL FastDlg::XUSB_FasteMMCBurn(int id, CString& portName,CString& m_pathName,in
     {
         delete []lpBuffer;
         fclose(fp);
-        //AfxMessageBox(_T("This file is not pack image"));
+        //AfxMessageBox(_T("Error! This file is not pack image"));
         return ERR_PACK_FORMAT;
     }
     fclose(fp);
@@ -7402,7 +7405,8 @@ BOOL FastDlg::XUSB_FasteMMCBurn(int id, CString& portName,CString& m_pathName,in
         total=0;
         memcpy(&child,(char *)pbuf,sizeof(PACK_CHILD_HEAD));
         u32imagetype = child.imagetype;
-
+        tempstr.Format(_T("[ %d ], imagetype:%d, file_len: 0x%x(%d)\n"), i, u32imagetype, child.filelen, child.filelen);
+        //AfxMessageBox(tempstr);
         bResult=NucUsb.NUC_WritePipe(id,(UCHAR *)pbuf, sizeof(PACK_CHILD_HEAD));
         if(WaitForSingleObject(m_ExitEventBurn[id], EMMC_RW_PIPE_TIMEOUT) != WAIT_TIMEOUT)
         {
@@ -7431,8 +7435,10 @@ BOOL FastDlg::XUSB_FasteMMCBurn(int id, CString& portName,CString& m_pathName,in
         if(u32imagetype == PARTITION)
         {
             pbuf+= sizeof(PACK_CHILD_HEAD)+PACK_FOMRAT_HEADER_LEN;
-            totalsize += sizeof(PACK_CHILD_HEAD)+PACK_FOMRAT_HEADER_LEN; // skip partition header
+            totalsize += sizeof(PACK_CHILD_HEAD)+PACK_FOMRAT_HEADER_LEN;//skip partition header
             TRACE(_T("totalsize = %d   file_len =%d   sizeof(PACK_MMC_FORMAT_INFO) =%d \n"), totalsize, file_len, sizeof(PACK_MMC_FORMAT_INFO));
+            tempstr.Format(_T("imagetype:%d, totalsize = %d   file_len =%d   sizeof(PACK_MMC_FORMAT_INFO) =%d \n"), u32imagetype, totalsize, file_len, sizeof(PACK_MMC_FORMAT_INFO));
+            AfxMessageBox(tempstr);
             pos=(int)(((float)(((float)totalsize/(float)file_len))*100));
             if(pos>=100)
             {
@@ -7757,8 +7763,6 @@ BOOL FastDlg::XUSB_FasteMMCVerify(int id, CString& portName, CString& m_VfypathN
             {
                 ddrlen = (((mainWnd->DDRLen+8+15)/16)*16);
                 pbuf += ddrlen + IBR_HEADER_LEN;
-                //pbuf += 16 + mainWnd->DDRLen + uBootHeadLen;
-                //total+= 16 + mainWnd->DDRLen + uBootHeadLen;
                 totalsize+= ddrlen + IBR_HEADER_LEN;
 
                 // send DDR parameter Length
