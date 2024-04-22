@@ -51,7 +51,7 @@ inline BOOL CSelChipDlg::OnInitDialog()
 
 	this->SetWindowText(PROJECT_NAME);
 
-	m_chip.AddString(_T("NUC970/N9H30 series"));
+	m_chip.AddString(_T("NUC970/N9H30/N9H31 series"));
 	m_chip.SetCurSel(0);
 
 	//init DDR & key dirctory------------------------------------------------
