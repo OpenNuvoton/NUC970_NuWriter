@@ -1643,7 +1643,7 @@ void UXmodem_MMC()
             MSG_DEBUG("#1512 \n");
         }
 
-        sysprintf("Partition ReserveSize: %d\n",pmmcImage->ReserveSize, eMMCBlockSize);
+        sysprintf("Partition ReserveSize: %d ! eMMCBlockSize: %d\n",pmmcImage->ReserveSize, eMMCBlockSize);
         MSG_DEBUG("pmmcImage->ReserveSize = %d ! eMMCBlockSize = %d\n",pmmcImage->ReserveSize, eMMCBlockSize);
         sysprintf("PartitionNum =%d, P1=%d MB(0x%x) P2=%d MB(0x%x) P3=%d MB(0x%x) P4=%d MB(0x%x)\n", pmmcImage->PartitionNum, pmmcImage->Partition1Size, pmmcImage->PartitionS1Size, pmmcImage->Partition2Size, pmmcImage->PartitionS2Size,
                   pmmcImage->Partition3Size, pmmcImage->PartitionS3Size, pmmcImage->Partition4Size, pmmcImage->PartitionS4Size);

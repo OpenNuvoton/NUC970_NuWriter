@@ -31,6 +31,7 @@ UINT8 *_sd_pSDHCBuffer;
 UINT32 _sd_ReferenceClock;
 
 __align(4096) UINT8 _sd_ucSDHCBuffer[64];
+unsigned char _fmi_uceMMCBuffer[512];
 
 void SD_CheckRB()
 {
@@ -686,23 +687,63 @@ void SD_Get_SD_info(FMI_SD_INFO_T *pSD, DISK_DATA_T *_info)
 
     SD_SDCmdAndRsp2(pSD, 9, pSD->uRCA, Buffer);
 
-    if ((Buffer[0] & 0xc0000000) && (pSD->uCardType != SD_TYPE_MMC) && (pSD->uCardType != SD_TYPE_EMMC))
+    if ((pSD->uCardType == SD_TYPE_MMC) || (pSD->uCardType == SD_TYPE_EMMC))
     {
-        C_Size = ((Buffer[1] & 0x0000003f) << 16) | ((Buffer[2] & 0xffff0000) >> 16);
-        size = (C_Size+1) * 512;// Kbytes
+        /* for MMC/eMMC card */
+        if ((Buffer[0] & 0xc0000000) == 0xc0000000)
+        {
+            /* CSD_STRUCTURE [127:126] is 3 */
+            /* CSD version depend on EXT_CSD register in eMMC v4.4 for card size > 2GB */
+            SD_SDCmdAndRsp(pSD, 7ul, pSD->uRCA, 0ul);
 
-        _info->diskSize = size;
-        _info->totalSectorN = size << 1;
+            ptr = (unsigned char *)((unsigned int)_sd_ucSDHCBuffer);
+            outpw(REG_NAND_DMACSAR, (unsigned int)ptr); // set DMA transfer starting address
+            outpw(REG_NAND_SDBLEN, 511); // read 512 bytes for EXT_CSD
+
+            if (SD_SDCmdAndRspDataIn(pSD, 8ul, 0x00ul) == Successful)
+            {
+                SD_SDCommand(pSD, 7ul, 0ul);
+                outpw(REG_NAND_SDCSR, inpw(REG_NAND_SDCSR) | SD_CSR_CLK8_OE);
+                while ( (inpw(REG_NAND_SDCSR) & SD_CSR_CLK8_OE) == SD_CSR_CLK8_OE)
+                {
+                }
+
+                _info->totalSectorN = (*(unsigned int *)(ptr + 212));
+                _info->diskSize = _info->totalSectorN / 2ul;
+            }
+        }
+        else
+        {
+            /* CSD version v1.0/1.1/1.2 in eMMC v4.4 spec for card size <= 2GB */
+            R_LEN = (Buffer[1] & 0x000f0000ul) >> 16;
+            C_Size = ((Buffer[1] & 0x000003fful) << 2) | ((Buffer[2] & 0xc0000000ul) >> 30);
+            MULT = (Buffer[2] & 0x00038000ul) >> 15;
+            size = (C_Size+1ul) * (1ul<<(MULT+2ul)) * (1ul<<R_LEN);
+
+            _info->diskSize = size / 1024ul;
+            _info->totalSectorN = size / 512ul;
+        }
     }
     else
     {
-        R_LEN = (Buffer[1] & 0x000f0000) >> 16;
-        C_Size = ((Buffer[1] & 0x000003ff) << 2) | ((Buffer[2] & 0xc0000000) >> 30);
-        MULT = (Buffer[2] & 0x00038000) >> 15;
-        size = (C_Size + 1) * (1 << (MULT + 2)) * (1 << R_LEN);
+        if ((Buffer[0] & 0xc0000000) != 0x0ul)
+        {
+            C_Size = ((Buffer[1] & 0x0000003ful) << 16) | ((Buffer[2] & 0xffff0000ul) >> 16);
+            size = (C_Size+1ul) * 512ul; /* Kbytes */
 
-        _info->diskSize = size / 1024;
-        _info->totalSectorN = size / 512;
+            _info->diskSize = size;
+            _info->totalSectorN = size << 1;
+        }
+        else
+        {
+            R_LEN = (Buffer[1] & 0x000f0000ul) >> 16;
+            C_Size = ((Buffer[1] & 0x000003fful) << 2) | ((Buffer[2] & 0xc0000000ul) >> 30);
+            MULT = (Buffer[2] & 0x00038000ul) >> 15;
+            size = (C_Size+1ul) * (1ul<<(MULT+2ul)) * (1ul<<R_LEN);
+
+            _info->diskSize = size / 1024ul;
+            _info->totalSectorN = size / 512ul;
+        }
     }
     _info->sectorSize = 512;
 
@@ -716,6 +757,9 @@ void SD_Get_SD_info(FMI_SD_INFO_T *pSD, DISK_DATA_T *_info)
     ptr = ptr + 10;
     for (i=0; i<4; i++)
         _info->serial[i] = *ptr++;
+
+    MSG_DEBUG("The size is %d KB\n", _info->diskSize);
+    MSG_DEBUG("            %d bytes * %d sectors\n", _info->sectorSize, _info->totalSectorN);
 }
 
 void SD_SetReferenceClock(UINT32 uClock)
