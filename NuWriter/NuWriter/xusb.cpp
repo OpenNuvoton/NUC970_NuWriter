@@ -7438,7 +7438,7 @@ BOOL FastDlg::XUSB_FasteMMCBurn(int id, CString& portName,CString& m_pathName,in
             totalsize += sizeof(PACK_CHILD_HEAD)+PACK_FOMRAT_HEADER_LEN;//skip partition header
             TRACE(_T("totalsize = %d   file_len =%d   sizeof(PACK_MMC_FORMAT_INFO) =%d \n"), totalsize, file_len, sizeof(PACK_MMC_FORMAT_INFO));
             tempstr.Format(_T("imagetype:%d, totalsize = %d   file_len =%d   sizeof(PACK_MMC_FORMAT_INFO) =%d \n"), u32imagetype, totalsize, file_len, sizeof(PACK_MMC_FORMAT_INFO));
-            AfxMessageBox(tempstr);
+            //AfxMessageBox(tempstr);
             pos=(int)(((float)(((float)totalsize/(float)file_len))*100));
             if(pos>=100)
             {

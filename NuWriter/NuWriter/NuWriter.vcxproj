@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E577BC12-2EFC-4F58-B2C5-5CC9FA0B11D6}</ProjectGuid>
+    <RootNamespace>NuWriter</RootNamespace>
+    <Keyword>MFCProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <UseOfMfc>Static</UseOfMfc>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <UseOfMfc>Static</UseOfMfc>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>16.0.32830.301</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>.\Debug\</OutDir>
+    <IntDir>.\Debug\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>.\Release\</OutDir>
+    <IntDir>.\Release\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/D "_CRT_SECURE_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>.\WinUsbLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalLibraryDirectories>.\WinUsbLib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/D "_CRT_SECURE_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>.\WinUsbLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat />
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalLibraryDirectories>.\WinUsbLib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="AddFileDialog.cpp" />
+    <ClCompile Include="aes.cpp" />
+    <ClCompile Include="enumser.cpp" />
+    <ClCompile Include="EraseDlg.cpp" />
+    <ClCompile Include="FastDlg.cpp" />
+    <ClCompile Include="FooButton.cpp" />
+    <ClCompile Include="FormatDlg.cpp" />
+    <ClCompile Include="IniFile.cpp" />
+    <ClCompile Include="InitDlg.cpp" />
+    <ClCompile Include="MMCDlg.cpp" />
+    <ClCompile Include="MTPDlg.cpp" />
+    <ClCompile Include="NANDDlg.cpp" />
+    <ClCompile Include="NandInfoDlg.cpp" />
+    <ClCompile Include="NucWinUsb.cpp" />
+    <ClCompile Include="NuWriter.cpp" />
+    <ClCompile Include="NuWriterDlg.cpp" />
+    <ClCompile Include="PACKDlg.cpp" />
+    <ClCompile Include="PackTab1.cpp" />
+    <ClCompile Include="PackTab2.cpp" />
+    <ClCompile Include="RAMDlg.cpp" />
+    <ClCompile Include="ReportCtrl.cpp" />
+    <ClCompile Include="SelChipDlg.cpp" />
+    <ClCompile Include="Serial.cpp" />
+    <ClCompile Include="Sliders.cpp" />
+    <ClCompile Include="SmartEdit.cpp" />
+    <ClCompile Include="SPIDlg.cpp" />
+    <ClCompile Include="SPIReadDlg.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="SubFormCollection.cpp" />
+    <ClCompile Include="xusb.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AddFileDialog.h" />
+    <ClInclude Include="aes.h" />
+    <ClInclude Include="device.h" />
+    <ClInclude Include="enumser.h" />
+    <ClInclude Include="EraseDlg.h" />
+    <ClInclude Include="FastDlg.h" />
+    <ClInclude Include="FooButton.h" />
+    <ClInclude Include="FormatDlg.h" />
+    <ClInclude Include="IniFile.h" />
+    <ClInclude Include="InitDlg.h" />
+    <ClInclude Include="MMCDlg.h" />
+    <ClInclude Include="MTPDlg.h" />
+    <ClInclude Include="NANDDlg.h" />
+    <ClInclude Include="NandInfoDlg.h" />
+    <ClInclude Include="NucWinUsb.h" />
+    <ClInclude Include="NuWriter.h" />
+    <ClInclude Include="NuWriterDlg.h" />
+    <ClInclude Include="PACKDlg.h" />
+    <ClInclude Include="PackTab1.h" />
+    <ClInclude Include="PackTab2.h" />
+    <ClInclude Include="RAMDlg.h" />
+    <ClInclude Include="ReportCtrl.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="SelChipDlg.h" />
+    <ClInclude Include="Serial.h" />
+    <ClInclude Include="SPIDlg.h" />
+    <ClInclude Include="SPIReadDlg.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="SubFormCollection.h" />
+    <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\Add.bmp" />
+    <Image Include="res\banner.bmp" />
+    <Image Include="res\banner2.bmp" />
+    <Image Include="res\banner3.bmp" />
+    <Image Include="res\bitmap1.bmp" />
+    <Image Include="res\Browse.bmp" />
+    <Image Include="res\chip.ico" />
+    <Image Include="res\Continue.bmp" />
+    <Image Include="res\Delete.bmp" />
+    <Image Include="res\EraseAll.bmp" />
+    <Image Include="res\Exit.bmp" />
+    <Image Include="res\Format.bmp" />
+    <Image Include="res\icon1.ico" />
+    <Image Include="res\Modify.bmp" />
+    <Image Include="res\NuWriter.bmp" />
+    <Image Include="res\NuWriter.ico" />
+    <Image Include="res\Output.bmp" />
+    <Image Include="res\Quit.bmp" />
+    <Image Include="res\ReadDevice.bmp" />
+    <Image Include="res\ReConnect0.bmp" />
+    <Image Include="res\ReConnect1.bmp" />
+    <Image Include="res\Verify.bmp" />
+    <Image Include="res\WriterDevice.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="NuWriter.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\NuWriter.rc2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="NuWriter.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
