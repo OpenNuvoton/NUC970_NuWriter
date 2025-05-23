@@ -16,13 +16,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Chinese (Taiwan) resources
+// 中文 (繁體，台灣) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHT)
-#ifdef _WIN32
 LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL
 #pragma code_page(950)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -71,7 +69,9 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\NuWriter.ico"
+
 IDI_CHIP                ICON                    "res\\chip.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -147,7 +147,7 @@ BEGIN
     LTEXT           "Select DDR parameter :",IDC_STATIC_DDR_PAR,16,48,116,8
     COMBOBOX        IDC_COMBO1,16,31,141,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_COMBO_DDR,16,61,141,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    CONTROL         140,IDC_STATIC,"Static",SS_BITMAP,1,1,501,15
+    CONTROL         IDB_BITMAP1,IDC_STATIC,"Static",SS_BITMAP,1,1,501,15
 END
 
 IDD_MMC DIALOGEX 0, 0, 442, 152
@@ -311,8 +311,8 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "About NuWriter"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,14,14,21,20
-    LTEXT           "NuWriter, Version 1.0",IDC_STATIC,42,14,114,8,SS_NOPREFIX
+    ICON            IDR_MAINFRAME,IDC_STATIC,14,14,20,20
+    LTEXT           "NuWriter, Version 2.09a",IDC_STATIC,42,14,114,8,SS_NOPREFIX
     LTEXT           "Copyright (C) 2014",IDC_STATIC,42,26,114,8
     DEFPUSHBUTTON   "OK",IDOK,113,41,50,14,WS_GROUP
 END
@@ -320,7 +320,7 @@ END
 IDD_NUWRITER_DIALOG DIALOGEX 0, 0, 482, 253
 STYLE DS_SETFONT | DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Nuvoton NuWriter v2.09"
+CAPTION "Nuvoton NuWriter v2.09a"
 FONT 8, "MS Sans Serif", 400, 0, 0x0
 BEGIN
     PUSHBUTTON      "EXIT",IDCANCEL,416,226,50,14
@@ -332,7 +332,7 @@ BEGIN
     LTEXT           " COMx ",IDC_COMPORT,334,37,71,11,SS_SUNKEN
     PUSHBUTTON      "Re-Connect",IDC_RECONNECT,407,35,58,14
     GROUPBOX        "...",IDC_TYPE,10,53,455,169
-    CONTROL         140,IDC_STATIC,"Static",SS_BITMAP,-1,0,1389,15
+    CONTROL         IDB_BITMAP1,IDC_STATIC,"Static",SS_BITMAP,-1,0,1389,15
 END
 
 IDD_FORMAT DIALOGEX 0, 0, 281, 227
@@ -577,33 +577,63 @@ END
 //
 
 IDB_BANNER              BITMAP                  "res\\banner.bmp"
+
 IDB_READ_DEVICE         BITMAP                  "res\\ReadDevice.bmp"
+
 IDB_WRITE_DEVICE        BITMAP                  "res\\WriterDevice.bmp"
+
 IDB_BROWSE              BITMAP                  "res\\Browse.bmp"
+
 IDB_FORMAT              BITMAP                  "res\\Format.bmp"
+
 IDB_ERASEALL            BITMAP                  "res\\EraseAll.bmp"
+
 IDB_VERIFY              BITMAP                  "res\\Verify.bmp"
+
 IDB_CONTINUE            BITMAP                  "res\\Continue.bmp"
+
 IDB_RECONNECT0          BITMAP                  "res\\ReConnect0.bmp"
+
 IDB_RECONNECT1          BITMAP                  "res\\ReConnect1.bmp"
+
 IDB_EXIT                BITMAP                  "res\\Exit.bmp"
+
 IDB_NUWRITER            BITMAP                  "res\\NuWriter.bmp"
+
 IDB_ADD                 BITMAP                  "res\\Add.bmp"
+
 IDB_DELETE              BITMAP                  "res\\Delete.bmp"
+
 IDB_MODIFY              BITMAP                  "res\\Modify.bmp"
+
 IDB_OUTPUT              BITMAP                  "res\\Output.bmp"
-#endif    // Chinese (Taiwan) resources
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_ABOUTBOX AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_NUWRITER_DIALOG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // 中文 (繁體，台灣) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// 英文 (美國) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -741,7 +771,7 @@ BEGIN
     IDS_ABOUTBOX            "&About NuWriter..."
 END
 
-#endif    // English (U.S.) resources
+#endif    // 英文 (美國) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
