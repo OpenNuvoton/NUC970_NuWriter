@@ -33,7 +33,7 @@ public:
 // Attributes
 public:
   //! Button types
-  static enum Type {
+  enum Type {
     //! Static button
     staticButton = 0,
     //! Standard pushbutton
@@ -61,7 +61,7 @@ public:
   };
 
   //! Text styles
-  static enum Text {
+  enum Text {
     //! No text displayed
     none = 0,
     //! Single-line left-justified text
@@ -73,7 +73,7 @@ public:
   };
 
   //! Focus styles
-  static enum Focus {
+  enum Focus {
     //! No focus rectangle displayed
     noFocus = 0,
     //! Show focus rectangle

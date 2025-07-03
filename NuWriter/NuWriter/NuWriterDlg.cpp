@@ -836,7 +836,7 @@ int CNuWriterDlg:: Get_Key_Data(HANDLE hFile)
     int		i;
     if (Read_File_Line(hFile) < 0)
         return -1;
-    sscanf_s(_FileLineBuff, "%d", &_nKenLen, 4);
+    sscanf_s(_FileLineBuff, "%d", &_nKenLen);
     if ((_nKenLen != 128) && (_nKenLen != 192) && (_nKenLen != 256)) {
         printf("Invalid key length: %d!\n", _nKenLen);
         return -1;
@@ -845,7 +845,7 @@ int CNuWriterDlg:: Get_Key_Data(HANDLE hFile)
     for (i = 0; i < 4; i++) {
         if (Read_File_Line(hFile) < 0)
             return -1;
-        sscanf_s(_FileLineBuff, "0x%x", (unsigned long *)&_ucKeys[i*4], 4);
+        sscanf_s(_FileLineBuff, "0x%x", (unsigned long *)&_ucKeys[i*4]);
     }
     if (_nKenLen == 128)
         return 0;
@@ -853,7 +853,7 @@ int CNuWriterDlg:: Get_Key_Data(HANDLE hFile)
     for (i = 4; i < 6; i++) {
         if (Read_File_Line(hFile) < 0)
             return -1;
-        sscanf_s(_FileLineBuff, "0x%x", (unsigned long *)&_ucKeys[i*4], 4);
+        sscanf_s(_FileLineBuff, "0x%x", (unsigned long *)&_ucKeys[i*4]);
     }
     if (_nKenLen == 192)
         return 0;
@@ -861,7 +861,7 @@ int CNuWriterDlg:: Get_Key_Data(HANDLE hFile)
     for (i = 6; i < 8; i++) {
         if (Read_File_Line(hFile) < 0)
             return -1;
-        sscanf_s(_FileLineBuff, "0x%x", (unsigned long *)&_ucKeys[i*4], 4);
+        sscanf_s(_FileLineBuff, "0x%x", (unsigned long *)&_ucKeys[i*4]);
     }
     return 0;
 }
@@ -1169,7 +1169,7 @@ BOOL CNuWriterDlg::OneDeviceInfo(int id)
     }
     Sleep(500);// Delay for emmc INFO complete
     bResult=NucUsb.NUC_ReadPipe(id,(UCHAR *)&m_info, sizeof(INFO_T));
-    if(WaitForSingleObject(m_ExitEvent[id], 0) != WAIT_TIMEOUT) bResult=FALSE;
+    //if(WaitForSingleObject(m_ExitEvent[id], 0) != WAIT_TIMEOUT) bResult=FALSE;
     if(bResult!=TRUE)	bResult=FALSE;
     TRACE(_T("OneDeviceInfo: IsUserConfig =%d, BlockPerFlash =%d, PagePerBlock = %d\n"),  m_info.Nand_uIsUserConfig, m_info.Nand_uBlockPerFlash, m_info.Nand_uPagePerBlock);
     NucUsb.CloseWinUsbDevice(id);

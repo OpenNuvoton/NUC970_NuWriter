@@ -9,6 +9,7 @@
 #define new DEBUG_NEW
 #endif
 
+//#define DEBUG_CONSOLE
 
 // CNuWriterApp
 
@@ -50,6 +51,14 @@ BOOL CNuWriterApp::InitInstance()
     CWinApp::InitInstance();
 
     AfxEnableControlContainer();
+
+#ifdef DEBUG_CONSOLE
+    AllocConsole();
+    freopen("CONOUT$", "w", stdout);
+    freopen("CONOUT$", "w", stderr);
+    freopen("CONIN$", "r", stdin);
+    printf("Console initialized\n");
+#endif
 
     // Standard initialization
     // If you are not using these features and wish to reduce the size

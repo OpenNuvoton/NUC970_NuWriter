@@ -137,7 +137,7 @@ END
 
 IDD_TARGET_CHIP DIALOGEX 0, 0, 183, 124
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Nuvoton NuWriter v2.09 - Select Chip"
+CAPTION "Nuvoton NuWriter v2.10 - Select Chip"
 FONT 8, "MS Sans Serif", 400, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "Continue",IDOK,96,84,61,14
@@ -312,19 +312,19 @@ CAPTION "About NuWriter"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,14,14,20,20
-    LTEXT           "NuWriter, Version 2.09a",IDC_STATIC,42,14,114,8,SS_NOPREFIX
-    LTEXT           "Copyright (C) 2014",IDC_STATIC,42,26,114,8
+    LTEXT           "NuWriter, Version 2.10",IDC_STATIC,42,14,114,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2025",IDC_STATIC,42,26,114,8
     DEFPUSHBUTTON   "OK",IDOK,113,41,50,14,WS_GROUP
 END
 
 IDD_NUWRITER_DIALOG DIALOGEX 0, 0, 482, 253
 STYLE DS_SETFONT | DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "Nuvoton NuWriter v2.09a"
+CAPTION "Nuvoton NuWriter v2.10"
 FONT 8, "MS Sans Serif", 400, 0, 0x0
 BEGIN
     PUSHBUTTON      "EXIT",IDCANCEL,416,226,50,14
-    LTEXT           " No Version",IDC_VERSION,6,20,67,11,SS_SUNKEN
+    LTEXT           "    No Version  ",IDC_VERSION,6,20,67,11,SS_SUNKEN
     LTEXT           "Choose type :",IDC_STATIC,7,37,59,8
     COMBOBOX        IDC_COMBO_TYPE,61,35,81,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "DDR Init :",IDC_STATIC,149,38,45,8
@@ -624,6 +624,11 @@ BEGIN
     0
 END
 
+IDD_TARGET_CHIP AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 #endif    // 中文 (繁體，台灣) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -727,7 +732,7 @@ END
 // Version
 //
 
-VS_VERSION_INFO VERSIONINFO
+AFX_ID_PREVIEW_CLOSE VERSIONINFO
  FILEVERSION 1,0,0,1
  PRODUCTVERSION 1,0,0,1
  FILEFLAGSMASK 0x3fL
@@ -744,13 +749,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "TODO: <Company name>"
-            VALUE "FileDescription", "TODO: <File description>"
-            VALUE "FileVersion", "1.0.0.1"
+            VALUE "CompanyName", "Nuvoton"
+            VALUE "FileDescription", "NUC970 NuWriter"
+            VALUE "FileVersion", "2.10"
             VALUE "InternalName", "NuWriter.exe"
-            VALUE "LegalCopyright", "TODO: (c) <Company name>.  All rights reserved."
+            VALUE "LegalCopyright", "Nuvoton Technology Corp.  All rights reserved."
             VALUE "OriginalFilename", "NuWriter.exe"
-            VALUE "ProductName", "TODO: <Product name>"
+            VALUE "ProductName", "NUC970/N9H30/N9H31"
             VALUE "ProductVersion", "1.0.0.1"
         END
     END
