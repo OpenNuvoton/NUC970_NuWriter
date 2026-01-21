@@ -30,8 +30,7 @@ UINT32 _sd_uR7_CMD=0;
 UINT8 *_sd_pSDHCBuffer;
 UINT32 _sd_ReferenceClock;
 
-__align(4096) UINT8 _sd_ucSDHCBuffer[64];
-unsigned char _fmi_uceMMCBuffer[512];
+__align(4096) UINT8 _sd_ucSDHCBuffer[512];
 
 void SD_CheckRB()
 {
